@@ -10,7 +10,7 @@
 \usepackage{listing}
 \usepackage{wrapfig}
 \usepackage[parfill]{parskip}
-
+\usepackage{subcaption}
 % Title Page
 \title{Facet-based Imaging}
 \author{Benjamin Hugo}
@@ -24,6 +24,7 @@ the problems faced by large arrays taking measurements over large fields of view
 focussing on how the current memory intensive techniques required for wide-field imaging can be traded off at the expense of higher computation costs. This tradeoff is qualified by the recent shift towards using 
 highly parallel platforms in all major computational fields; ranging in everything from computational chemestry, computing financial models of option pricing, through to radio astronomy. In particular we will be investigating 
 the use of General Purpose Graphics Processing Units (GPGPU) in accelerating the facet-based convolutional gridding algorithm. More on this a bit later on.
+
 \section{Brief history}
 Through eons of visual observation mankind learned, amongst other things, the laws that govern the movement of the celestrial objects in the skies above him. In the last 500 years we've 
 seen major advances in our ability to observe new phenomina, starting with the first optical telescope and manufacture of transparent glass. However these observations
@@ -40,11 +41,11 @@ historical development has been geared toward shorter wavelengths (see figure~\r
  \includegraphics[width=0.8\textwidth]{images/radio_window.png}
  \caption[The radio window]{The radio window - Earth-based radio astronomy is bound to a range of wavelengths between $\lambda\approx 0.2mm$ and $\lambda\approx 20m$ by the molecular absorbtion bands of oxygen and water at the
  small wavelengths and the ionosphere at the long end. The figure shows at what altitude the incomming electromagnetic radiation is attenuated by a factor of 0.5 \cite{wilson2009tools}.}
- \end{mdframed}
  \label{fig_radio_window}
+ \end{mdframed}
 \end{figure}
 
-\section{Measurement}
+\section{Measuring flux with a single element telescope}
 Some of the most important measurements of a celestrial object includes the object's angular size, position (according to some celestrial coordinate system) and the \textit{flux} density over a 
 frequency spectrum of the object. The flux density is measured as the power per square meter per unit frequency, falling on a surface, normal to the direction of the source. This flux 
 density of sources is often a very small value and the Jansky (abbreviated Jy) serves as the unit of measure \cite{christiansenradiotelescopes,wilson2009tools}:
@@ -59,13 +60,17 @@ sources, one of the most common generators of electromagnetic ratiation magnetic
 astronomy focusses on the non-thermal sources. These are generally very intense sources of electromagnetic radiation and are very far away \cite{christiansenradiotelescopes}.
 
 It is worth noting that not only are radio telescopes used to observe continuous spectra consisting of a wide band of frequencies, but it is also critical sometimes to isolate a number of
-spectral lines for observation. These don't originate from large black-body structures, but focusses on the detection of certain molecules, such as neutral hydrogen (at $\lambda = 21 cm$),
-hydroxyl ($\lambda \approx 21 cm)$. These spectral lines are vital in measuring radial velocities through Doppler frequency shift \cite{christiansenradiotelescopes}.
+spectral lines for observation. These don't originate from large black-body structures, but focusses on the detection of certain molecules, such as neutral hydrogen (at $\lambda = 21 cm$) and
+hydroxyl ($\lambda \approx 18 cm)$. These spectral lines are vital in measuring radial velocities through Doppler frequency shift \cite{christiansenradiotelescopes}.
 
-The wave fronts from these sources can be viewed as planar fronts if the source of the radiation is sufficiently far away. This is not 
-necessarily true for sources within our own galaxy for example. Furthermore if the wavelength is much smaller than the scale of the observing antenna the radiation can be 
-viewed as traveling as rays. The total flux of a source is then obtained over the solid angle subtended by the source (see figure~\ref{fig_measuring_source_brightness}) as 
-follows \cite{wilson2009tools}:
+It should be clear that since most sources are extremely faint, the telescopes needed to detect them will be some of the most sensitive instruments ever designed. Although we cannot
+cover antenna theory extensively here, it is essential to briefly relate how the electromagnetic radiation covered earlier, is measured by instrumentation in general, as well as some of the constraints under which
+these measurements are made.
+
+The wave fronts from distant sources can be viewed as planar fronts if the source of the radiation is sufficiently far away. This is not necessarily true for sources within our own galaxy for example. Furthermore 
+if the wavelength is much smaller than the scale of the phenomena the radiation can be viewed as rays. In radio astronomy these measures serve only as rough discriptions of the 
+equations that govern wave propagation, as the wavelengths are significantly longer than in optical systems.  The total flux of a source is then obtained over the solid angle subtended by the 
+source (see figure~\ref{fig_measuring_source_brightness}) as follows \cite{wilson2009tools}:
 
   \begin{equation}
     S_v := \int_{\Omega_s}{I_v(\theta,\phi)\cos{\theta}d\Omega}
@@ -87,13 +92,101 @@ follows \cite{wilson2009tools}:
  \centering
  \includegraphics[width=0.2\textwidth]{images/measuring_source_brightness.png}
  \caption[Source brightness]{Flux density over a small area per unit frequency \cite{wilson2009tools}.}
-\end{mdframed}
  \label{fig_measuring_source_brightness}
+\end{mdframed}
 \end{figure}
 
-It should be clear that since most sources are extremely faint, the telescopes needed to detect them will be some of the most sensitive instruments ever designed. Although we cannot
-cover antenna theory extensively here, it is essential to briefly relate how the electromagnetic radiation covered earlier, is measured by instrumentation in general.
+For the sake of simplicity we will only consider a single simple parabollic reflector telescope for now to explain the general concepts of the primary beam and what impact it has on wide-field observations. Synthesis imaging \cite[ch. 3]{taylor1999synthesis} 
+gives a more extensive overview of different antennae optics and mountings. Filled reflector antennas are normally used for $\lambda \geq 1m$, whereas unfilled ``wire'' antennae are frequently used at shorter wavelengths. We can describe
+the operation of these parabollic reflectors using Huygen's principle \cite{christiansenradiotelescopes}: 
+\begin{quote}
+The energy at the focus of the telescope is the sum of the of the contributions from all parts of the incoming wave-front, taking into account the different path lengths and therefore different radio-frequency phases at the focus.
+\end{quote}
+The power available for a feed antenna placed at the focal point is proportional to the square intensity of the field of view and is known as the beam of the antenna and varies with the angle of incidence betweeen the the waves and the pointing of
+direction of the antenna, see figure~\ref{diffraction_pattern_and_power_at_focus}. It should therefore be clear the telescope has a limited effective area of view. It turns out that the size of the aperture of the telescope plays a key role
+in the resolving power of the telescope, which is limited by the diffraction patterns as seen in figure~\ref{diffraction_pattern_and_power_at_focus}. Any object larger than the primary beam of the antennae will be aliased to a certain
+extent by the sidelobes shown in figure~\ref{diffraction_pattern_and_power_at_focus}, although the general structure may still be the same:
+\begin{equation*}
+ \text{resolving power} \propto \frac{\lambda}{D}
+\end{equation*}
+\begin{figure}[ht]
+ \begin{mdframed}
+  \centering
+  \begin{subfigure}[b]{0.3\textwidth}
+   \includegraphics[width=\textwidth]{images/diffraction_pattern.png}
+   \caption{}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.3\textwidth}
+   \includegraphics[width=\textwidth]{images/field_strength_in_the_focal_plane.png}
+   \caption{}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.3\textwidth}
+   \includegraphics[width=\textwidth]{images/radiation_pattern.png}
+   \caption{}
+  \end{subfigure}
+  \caption[Collection of electromagnetic wave energy and responce]{In (a) we illustrate the defraction pattern of a parabollic aperture and how the total energy is collected at the focal point \cite{christiansenradiotelescopes}. In (b) the power at the antenna terminals
+  is significantly higher for small angles from the antenna pointing direction \cite{christiansenradiotelescopes}. Lastly in (c) we give a 1 dimensional illustration of the effects of apperture form and diameter on the antenna's effective resolving capability. If objects
+  larger than the center beam is observed the objects will be effectively aliased by the ``sidelobes'' off both ends of the ``primary'' beam. The response is the \textit{fourier transform} of the shape of the aperture. It should now be clear
+  that the effective collection area, $A(l,m)$ approaches the geometric area of the apperture in the direction of maximum response \cite{taylor1999synthesis}.}
+  \label{diffraction_pattern_and_power_at_focus}
+ \end{mdframed}
+\end{figure}
 
+Another key observation to take into consideration are the effects of polarization in electomagnetic wavefronts. All electromagnetic radiation can be characterised by a field vector parallel to to the wavefront. This wavefront is said to
+be either elliptically polarized if the field vector traces out an ellipse of constant orientation and eccentricity (linear and circular polirization are special cases of this). On the other hand it may be randomly polarized (or ``unpolarized'') if the field 
+vector changes randomly. To capture the total energy of of the electromagnetic field any antenna should have two independent feeds to resolve any radio wave, where the second feed must be placed at right angles to the first. The first and second feeds will carry, 
+on average equal amounts of power. The total flux density is therefore the sum of both polarized feeds \cite{christiansenradiotelescopes}.
+
+Up to this point we've assumed that the energy measured at the focus point of the telescope is attributed to a single point source. In reality many sources contribute to the specific intensity integral over the solid angle $d\Omega$. These point sources
+are generally accepted to be completely uncorrelated, and therefore the mean squared voltage at each of the antenna feeds is a linear combination from each of these sources (weighted by the effective area function $A(l,m)$) \cite{christiansenradiotelescopes}. In general this requires instrument 
+calibration to be done over all the bright sources in the beam-limited field of view. More on calibration techniques later on.
+
+\section{Interferometric telescopes}
+As pointed out in the previous section the angular resolution is constrained to the diameter of the telescope. Unfortunately there are material constraints to the size of an apperture ($\sim 300m$ as pointed out in \cite{wilson2009tools}). The Arecibo Observatory, Puerto Rico is the extreme case 
+of this, see fig~\ref{fig_arecibo}. Luckily the same resolving power may also be obtained by \textit{coherently} combining the feeds from two reflectors, seperated by a straight-line distance, $B$:
+\begin{equation*}
+ \text{resolving power} \propto \frac{\lambda}{B} \text{ if } D\ll B
+\end{equation*}
+\begin{figure}[ht]
+ \begin{mdframed}
+ \centering
+ \includegraphics[width=0.7\textwidth]{images/arecibo.jpg}
+ \caption[Arecibo Observatory]{At a wopping 305m diameter, the telescope at the Arecibo Observatory is the largest single-apperature telescope in the world. Image courtesy of the National Oceanic and Atmospheric Administration (public domain).}
+  \label{fig_arecibo}
+ \end{mdframed}
+\end{figure}
+This combination process synthesizes a larger aperture (in general this aperture is unfilled \cite{christiansenradiotelescopes}), with the first practical demonstration made by Ryle and his associates. The feeds from two antennae are joined by a 
+correlator which, can be thought of, as taking short-time averages. When the antennae are spaced $B$ units appart the electromagnetic wavefront will reach one telescope before reaching the other (figure~\ref{fig_cosine_correlator}). This delay, 
+$\tau=\frac{\vec{b}\cdot\vec{s}}{c}$ is usually compensated for by the correlator in order to achieve a coherent correlation (as mentioned previously). For short intervals the correlator response (for a planar wavefront) over all the sources in the effective collection area is (refer to figure~\ref{fig_cosine_correlator}):
+\begin{equation}
+\label{eqn_cosine_correlation}
+r=\Delta\upsilon \int_{\vec{s}}{A(\vec{s})I(\vec{s})\cos{\frac{2\pi\vec{b}\cdot\vec{\sigma}}{\lambda}}d\Omega}
+\end{equation}
+
+\begin{figure}[ht]
+ \begin{mdframed}
+ \centering
+ \begin{subfigure}[b]{0.3\textwidth}
+ \includegraphics[width=\textwidth]{images/phase_center.png}
+ \caption{}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.4\textwidth}
+ \includegraphics[width=\textwidth]{images/cosine_correlator.png}
+ \caption{}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.2\textwidth}
+ \includegraphics[width=\textwidth]{images/fringe.png}
+ \caption{}
+ \end{subfigure}
+ \caption[Cosine correlator]{(a) Position vectors used in the interferometer response. $\vec{s_0}$ is the \textit{phase tracking center} where $\tau:=0$ (b) Simplified diagram of a two-element correlator, combining the output of two elements spaced $B=||\vec{b}||$ appart. The integrator takes the \textit{cross correlation} of the signal 
+ from the second telescope and a time-delayed signal from the first telescope over a small period of time.(c) The power produced through cross correlation, differs from that of a single element telescope as shown in figure~\ref{diffraction_pattern_and_power_at_focus} and has a response for greater angles than a small single reflector telescope. If $B$ is doubled, 
+ the amount of power collected by the correlator is also doubled.}
+  \label{fig_cosine_correlator}
+ \end{mdframed}
+\end{figure}
+It is easy to see that this correlator ``fringe'' pattern has a major drawback: the correlator is insensitive for $\frac{2\pi\vec{b}\cdot\vec{\sigma}}{\lambda} = \frac{\pi}{2} \pm n\pi$. To fix this problem correlators typically
+take the form of \textit{complex correlators} where a second correlation is made by introducing a phase delay of $\frac{\pi}{2}$ in the feeds of both antennae. The second correlator is effectively a \textit{sine correlator}. We can
+now replace the cosine term in equation~\ref{eqn_cosine_correlation} by $e^{-2\pi\vec{b}\cdot\vec{\sigma}/\lambda}$ through the Euler relation between the complex exponential and the polar form of a complex coordinate.
 \bibliography{bibfile}
 \bibliographystyle{plain}
 \end{document}          
