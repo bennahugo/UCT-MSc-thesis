@@ -11,6 +11,7 @@
 \usepackage{wrapfig}
 \usepackage[parfill]{parskip}
 \usepackage{subcaption}
+\usepackage{hyperref}
 % Title Page
 \title{Facet-based Imaging}
 \author{Benjamin Hugo}
@@ -45,6 +46,8 @@ historical development has been geared toward shorter wavelengths (see figure~\r
  \end{mdframed}
 \end{figure}
 
+Radio astronomy has its roots in Digital Signals Processing. Before diving into the details of how these telescopes work we refer the reader to the \textit{Scientist's and Engineer's guide to Digital Signals Processing} by 
+Steven Smith\footnote{Available freely at \url{http://www.dspguide.com/}}\cite{smith1997scientist} for a detailed, yet simple overview of the field.
 \section{Measuring flux with a single element telescope}
 Some of the most important measurements of a celestrial object includes the object's angular size, position (according to some celestrial coordinate system) and the \textit{flux} density over a 
 frequency spectrum of the object. The flux density is measured as the power per square meter per unit frequency, falling on a surface, normal to the direction of the source. This flux 
@@ -157,7 +160,8 @@ of this, see fig~\ref{fig_arecibo}. Luckily the same resolving power may also be
 \end{figure}
 This combination process synthesizes a larger aperture (in general this aperture is unfilled \cite{christiansenradiotelescopes}), with the first practical demonstration made by Ryle and his associates. The feeds from two antennae are joined by a 
 correlator which, can be thought of, as taking short-time averages. When the antennae are spaced $B$ units appart the electromagnetic wavefront will reach one telescope before reaching the other (figure~\ref{fig_cosine_correlator}). This delay, 
-$\tau=\frac{\vec{b}\cdot\vec{s}}{c}$ is usually compensated for by the correlator in order to achieve a coherent correlation (as mentioned previously). For short intervals the correlator response (for a planar wavefront) over all the sources in the effective collection area is (refer to figure~\ref{fig_cosine_correlator}):
+$\tau=\frac{\vec{b}\cdot\vec{s}}{c}$ is usually compensated for by the correlator in order to achieve a coherent correlation (as mentioned previously). For short intervals the correlator response (for a planar wavefront) over all the sources in 
+the effective collection area is (refer to figure~\ref{fig_cosine_correlator}) \cite{taylor1999synthesis}:
 \begin{equation}
 \label{eqn_cosine_correlation}
 r=\Delta\upsilon \int_{\vec{s}}{A(\vec{s})I(\vec{s})\cos{\frac{2\pi\vec{b}\cdot\vec{\sigma}}{\lambda}}d\Omega}
@@ -178,15 +182,57 @@ r=\Delta\upsilon \int_{\vec{s}}{A(\vec{s})I(\vec{s})\cos{\frac{2\pi\vec{b}\cdot\
  \includegraphics[width=\textwidth]{images/fringe.png}
  \caption{}
  \end{subfigure}
- \caption[Cosine correlator]{(a) Position vectors used in the interferometer response. $\vec{s_0}$ is the \textit{phase tracking center} where $\tau:=0$ (b) Simplified diagram of a two-element correlator, combining the output of two elements spaced $B=||\vec{b}||$ appart. The integrator takes the \textit{cross correlation} of the signal 
- from the second telescope and a time-delayed signal from the first telescope over a small period of time.(c) The power produced through cross correlation, differs from that of a single element telescope as shown in figure~\ref{diffraction_pattern_and_power_at_focus} and has a response for greater angles than a small single reflector telescope. If $B$ is doubled, 
- the amount of power collected by the correlator is also doubled.}
+ \caption[Cosine correlator]{(a) Position vectors used in the interferometer response. $\vec{s_0}$ is the \textit{phase tracking center} where $\tau:=0$ \cite{taylor1999synthesis} (b) Simplified diagram of a two-element correlator, combining the output of two elements spaced $B=||\vec{b}||$ appart. The integrator takes the \textit{cross correlation} of the signal 
+ from the second telescope and a time-delayed signal from the first telescope over a small period of time \cite{taylor1999synthesis}. (c) The power produced through cross correlation, differs from that of a single element telescope as shown in figure~\ref{diffraction_pattern_and_power_at_focus} and has a response for greater angles than a small single reflector telescope. If $B$ is doubled, 
+ the amount of power collected by the correlator is also doubled \cite{wilson2009tools}.}
   \label{fig_cosine_correlator}
  \end{mdframed}
 \end{figure}
 It is easy to see that this correlator ``fringe'' pattern has a major drawback: the correlator is insensitive for $\frac{2\pi\vec{b}\cdot\vec{\sigma}}{\lambda} = \frac{\pi}{2} \pm n\pi$. To fix this problem correlators typically
-take the form of \textit{complex correlators} where a second correlation is made by introducing a phase delay of $\frac{\pi}{2}$ in the feeds of both antennae. The second correlator is effectively a \textit{sine correlator}. We can
-now replace the cosine term in equation~\ref{eqn_cosine_correlation} by $e^{-2\pi\vec{b}\cdot\vec{\sigma}/\lambda}$ through the Euler relation between the complex exponential and the polar form of a complex coordinate.
+take the form of \textit{complex correlators} where a second correlation is made by introducing a phase delay of $\frac{\pi}{2}$ in the feeds of the antennae. The second correlator is effectively a \textit{sine correlator}. We can
+now replace the cosine term in equation~\ref{eqn_cosine_correlation} by $e^{-2\pi\vec{b}\cdot\vec{\sigma}/\lambda}$ through the Euler relation between the complex exponential and the polar form of a complex coordinate \cite{taylor1999synthesis}.
+
+The next issue are the effects of limited \textit{bandwidth}, $\Delta\upsilon$, in correlators. Since it is computationally infeasible to sample an infinite spectrum of frequencies, only a select number of channels are sampled. This
+band is normally shifted down to \textit{baseband} ($\upsilon=0$) and filtered appropriately with a lowpass filter to reduce aliasing, refer to figure~\ref{fig_bandwidth}. The baseline is normally measured in wavelengths and therefore depends on the
+center frequency through the well-known relation $\upsilon=\frac{c}{\lambda}$. Unfortunately this has a negative impact on the fringe pattern of the correlator; the fringe is modulated by a sinc-function for a rectangular band. This has
+the effect of tapering the fringe which again reduces the effective area of the interferometric telescope. The obvious solution is to observe only narrow spectra. The fringe depends on the delay term and oscilates in time. Normally this is not a problem.
+However, with exceedingly long baselines such as those in \textit{Very Long Baseline Interferometry}, where the baselines may span continents (see Middelberg et al. \cite{middelberg2008high} for a detailed overview), the local oscilator term is usually varied 
+by a delay tracking computer, which essentially stops any fringe oscilation (known as \textit{fringe stopping}) \cite{taylor1999synthesis}.
+\begin{figure}[ht]
+ \begin{mdframed}
+ \centering
+ \begin{subfigure}[b]{0.3\textwidth}
+ \includegraphics[width=\textwidth]{images/rectangular_band.png}
+ \caption{}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.5\textwidth}
+ \includegraphics[width=\textwidth]{images/mixing.png}
+ \caption{}
+ \end{subfigure}
+ \caption[Sampling a limited bandwidth]{(a) illustrates the idealized rectangular responce of the correlator. Due to inevitable filter rolloff this is obviously unatainable. (b) For practical
+ reasons the signal is shifted to baseband before filtering out higher frequencies. This is achieved by multiplying the signal with a tone produced by a local oscilator (mixing) this shifts the frequency responce by $\pm\upsilon_{lo}$} 
+  \label{fig_bandwidth}
+ \end{mdframed}
+\end{figure}
+
+Up to this point we conveniently only discussed correlator output for a single feed of each antenna in a two element interferometer. The correlator additionally cross-correlates the two polarization feeds to form the following matrix of complex cross-correlations between the
+antennae p \& q (where * indicates the complex conjugate). The equation governing the correlator power response remain the same. Here I, V, U and Q are the four Stokes parameters \cite{taylor1999synthesis}.
+\begin{equation}
+X_{pq} = \left[\begin{array}{c c}
+     e_{X_pX_q^*} & e_{X_pY_q^*} \\
+     e_{Y_pX_q^*} & e_{Y_pY_q^*} \\
+    \end{array}\right] = 
+    \left[\begin{array}{c c}
+     I + V & Q + iU \\
+     Q - iU & I - V \\
+    \end{array}\right]
+\end{equation}
+
+It is worthwhile to note that the correlation, delay and phase compensations can also be done in the fourier domain, and in the case of delay compensation this approach makes fractional delay compensation feasible (see \cite{taylor1999synthesis}). These correlators are effectively 
+known as \textit{FX} correlators. If these power spectra are of high time resolution it is possible to perform surveys focussed on transient detection. Modern arrays such as LOFAR, KAT-7 and MeerKAT (currently under construction) have the capability to perform these searches through
+special \textit{beamforming} modes which may be run concurrently with imaging modes. See \cite{stappers2011observing} for details on pulsar observation with LOFAR. In this thesis, however, we will focus solely on the imaging pipeline which is discussed in the next section.
+
+
 \bibliography{bibfile}
 \bibliographystyle{plain}
 \end{document}          
