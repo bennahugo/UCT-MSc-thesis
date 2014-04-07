@@ -47,8 +47,29 @@ historical development has been geared toward shorter wavelengths (see figure~\r
  \end{mdframed}
 \end{figure}
 
-Radio astronomy has its roots in Digital Signals Processing. Before diving into the details of how these telescopes work we refer the reader to the \textit{Scientist's and Engineer's guide to Digital Signals Processing} by 
-Steven Smith\footnote{Available freely at \url{http://www.dspguide.com/}}\cite{smith1997scientist} for a detailed, yet simple overview of the field.
+\section{Review of core signals processing techniques}
+Radio astronomy has its roots in Digital Signals Processing. Before diving into the details of how these telescopes work we refer the reader to the \textit{Scientist and Engineer's guide to Digital Signals Processing} by 
+Steven Smith\footnote{Available freely at \url{http://www.dspguide.com/}}\cite{smith1997scientist} for a detailed, yet simple overview of the field. A (very) brief overview of some of the core terminology is given here.
+
+A signal is simply a description of how one parameter depends on another. A typical example of this is how voltage varies over time. Since the focus in this thesis lie solely in digitized signals, it is necessary to carefully
+define under what circumstances the underlying continuous analog signal can be reconstructed. The Shannon-Nyquest \textit{sampling theorem} forms the cornerstone of Digital Signals Processing. It simply states that the rate at
+which samples are taken from a continuous signal has to be at least twice the highest frequency component of that signal. Such a signal is said to be critically sampled if it obeys this minimum requirement. If the requirement is
+not satisfied the sampled signal is aliased (higher frequencies appear as low frequency components). This can be illustrated through figure~\ref{fig_invalid_sampling}. Aliasing is usually reduced by applying a filter that essentially
+have low responses at frequencies outside a limited \text{passband} of frequencies. This filter is can be something as simple as a windowed sinc function for instance. Although a sharp cutoff frequency is ideal, it should be noted 
+that in reality this is not achieved. Filter frequency responces usually decline over a non-infinitesimal section of the spectrum (this is known as \textit{rolloff}).
+
+\begin{figure}[ht]
+ \begin{mdframed}
+ \centering
+ \includegraphics[width=0.8\textwidth]{images/improper_sampling.png}
+ \caption[Aliasing]{The first signal is sampled at 3 times the highest composing frequency. Its frequency spectrum shows no overlap between sidebands. The second signal is subsampled and higher frequencies overlap lower frequencies
+ in its frequency spectrum. This illustrates a key observation: discarding samples in one domain causes aliasing in the other \cite{smith1997scientist}.}
+ \label{fig_invalid_sampling}
+ \end{mdframed}
+\end{figure}
+
+The next observation is that the propogation of electromagnetic waves and their interactions can be considered as a linear system.
+
 \section{Measuring flux with a single element telescope}
 Some of the most important measurements of a celestrial object includes the object's angular size, position (according to some celestrial coordinate system) and the \textit{flux} density over a 
 frequency spectrum of the object. The flux density is measured as the power per square meter per unit frequency, falling on a surface, normal to the direction of the source. This flux 
@@ -185,7 +206,7 @@ r=\Delta\upsilon \int_{\vec{s}}{A(\vec{s})I(\vec{s})\cos{\frac{2\pi\vec{b}\cdot\
  \end{subfigure}
  \caption[Cosine correlator]{(a) Position vectors used in the interferometer response. $\vec{s_0}$ is the \textit{phase tracking center} where $\tau:=0$ \cite{taylor1999synthesis} (b) Simplified diagram of a two-element correlator, combining the output of two elements spaced $B=||\vec{b}||$ appart. The integrator takes the \textit{cross correlation} of the signal 
  from the second telescope and a time-delayed signal from the first telescope over a small period of time \cite{taylor1999synthesis}. (c) The power produced through cross correlation, differs from that of a single element telescope as shown in figure~\ref{diffraction_pattern_and_power_at_focus} and has a response for greater angles than a small single reflector telescope. If $B$ is doubled, 
- the amount of power collected by the correlator is also doubled \cite{wilson2009tools}.}
+ the fringe width is halved and the the correlator response for larger angles improves. \cite{wilson2009tools}.}
   \label{fig_cosine_correlator}
  \end{mdframed}
 \end{figure}
