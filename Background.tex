@@ -12,6 +12,7 @@
 \usepackage[parfill]{parskip}
 \usepackage{subcaption}
 \usepackage{hyperref}
+\usepackage[font={small}]{caption}
 % Title Page
 \title{Facet-based Imaging}
 \author{Benjamin Hugo}
@@ -198,7 +199,7 @@ center frequency through the well-known relation $\upsilon=\frac{c}{\lambda}$. U
 the effect of tapering the fringe which again reduces the effective area of the interferometric telescope. The obvious solution is to observe only narrow spectra. The fringe depends on the delay term and oscilates in time. Normally this is not a problem.
 However, with exceedingly long baselines such as those in \textit{Very Long Baseline Interferometry}, where the baselines may span continents (see Middelberg et al. \cite{middelberg2008high} for a detailed overview), the local oscilator term is usually varied 
 by a delay tracking computer, which essentially stops any fringe oscilation (known as \textit{fringe stopping}) \cite{taylor1999synthesis}.
-\begin{figure}[ht]
+\begin{figure}
  \begin{mdframed}
  \centering
  \begin{subfigure}[b]{0.3\textwidth}
@@ -209,8 +210,9 @@ by a delay tracking computer, which essentially stops any fringe oscilation (kno
  \includegraphics[width=\textwidth]{images/mixing.png}
  \caption{}
  \end{subfigure}
- \caption[Sampling a limited bandwidth]{(a) illustrates the idealized rectangular responce of the correlator. Due to inevitable filter rolloff this is obviously unatainable. (b) For practical
- reasons the signal is shifted to baseband before filtering out higher frequencies. This is achieved by multiplying the signal with a tone produced by a local oscilator (mixing) this shifts the frequency responce by $\pm\upsilon_{lo}$} 
+ \caption[Sampling a limited bandwidth]{(a) illustrates the idealized rectangular responce of the correlator. Due to inevitable filter rolloff this is obviously unatainable \cite{taylor1999synthesis}. (b) For practical
+ reasons the signal is shifted to baseband before filtering out higher frequencies. This is achieved by multiplying the signal with a tone produced by a local oscilator (mixing) this shifts the 
+ frequency response of the correlator by $\pm\upsilon_{lo}$ \cite{taylor1999synthesis}} 
   \label{fig_bandwidth}
  \end{mdframed}
 \end{figure}
@@ -227,11 +229,33 @@ X_{pq} = \left[\begin{array}{c c}
      Q - iU & I - V \\
     \end{array}\right]
 \end{equation}
+Each of the parameters Q, U and V are linearly independent and discribe a position on the Poincar\'e Sphere (figure \ref{fig_poincare}). Their coordinates on the sphere are given by
+\begin{equation}
+  \begin{split}
+    Q &= I\cos{2\chi}\cos{2\psi}\\
+    U &= I\cos{2\chi}\sin{2\psi}\\
+    V &= I\sin{2\chi}\\
+  \end{split}
+\end{equation}
 
-It is worthwhile to note that the correlation, delay and phase compensations can also be done in the fourier domain, and in the case of delay compensation this approach makes fractional delay compensation feasible (see \cite{taylor1999synthesis}). These correlators are effectively 
+\begin{figure}
+ \begin{mdframed}
+ \centering
+ \includegraphics[width=0.45\textwidth]{images/poincare_sphere.png}
+ \caption[The Poincar\'e Sphere]{The Poincar\'e Sphere gives a visualization for the different polarizations an electromagnetic field. The angles $2\psi$ and
+ $2\chi$ are the angles in a polar coordinate system, with each point on the sphere corresponding to a unique polarization. At $2\chi=0$ (the equator) the polarizations 
+ are either linear (Q) and orthagonal (U). The northern latitudes ($2\chi > 0$) contain right-handed circular polarization, while the southern hemisphere 
+ contains the left-handed circular polarizations. $I$ is not linearly independent and describes the total Poynting flux of the electromagnetic wave; $I = E_1^2 + E_2^2$ \cite{wilson2009tools}}
+  \label{fig_poincare}
+ \end{mdframed}
+\end{figure}
+
+It is worthwhile to note that the correlation, delay and phase compensations can also be done in the fourier domain, and in the case of delay compensation this approach makes fractional delay compensation feasible (see Taylor et al. \cite{taylor1999synthesis}). These correlators are effectively 
 known as \textit{FX} correlators. If these power spectra are of high time resolution it is possible to perform surveys focussed on transient detection. Modern arrays such as LOFAR, KAT-7 and MeerKAT (currently under construction) have the capability to perform these searches through
-special \textit{beamforming} modes which may be run concurrently with imaging modes. See \cite{stappers2011observing} for details on pulsar observation with LOFAR. In this thesis, however, we will focus solely on the imaging pipeline which is discussed in the next section.
+special \textit{beamforming} modes which may be run concurrently with imaging modes. See Stappers et al. \cite{stappers2011observing} for details on pulsar observation with LOFAR. In this thesis, however, we will focus solely on the imaging pipeline which is discussed in the next section.
 
+\section{Synthesis imaging}
+{\color{red} TODO}
 
 \bibliography{bibfile}
 \bibliographystyle{plain}
