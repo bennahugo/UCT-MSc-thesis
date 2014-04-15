@@ -122,9 +122,9 @@ law and states that a black-body will have a flux density $S\propto \upsilon^2T$
 sources, one of the most common generators of electromagnetic ratiation magnetic is \textit{synchrotron emission}. This process accelerates the electrons passing through electric fields. A significant portion of radio 
 astronomy focusses on the non-thermal sources. These are generally very intense sources of electromagnetic radiation and are very far away \cite{christiansenradiotelescopes}.
 
-It is worth noting that not only are radio telescopes used to observe continuous spectra consisting of a wide band of frequencies, but it is also critical sometimes to isolate a number of
-spectral lines for observation. These don't originate from large black-body structures, but focusses on the detection of certain molecules, such as neutral hydrogen (at $\lambda = 21 cm$) and
-hydroxyl ($\lambda \approx 18 cm)$. These spectral lines are vital in measuring radial velocities through Doppler frequency shift \cite{christiansenradiotelescopes}.
+It is worth noting that, not only are radio telescopes used to observe spectra consisting of a wide band of frequencies, but for spectral line observations it is critical to observe narrow bands, with densely spaced channels. 
+These spectral lines don't originate from large black-body structures, but focusses on the detection of certain molecules, such as neutral hydrogen (at $\lambda = 21 cm$) and
+hydroxyl ($\lambda \approx 18 cm)$. These spectral lines are vital in measuring radial velocities through Doppler frequency shift \cite{christiansenradiotelescopes,taylor1999synthesis}.
 
 It should be clear that since most sources are extremely faint, the telescopes needed to detect them will be some of the most sensitive instruments ever designed. Although we cannot
 cover antenna theory extensively here, it is essential to briefly relate how the electromagnetic radiation covered earlier, is measured by instrumentation in general, as well as some of the constraints under which
@@ -165,6 +165,7 @@ the operation of these parabollic reflectors using Huygen's principle \cite{chri
 \begin{quote}
 The energy at the focus of the telescope is the sum of the of the contributions from all parts of the incoming wave-front, taking into account the different path lengths and therefore different radio-frequency phases at the focus.
 \end{quote}
+
 The power available for a feed antenna placed at the focal point is proportional to the square intensity of the field of view and is known as the beam of the antenna and varies with the angle of incidence betweeen the the waves and the pointing of
 direction of the antenna, see figure~\ref{diffraction_pattern_and_power_at_focus}. It should therefore be clear the telescope has a limited effective area of view. It turns out that the size of the aperture of the telescope plays a key role
 in the resolving power of the telescope, which is limited by the diffraction patterns as seen in figure~\ref{diffraction_pattern_and_power_at_focus}. Any object larger than the primary beam of the antennae will be aliased to a certain
@@ -187,10 +188,10 @@ extent by the sidelobes shown in figure~\ref{diffraction_pattern_and_power_at_fo
    \includegraphics[width=\textwidth]{images/radiation_pattern.png}
    \caption{}
   \end{subfigure}
-  \caption[Collection of electromagnetic wave energy and responce]{In (a) we illustrate the defraction pattern of a parabollic aperture and how the total energy is collected at the focal point \cite{christiansenradiotelescopes}. In (b) the power at the antenna terminals
-  is significantly higher for small angles from the antenna pointing direction \cite{christiansenradiotelescopes}. Lastly in (c) we give a 1 dimensional illustration of the effects of apperture form and diameter on the antenna's effective resolving capability. If objects
-  larger than the center beam is observed the objects will be effectively aliased by the ``sidelobes'' off both ends of the ``primary'' beam. The response is the \textit{fourier transform} of the shape of the aperture. It should now be clear
-  that the effective collection area, $A(l,m)$ approaches the geometric area of the apperture in the direction of maximum response \cite{taylor1999synthesis}.}
+  \caption[Collection of electromagnetic wave energy and responce]{In (a) we illustrate the defraction pattern of a parabollic aperture and how the total energy is collected at the focal point \cite{christiansenradiotelescopes}. This is similar to the diffraction pattern of
+  visible light caused by passing through a single narrow slit. In (b) the power at the antenna terminals is significantly higher for small angles from the antenna pointing direction \cite{christiansenradiotelescopes}. Lastly in (c) we give a 1 dimensional illustration of 
+  the effects of apperture form and diameter on the antenna's effective resolving capability. If objects larger than the center beam is observed the objects will be effectively aliased by the ``sidelobes'' off both ends of the ``primary'' beam. The response is the \textit{fourier transform} 
+  of the shape of the aperture. It should now be clear that the effective collection area, $A(l,m)$ approaches the geometric area of the apperture in the direction of maximum response \cite{taylor1999synthesis}.}
   \label{diffraction_pattern_and_power_at_focus}
  \end{mdframed}
 \end{figure}
@@ -218,13 +219,14 @@ of this, see fig~\ref{fig_arecibo}. Luckily the same resolving power may also be
   \label{fig_arecibo}
  \end{mdframed}
 \end{figure}
+
 This combination process synthesizes a larger aperture (in general this aperture is unfilled \cite{christiansenradiotelescopes}), with the first practical demonstration made by Ryle and his associates. The feeds from two antennae are joined by a 
-correlator which, can be thought of, as taking short-time averages. When the antennae are spaced $B$ units appart the electromagnetic wavefront will reach one telescope before reaching the other (figure~\ref{fig_cosine_correlator}). This delay, 
-$\tau=\frac{\vec{b}\cdot\vec{s}}{c}$ is usually compensated for by the correlator in order to achieve a coherent correlation (as mentioned previously). For short intervals the correlator response (for a planar wavefront) over all the sources in 
-the effective collection area is (refer to figure~\ref{fig_cosine_correlator}) \cite{taylor1999synthesis}:
+correlator which, can be thought of, as taking short-time averages to measure the difference in phase between two signals. When the antennae are spaced $B$ units appart the electromagnetic wavefront will reach one telescope before reaching the 
+other (figure~\ref{fig_cosine_correlator}). This delay, $\tau=\frac{\vec{b}\cdot\hat{s}}{c}$ is usually compensated for by the correlator in order to achieve a coherent correlation (as mentioned previously). For short intervals the correlator 
+response (for a planar wavefront) over all the sources in the effective collection area, projected onto a \textit{baseline} $\vec{b}$, is given as (refer to figure~\ref{fig_cosine_correlator}) \cite{taylor1999synthesis}:
 \begin{equation}
 \label{eqn_cosine_correlation}
-r=\Delta\upsilon \int_{\vec{s}}{A(\vec{s})I(\vec{s})\cos{\frac{2\pi\vec{b}\cdot\vec{\sigma}}{\lambda}}d\Omega}
+r=\Delta\upsilon \int_{\vec{s}}{A(\vec{s})I(\vec{s})\cos{\frac{2\pi\vec{b}\cdot(\vec{s}-\vec{s_0})}{\lambda}}d\Omega}
 \end{equation}
 
 \begin{figure}[ht]
@@ -244,13 +246,13 @@ r=\Delta\upsilon \int_{\vec{s}}{A(\vec{s})I(\vec{s})\cos{\frac{2\pi\vec{b}\cdot\
  \end{subfigure}
  \caption[Cosine correlator]{(a) Position vectors used in the interferometer response. $\vec{s_0}$ is the \textit{phase tracking center} where $\tau:=0$ \cite{taylor1999synthesis} (b) Simplified diagram of a two-element correlator, combining the output of two elements spaced $B=||\vec{b}||$ appart. The integrator takes the \textit{cross correlation} of the signal 
  from the second telescope and a time-delayed signal from the first telescope over a small period of time \cite{taylor1999synthesis}. (c) The power produced through cross correlation, differs from that of a single element telescope as shown in figure~\ref{diffraction_pattern_and_power_at_focus} and has a response for greater angles than a small single reflector telescope. If $B$ is doubled, 
- the fringe width is halved and the the correlator response for larger angles improves. \cite{wilson2009tools}.}
+ the fringe width is halved and the the correlator response for larger angles improves. This process is analoguous to the diffraction of visible light in Young's double-slit experiment. \cite{wilson2009tools}.}
   \label{fig_cosine_correlator}
  \end{mdframed}
 \end{figure}
-It is easy to see that this correlator ``fringe'' pattern has a major drawback: the correlator is insensitive for $\frac{2\pi\vec{b}\cdot\vec{\sigma}}{\lambda} = \frac{\pi}{2} \pm n\pi$. To fix this problem correlators typically
+It is easy to see that this correlator ``fringe'' pattern has a major drawback: the correlator is insensitive for $\frac{2\pi\vec{b}\cdot(\vec{s}-\vec{s_0})}{\lambda} = \frac{\pi}{2} \pm n\pi$. To fix this problem correlators typically
 take the form of \textit{complex correlators} where a second correlation is made by introducing a phase delay of $\frac{\pi}{2}$ in the feeds of the antennae. The second correlator is effectively a \textit{sine correlator}. We can
-now replace the cosine term in equation~\ref{eqn_cosine_correlation} by $e^{-2\pi\vec{b}\cdot\vec{\sigma}/\lambda}$ through the Euler relation between the complex exponential and the polar form of a complex coordinate \cite{taylor1999synthesis}.
+now replace the cosine term in equation~\ref{eqn_cosine_correlation} by $e^{-2\pi\vec{b}\cdot(\vec{s}-\vec{s_0})/\lambda}$ through the Euler relation between the complex exponential and the polar form of a complex coordinate \cite{taylor1999synthesis}.
 
 The next issue are the effects of limited \textit{bandwidth}, $\Delta\upsilon$, in correlators. Since it is computationally infeasible to sample an infinite spectrum of frequencies, only a select number of channels are sampled. This
 band is normally shifted down to \textit{baseband} ($\upsilon=0$) and filtered appropriately with a lowpass filter to reduce aliasing, refer to figure~\ref{fig_bandwidth}. The baseline is normally measured in wavelengths and therefore depends on the
@@ -276,8 +278,9 @@ by a delay tracking computer, which essentially stops any fringe oscilation (kno
  \end{mdframed}
 \end{figure}
 
-Up to this point we conveniently only discussed correlator output for a single feed of each antenna in a two element interferometer. The correlator additionally cross-correlates the two polarization feeds to form the following matrix of complex cross-correlations between the
-antennae p \& q (where * indicates the complex conjugate). The equation governing the correlator power response remain the same. Here I, V, U and Q are the four Stokes parameters \cite{taylor1999synthesis}.
+Up to this point we conveniently only discussed correlator output for a single feed of each antenna in a two element interferometer. The correlator \textit{may} additionally cross-correlate the two polarization feeds to 
+form the following matrix of correlation components between the antennae p \& q (where * indicates the complex conjugate). In instances where all of these components are available may the Stokes parameters (I, V, U and Q) be computed. 
+The equation governing the correlator power response remain the same for the four different polarizations.  \cite{taylor1999synthesis}.
 \begin{equation}
 X_{pq} = \left[\begin{array}{c c}
      e_{X_pX_q^*} & e_{X_pY_q^*} \\
@@ -313,8 +316,91 @@ It is worthwhile to note that the correlation, delay and phase compensations can
 known as \textit{FX} correlators. If these power spectra are of high time resolution it is possible to perform surveys focussed on transient detection. Modern arrays such as LOFAR, KAT-7 and MeerKAT (currently under construction) have the capability to perform these searches through
 special \textit{beamforming} modes which may be run concurrently with imaging modes. See Stappers et al. \cite{stappers2011observing} for details on pulsar observation with LOFAR. In this thesis, however, we will focus solely on the imaging pipeline which is discussed in the next section.
 
-\section{Synthesis imaging}
-{\color{red} TODO}
+\section{Synthesis imaging on arrays}
+In the previous section the response, $r$, of a complex correlator was described. The \textit{visibility} is an unnormalized measure of the coherence of an electric field, and is very closely related to the correlator response to the planar wave fronts emitted
+by a source on the celestrial sphere, see figure~\ref{fig_uvw_lmn}. The magnitude of this coherence has dimensions of flux density as described earlier. Without loss of generality when extended to the different polarization terms, the relation between the measured visibilities and the 
+image can be defined as:
+\begin{equation}
+ \label{eqn_visibility}
+ \begin{split}
+  V(u,v,w) &:= \int_{\vec{s}}{A(\vec{s})I(\vec{s})\cos{\frac{2\pi\vec{b}\cdot(\vec{s}-\vec{s_0})}{\lambda}}d\Omega}\\
+	   &= \int_{-\infty}^\infty{\int_{-\infty}^\infty{A(l,m)I(l,m)e^{-2\pi i[ul+vm+w(n-1)]} \frac{dldm}{\sqrt{1-l^2-m^2}}}}\\
+	   &= \int_{-\infty}^\infty{\int_{-\infty}^\infty{A(l,m)I(l,m)e^{-2\pi i[ul+vm+w(\sqrt{1-l^2-m^2}-1)]} \frac{dldm}{\sqrt{1-l^2-m^2}}}}
+ \end{split}
+\end{equation}
+
+\begin{figure}[h]
+ \begin{mdframed}
+ \centering
+ \includegraphics[width=0.5\textwidth]{images/lmn_uvw.png}
+ \caption[The relation between image space and visibilities]{The relation between the measured spatial coherence function and the source on the unit ``celestial'' sphere, emitting planar waves of radiation \cite{taylor1999synthesis}.}
+  \label{fig_uvw_lmn}
+ \end{mdframed}
+\end{figure}
+
+When the field of view being observed is sufficiently small, $n$ is close to unity and the term $w(n-1) = 0$. Similarly, if the all the antenna are at equal height (\textit{co-planar}) $w=0$ and the term disappears as well.
+Under these circumstances equation~\ref{eqn_visibility} is the two dimensional fourier transform of the image. In reality the image is not only affected by the effective area of the comprising elements in the interferometer, but is subject to incomplete sampling, 
+direction-independent antenna gains, as well as directional effects, such as ionospheric and tropospheric conditions. Equation~\ref{eqn_visibility} may thus be rewritten to take multiple polarizations, the gains and directional effects into account through a \textit{Jones}
+matricies formulation presented by Smirnov in a series of papers on the formulation and its implications for calibration \cite{2011A&A...527A.106S,2011A&A...527A.107S,2011A&A...527A.108S}.
+
+Due to the improvements in execution speed the Inverse Fast Fourier Transform is taken of the visibilities through a process of \textit{convolutional gridding}, which will be detailed in the next section. After that the problem 
+of non-coplanar baselines wide-field imaging will be investigated. In the remainder of this section a short overview of coordinate systems, and arrays and their calibration are given. Much more can be found in 
+Synthesis Imaging II \cite[Lectures 2, 3, 8, 10]{taylor1999synthesis}.
+
+
+\subsection{calibration}
+{\color{red}
+Lectures 3, 8 and 10
+
+
+Short integration intervals ensure gains stay relatively constant (worse effects are at edge of field of view). longer integration times only if angular extent of the source is less than primary beam size.
+
+3 Areas of calibration:
+Direct
+Calibrator sources - antennae phase offset \& atmospheric conditions
+Self-calibration
+
+$\tilde V_pq = G_pq(t,v)V_pq + \epsilon_pq + n_pq$
+The gain is an amplitude multiplication and phase shift per antennae. The frequency variation is normally calibrated by observing a bright
+source with a flat spectrum over the observed frequency band. These frequency dependent effects luckly vary slow with time and only one such
+calibration is normally needed per observation.
+
+Calibration is performed per frequency channel and polarization.
+
+Primary beam distribution (l,m) stays constant and is assumed equal for all antennae.
+
+Pointing errors (wind and heat) can be corrected.
+
+Geometrical delays can be calculatated but may suffer from quantization errors. Polarization delays are calibrated through strongly 
+polarized sources. Calibration is additionally needed to accomodate for leakage between orthogonal polarizations.
+
+Timing error will ultimately result in pointing error.
+
+Non-coplanar interferometry requires phase correction due to atmospheric effects. At tropospheric levels this includes both dry (stable) and wet effects (largely variable). The problem grows worse with longer baselines, when the curvature and variations in 
+water-vapor of the atmosphere has to be taken into consideration. Calibration for these wet effects rely heavily on measurements of atmospheric conditions at the seperate interferometer elements.
+
+While tropospheric conditions are largely independent of frequency, Ionospheric effects are dependent on frequency. The electron column densities are measured by high frequency radar examination (an \textit{ionosonde}) or by dual frequency satellite transmission. This effects
+varies with direction.
+
+Troposphere and Ionosphere additionally absorbs some of the source signal and contributes to the noise levels in the signal. These can normally be corrected by observing a source of known flux or tipping curve techniques.
+
+Magnetic effects in the Ionosphere typically produces directionally dependent \textit{Faraday Rotation} which introduces a phase rotation
+between the R and L polarization feeds.
+
+The lack of strong calibrators, and the requirements placed on the properties of these calibrators, near observations make the process of calibrating the rapidly varying directional effects within the atmosphere a very hard problem. By allowing the individual element gains to
+be free parameters forms the basis of self-calibration. 
+
+Self-calibration imposes some restrictions: information about the absolute position, structure and intensity of an observed source is traded
+for improved signal-to-noise ratios. These effects are greatly reduced by adding additional antennae to the array. The self-calibration problem can
+be viewed as iteratively improving an initial model by correcting the effects of gain on sky brightness through algorithms such as the Maximum Entropy Method
+and the CLEAN algorithm. The specification of the initial model does not necessarily have to be very accurate for CLEAN to converge at some point: it may simply consist of point sources for relatively simple images.
+
+The H\"ogbom CLEAN algorithm locates (and keeps a list of) the brightest sources in an image in an iterative cycle, subtracting the Point Spread Function from each source until some thresholding condition is met. The remaining image is termed the residuals. After convolving the found point sources with elliptical function fitted over the Point Spread Function, the residuals are added to the convolved image, forming the final ''clean" image. Many other variations on the algorithm exist, bringing with them improvements in execution speed and stability.
+
+While CLEAN provides a procedural approach to deconvolution the Maximum Entropy Method selects an image that fits the data to within a specified noise level, and is not procedural.
+The method essentially limits the range of pixel values and focusses these ranges around bright objects. Though CLEAN is usually much faster on smaller simple images, it is prohibatively slow on large complex images. Under these conditions the Maximum Entropy Method is outright faster.
+}
+
 
 \bibliography{bibfile}
 \bibliographystyle{plain}
