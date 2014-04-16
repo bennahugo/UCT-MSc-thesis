@@ -13,6 +13,7 @@
 \usepackage{subcaption}
 \usepackage{hyperref}
 \usepackage[font={small}]{caption}
+\usepackage{marvosym}
 % Title Page
 \title{Facet-based Imaging}
 \author{Benjamin Hugo}
@@ -54,7 +55,7 @@ Steven Smith\footnote{Available freely at \url{http://www.dspguide.com/}}\cite{s
 A signal is simply a description of how one parameter depends on another. A typical example of this is how voltage varies over time. Since the focus in this thesis lie solely in digitized signals, it is necessary to carefully
 define under what circumstances the underlying continuous analog signal can be reconstructed. The Shannon-Nyquest \textit{sampling theorem} forms the cornerstone of Digital Signals Processing. It simply states that the rate at
 which samples are taken from a continuous signal has to be at least twice the highest frequency component of that signal. Such a signal is said to be critically sampled if it obeys this minimum requirement. If the requirement is
-not satisfied the sampled signal is aliased (higher frequencies appear as low frequency components). This can be illustrated through figure~\ref{fig_invalid_sampling}. Aliasing is usually reduced by applying a filter that essentially
+not satisfied the sampled signal is aliased (higher frequencies appear as low frequency com on gradebook and assignments tab yesterday on vula, so I thought I should contact you to know whether this is known to you. I don't know what happened but I had marks before. Thank you!ponents). This can be illustrated through figure~\ref{fig_invalid_sampling}. Aliasing is usually reduced by applying a filter that essentially
 have low responses at frequencies outside a limited \text{passband} of frequencies. This filter is can be something as simple as a windowed sinc function for instance. Although a sharp cutoff frequency is ideal, it should be noted 
 that in reality this is not achieved. Filter frequency responces usually decline over a non-infinitesimal section of the spectrum (this is known as \textit{rolloff}).
 
@@ -282,14 +283,14 @@ Up to this point we conveniently only discussed correlator output for a single f
 form the following matrix of correlation components between the antennae p \& q (where * indicates the complex conjugate). In instances where all of these components are available may the Stokes parameters (I, V, U and Q) be computed. 
 The equation governing the correlator power response remain the same for the four different polarizations.  \cite{taylor1999synthesis}.
 \begin{equation}
-X_{pq} = \left[\begin{array}{c c}
-     e_{X_pX_q^*} & e_{X_pY_q^*} \\
-     e_{Y_pX_q^*} & e_{Y_pY_q^*} \\
-    \end{array}\right] = 
+    \left[\begin{array}{c c}
+     <e_{X_p}e_{X_q}^*> & <e_{X_p}e_{Y_q}^*> \\
+     <e_{Y_p}e_{X_q}^*> & <e_{Y_p}e_{Y_q}^*> \\
+    \end{array}\right] \approx 
     \left[\begin{array}{c c}
      I + V & Q + iU \\
      Q - iU & I - V \\
-    \end{array}\right]
+    \end{array}\right] = B
 \end{equation}
 Each of the parameters Q, U and V are linearly independent and discribe a position on the Poincar\'e Sphere (figure \ref{fig_poincare}). Their coordinates on the sphere are given by
 \begin{equation}
@@ -317,9 +318,10 @@ known as \textit{FX} correlators. If these power spectra are of high time resolu
 special \textit{beamforming} modes which may be run concurrently with imaging modes. See Stappers et al. \cite{stappers2011observing} for details on pulsar observation with LOFAR. In this thesis, however, we will focus solely on the imaging pipeline which is discussed in the next section.
 
 \section{Synthesis imaging on arrays}
+\subsection{The all-sky Radio Interferometric Measurement Equation}
 In the previous section the response, $r$, of a complex correlator was described. The \textit{visibility} is an unnormalized measure of the coherence of an electric field, and is very closely related to the correlator response to the planar wave fronts emitted
-by a source on the celestrial sphere, see figure~\ref{fig_uvw_lmn}. The magnitude of this coherence has dimensions of flux density as described earlier. Without loss of generality when extended to the different polarization terms, the relation between the measured visibilities and the 
-image can be defined as:
+by a source. The magnitude of this coherence has dimensions of flux density as described earlier. The Radio Interferometric Measurement Equation relates between these visibilities and the projection of the source onto the celestial sphere. This projection and measurement
+process is illustracted in figure~\ref{fig_uvw_lmn}. Without loss of generality when extended to the different polarization terms, the relation between the measured visibilities and the image can be defined as:
 \begin{equation}
  \label{eqn_visibility}
  \begin{split}
@@ -338,16 +340,85 @@ image can be defined as:
  \end{mdframed}
 \end{figure}
 
-When the field of view being observed is sufficiently small, $n$ is close to unity and the term $w(n-1) = 0$. Similarly, if the all the antenna are at equal height (\textit{co-planar}) $w=0$ and the term disappears as well.
-Under these circumstances equation~\ref{eqn_visibility} is the two dimensional fourier transform of the image. In reality the image is not only affected by the effective area of the comprising elements in the interferometer, but is subject to incomplete sampling, 
-direction-independent antenna gains, as well as directional effects, such as ionospheric and tropospheric conditions. Equation~\ref{eqn_visibility} may thus be rewritten to take multiple polarizations, the gains and directional effects into account through a \textit{Jones}
-matricies formulation presented by Smirnov in a series of papers on the formulation and its implications for calibration \cite{2011A&A...527A.106S,2011A&A...527A.107S,2011A&A...527A.108S}.
+Typically some reference point is used to specify the relative positions of the Antennae. The baseline is then given by the following relation, where $H_0$ and $\delta_0$ is the respective hour angle and declanation of the 
+phase reference center and $\lambda$ is he wavelength corresponding to the center frequency of the receiver as mentioned previously. Refer to figure~\ref{fig_celestrial_coords} for a visual reference of the celestrial 
+sphere, and the equatorial and alt-azimuth coordinate system.
+\begin{equation}
+ \left[\begin{array}{c}
+     u\\
+     v \\
+     w \\
+    \end{array}\right] = \frac{1}{\lambda}
+ \left[\begin{array}{c c c}
+     \sin{H_0} 			& \cos{H_0}			& 0 \\
+     -\sin{\delta_0}\cos{H_0} 	& \sin{\delta_0}\sin{H_0}	& \cos{\delta_0}\\
+     \cos{\delta_0}\cos{H_0} 	& -\cos{\delta_0}\sin{H_0}	& \sin{\delta_0}\\
+    \end{array}\right]   
+ \left[\begin{array}{c}
+     L_X \\
+     L_Y \\
+     L_Z \\
+    \end{array}\right]
+\end{equation}
+
+\begin{figure}[h]
+ \begin{mdframed}
+ \centering
+ \includegraphics[width=0.75\textwidth]{images/equatorial_coords.png}
+ \caption[Equatorial and alt-azimuth coordinate system]{The angular coordinates of a point in space is usually measured in terms of declination ($\delta$) and either right-ascension ($\alpha$ or R.A.) or the hour angle ($H$) from the place
+ where observations are taken. The first point of Aries (\Aries) is the position of the Sun at the March Equinox. The celestrial equator is simply Earth's equator projected onto the celestial sphere. There is normally a slow precession in the Earth's
+ axis and this has to be corrected for, based on some reference point in time (an epoch). The last epoch at the time of writing was at noon January 1, 2000. See Radiotelescopes \cite[Appendix 4]{christiansenradiotelescopes} for more information.}
+  \label{fig_celestrial_coords}
+ \end{mdframed}
+\end{figure}
+
+When the field of view being observed is sufficiently small, $n$ is close to unity and the term $w(n-1) = 0$. Similarly, if the all the antenna are at equal height (\textit{co-planar}) $w=0$ and the term disappears as well. Under 
+these circumstances equation~\ref{eqn_visibility} is the two dimensional fourier transform of the image. In reality the image is not only affected by the effective area of the comprising elements in the interferometer, but is 
+subject to incomplete sampling, direction-independent antenna gains, as well as directional effects, such as ionospheric and tropospheric conditions. 
+
+Equation~\ref{eqn_visibility} may thus be rewritten to take multiple polarizations, the gains and directional effects into account through a \textit{Jones} matricies formulation presented by Smirnov in a series of papers on the 
+formulation and its implications for calibration \cite{2011A&A...527A.106S,2011A&A...527A.107S,2011A&A...527A.108S}. Here the B term is the Stokes parameter matrix as we defined in the previous section (B may represent either
+linear or circular polarizations, with the necessary coordinate system transformations added):
+
+\begin{equation}
+\begin{split}
+    V_{pq} &= G_p(t,\upsilon)\left(\int_{-\infty}^{\infty}\int_{-\infty}^{\infty}D_p(l,m,t,\upsilon)BK_{pq}D_q(l,m,t,\upsilon)^H\frac{dldm}{\sqrt{1-l^2-m^2}}\right)G_q(t,\upsilon)\\
+	  &\text{where }K = e^{-2\pi i(u_{pq}l+v_{pq}m+w_{pq}(n-1))}
+    \left[\begin{array}{c c}
+     1 & 0 \\
+     0 & 1 \\
+    \end{array}\right]\\
+	 &\text{and the G terms are the direction-independent effects,}\\
+	 &\text{while the E terms are dependent on the direction of the source in l,m space}\\
+ 	 &J^H:=\bar J^T \text{ indicates the Hermitian transpose (or the transpose of complex conjugate matrix of all the J indicies)}\\ 
+\end{split}
+\end{equation}
+
+The fundamental assumption here is that all effects on the measured intensities (subject to attenuation by the primary beam of each antenna) are linear and can therefore be written as two-dimensional matricies. Each antenna will additionally have its own set of these effects / gain terms. They include corrections for
+Faraday rotation, ionospheric effects, tropospheric effects and pointing error due to weather (wind and heat). These corrections only account for amplitude scaling and phase shifts and can be combined in a layered approach by multiplying several of these 
+Jones terms together (note that the terms may not necessarily commute, so the order of multiplication is important). The different effect effects will be described later when calibration is discussed.
+
+\subsection{Array-based observation}
+Each observation will typically extend over a prolonged period of time (over many hours for instance) and collect a large number of visibilities, typically over a large number of channels. As the earth rotates each baseline sweeps out
+eliptical paths in u,v space, sampling the coherence function at regular intervals. As the number of antennae in the array is increased the number of measured visibilities grow quadratically, since the number of possible baselines between 
+antennae is given as \frac{n(n-1)}{2}+n. Adding a small number of antennae to the array can therefore effectively improve the uv coverage. By adding more visibilities in fourier space the quality of the synthesized 
+image is improved, because the associated sampling function can be more effectively deconvolved from the produced image as is explained in the section on convolutional gridding.
+
+The uniform and wide coverage of the u,v space can normally be attained using only east-west baselines, except at very low declanations (less than about $30^o$) at the horizon. At low declanations baselines with a component sufficiently 
+parallel to the Earths axis (non East-West) are needed. Such a two dimensional array have baseline components which don't remain co-planar over long observations and require the l and m components being small enough to ensure $(\sqrt{1 - l^2 - m^2} - 1)w \approx 0$. 
+See figure~\ref{fig_VLBA_uv} for an illustration of the uv-coverage attained by the VLBA array.
+
+\begin{figure}[h]
+ \begin{mdframed}
+ \centering
+ \includegraphics[width=0.5\textwidth]{images/eliptical_sampling.png}
+ \caption[VLBA uv-coverage]{The sampling patterns of the ten antennae of the VLBA at 4 different declanations. The best coverage is attained at greater declanations}
+  \label{fig_VLBA_uv}
+ \end{mdframed}
+\end{figure}
 
 Due to the improvements in execution speed the Inverse Fast Fourier Transform is taken of the visibilities through a process of \textit{convolutional gridding}, which will be detailed in the next section. After that the problem 
-of non-coplanar baselines wide-field imaging will be investigated. In the remainder of this section a short overview of coordinate systems, and arrays and their calibration are given. Much more can be found in 
-Synthesis Imaging II \cite[Lectures 2, 3, 8, 10]{taylor1999synthesis}.
-
-
+of non-coplanar baselines wide-field imaging will be investigated. Much more on calibration and the role of different effects can be found in Synthesis Imaging II \cite[Lectures 2, 3, 8, 10]{taylor1999synthesis}.
 \subsection{calibration}
 {\color{red}
 Lectures 3, 8 and 10
