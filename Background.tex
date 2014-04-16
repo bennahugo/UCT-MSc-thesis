@@ -258,8 +258,7 @@ now replace the cosine term in equation~\ref{eqn_cosine_correlation} by $e^{-2\p
 The next issue are the effects of limited \textit{bandwidth}, $\Delta\upsilon$, in correlators. Since it is computationally infeasible to sample an infinite spectrum of frequencies, only a select number of channels are sampled. This
 band is normally shifted down to \textit{baseband} ($\upsilon=0$) and filtered appropriately with a lowpass filter to reduce aliasing, refer to figure~\ref{fig_bandwidth}. The baseline is normally measured in wavelengths and therefore depends on the
 center frequency through the well-known relation $\upsilon=\frac{c}{\lambda}$. Unfortunately this has a negative impact on the fringe pattern of the correlator; the fringe is modulated by a sinc-function for a rectangular band. This has
-the effect of tapering the fringe which again reduces the effective area of the interferometric telescope. The obvious solution is to observe only narrow spectra. The fringe depends on the delay term and oscilates in time. Normally this is not a problem.
-However, with exceedingly long baselines such as those in \textit{Very Long Baseline Interferometry}, where the baselines may span continents (see Middelberg et al. \cite{middelberg2008high} for a detailed overview), the local oscilator term is usually varied 
+the effect of tapering the fringe which again reduces the effective area of the interferometric telescope. The obvious solution is to observe only narrow spectra. The fringe additionally depends on the delay term and oscilates in time. Normally this is not a problem. However, with exceedingly long baselines such as those in \textit{Very Long Baseline Interferometry}, where the baselines may span continents (see Middelberg et al. \cite{middelberg2008high} for a detailed overview), the local oscilator term is usually varied 
 by a delay tracking computer, which essentially stops any fringe oscilation (known as \textit{fringe stopping}) \cite{taylor1999synthesis}.
 \begin{figure}
  \begin{mdframed}
@@ -317,7 +316,7 @@ It is worthwhile to note that the correlation, delay and phase compensations can
 known as \textit{FX} correlators. If these power spectra are of high time resolution it is possible to perform surveys focussed on transient detection. Modern arrays such as LOFAR, KAT-7 and MeerKAT (currently under construction) have the capability to perform these searches through
 special \textit{beamforming} modes which may be run concurrently with imaging modes. See Stappers et al. \cite{stappers2011observing} for details on pulsar observation with LOFAR. In this thesis, however, we will focus solely on the imaging pipeline which is discussed in the next section.
 
-\section{Synthesis imaging on arrays}
+\section{The fundamentals of array-based imaging}
 \subsection{The all-sky Radio Interferometric Measurement Equation}
 In the previous section the response, $r$, of a complex correlator was described. The \textit{visibility} is an unnormalized measure of the coherence of an electric field, and is very closely related to the correlator response to the planar wave fronts emitted
 by a source. The magnitude of this coherence has dimensions of flux density as described earlier. The Radio Interferometric Measurement Equation relates between these visibilities and the projection of the source onto the celestial sphere. This projection and measurement
@@ -394,19 +393,22 @@ linear or circular polarizations, with the necessary coordinate system transform
 \end{split}
 \end{equation}
 
-The fundamental assumption here is that all effects on the measured intensities (subject to attenuation by the primary beam of each antenna) are linear and can therefore be written as two-dimensional matricies. Each antenna will additionally have its own set of these effects / gain terms. They include corrections for
-Faraday rotation, ionospheric effects, tropospheric effects and pointing error due to weather (wind and heat). These corrections only account for amplitude scaling and phase shifts and can be combined in a layered approach by multiplying several of these 
-Jones terms together (note that the terms may not necessarily commute, so the order of multiplication is important). The different effect effects will be described later when calibration is discussed.
+The fundamental assumption here is that all effects on the measured intensities (subject to attenuation by the primary beam of each antenna) are linear and can therefore be written as two-dimensional matricies. Each antenna will additionally have its own 
+set of these effects. They include corrections for Faraday rotation, ionospheric effects, tropospheric effects and pointing error due to weather (wind and heat). These corrections only account for amplitude scaling and phase shifts and can be 
+combined in a layered approach by multiplying several of these Jones terms together (note that the terms may not necessarily commute, so the order of multiplication is important). The different effect effects will be described later when calibration is 
+discussed.
 
 \subsection{Array-based observation}
 Each observation will typically extend over a prolonged period of time (over many hours for instance) and collect a large number of visibilities, typically over a large number of channels. As the earth rotates each baseline sweeps out
 eliptical paths in u,v space, sampling the coherence function at regular intervals. As the number of antennae in the array is increased the number of measured visibilities grow quadratically, since the number of possible baselines between 
-antennae is given as \frac{n(n-1)}{2}+n. Adding a small number of antennae to the array can therefore effectively improve the uv coverage. By adding more visibilities in fourier space the quality of the synthesized 
-image is improved, because the associated sampling function can be more effectively deconvolved from the produced image as is explained in the section on convolutional gridding.
+antennae is given as $\frac{n(n-1)}{2}+n$. Adding a small number of antennae to the array can therefore effectively improve the uv coverage. By adding more visibilities in fourier space the quality of the synthesized 
+image is improved, because the effects of the limited sampling can be more effectively removed from the produced image as is explained in the section on convolutional gridding.
 
-The uniform and wide coverage of the u,v space can normally be attained using only east-west baselines, except at very low declanations (less than about $30^o$) at the horizon. At low declanations baselines with a component sufficiently 
-parallel to the Earths axis (non East-West) are needed. Such a two dimensional array have baseline components which don't remain co-planar over long observations and require the l and m components being small enough to ensure $(\sqrt{1 - l^2 - m^2} - 1)w \approx 0$. 
-See figure~\ref{fig_VLBA_uv} for an illustration of the uv-coverage attained by the VLBA array.
+The uniform and wide coverage of the entire u,v space (the size of which is determined by the required angular resolution), can normally be attained using only east-west baselines, except at very low declanations (less than about $30^o$) at the horizon. At low declanations baselines 
+with a component sufficiently parallel to the Earths axis (non East-West) are needed. Such a two dimensional array have baseline components which don't remain co-planar over long observations and require the l and m components being small enough to 
+ensure $(\sqrt{1 - l^2 - m^2} - 1)w \approx 0$. See figure~\ref{fig_VLBA_uv} for an illustration of the uv-coverage attained by the VLBA array. The spacing in such an East-West array is of high importance
+in ensuring the uniform sampling of the u,v space. Spacing the antennas uniformly for instance will result in many redundant coverages by the shorter baselines. Other designs include movable
+antennae provide greater flexibility and can cover more baselines. For two dimensional arrays reducing redundancy becomes even more challenging as eluded to in Synthesis Imaging II \cite[Lecture 2]{taylor1999synthesis}.
 
 \begin{figure}[h]
  \begin{mdframed}
@@ -417,61 +419,76 @@ See figure~\ref{fig_VLBA_uv} for an illustration of the uv-coverage attained by 
  \end{mdframed}
 \end{figure}
 
+\subsection{Effects on the image and calibration}
+Telescope calibration is regarded as a hard problem in radio astronomy and is filled with heuristical approaches which attempt to correct for, predominantly, those effects which alter the
+incomming electromagnetic wavefronts prior to the process of correlation. It usually deals with both slow and fast-varying effects and is broken into three areas:
+\begin{itemize}
+ \item \textbf{Direct calibration} involves data flagging. This type of calibration is normally used to mark broad portions of the data that is known to be invalid, due to for example
+ technical malfunction. Modern radio astronomy software, for example the CASA family of toolkits, have tools for performing this type of calibration.
+ \item \textbf{Calibration through known calibrator sources and apriori information} 
+ \item \textbf{Self-calibration processes} are iterative processes which comprise primarily of intensity adjustments in image space and convergence testing in the uv space.
+\end{itemize}
+
+Much of this overview is based on the litterature of Synthesis Imaging II \cite[Lectures 5, 8 and 10]{taylor1999synthesis}.
+
+\subsubsection{Calibration sources}
+ Sources with known flux and other apriori information is used to correct telescope gain. Gain correction focusses on reversing amplitude modulation and phase error, and is 
+ comprised of, both directionally dependent effects, and directionally independent effects. Gain have to be corrected either for each baseline or per antenna (the latter is 
+ preferred, especially since the number of baselines grow quadratically), and the calibration is performed individually per frequency channel and polarization.
+ 
+ Some of the worst effects are apparent far from delay tracking center at the edge of the field of view. At the edges the gain term stays constant for only a short period of time, which
+ places a restriction on the integration interval of the correlator. Longer integration times are only permissible if the angular extent of the source is less than the primary beam size.
+ This short time averaging, along with limited bandwidth observation are responsible for some of the radial smearing effects seen in images. See figure~\ref{fig_radial_smeering}.
+ 
+ \begin{figure}[h]
+ \begin{mdframed}
+ \centering
+ \includegraphics[width=0.9\textwidth]{images/radial_smeering.png}
+ \caption[The effects of bandwidth and short-time integration]{The effect of higher frequency components in the bandlimited sampling process manifests itself as orthogonal concentric 
+ curves in u,v space, while the effects of short time averaging is smearing in a radial direction. The effect becomes more apparent near the edges of the u,v space \cite{middelberg2008high}.}
+  \label{fig_radial_smeering}
+ \end{mdframed}
+\end{figure}
+
+ The delay tracking center is, itself, not free from error either. Antenna pointing errors can be corrected by keeping sensor data for every antenna. These errors are predominantly due to
+ the antenna's suseptability to wind and the effects of heat on the material of the antenna. Special instrumentation like tiltmeters can monitor changes in pointing direction and with fast
+ feedback these can be used to track changes in antenna pointing. Other problems such as inadequite timing resolution, quantization errors in the calculation and correction of geometrical 
+ delays, and synchronization will also result in pointing error.
+
+ Large arrays typically also require phase correction due to other atmospheric effects. At tropospheric levels this includes both dry (stable) and wet effects (largely variable). The problem grows worse with longer baselines, when the 
+ curvature, and variations in water-vapor, of the atmosphere has to be taken into consideration. Calibration for these wet effects rely heavily on measurements of atmospheric conditions at the seperate interferometer elements.
+ This data is normally stored as additional tables of information and accompany observations.
+
+ While tropospheric conditions are largely independent of frequency, Ionospheric effects are dependent on frequency. The electron column densities are measured by high frequency radar examination (an \textit{ionosonde}) or by dual 
+ frequency satellite transmission. These effects additionally vary with direction, as the electron density in the ionosphere is not constant over the entire field of view. The frequency dependency of the ionospheric term is 
+ normally calibrated by observing a bright source with a flat spectrum over the observed frequency band. These frequency dependency luckily vary slowly with time and only one such calibration is normally needed per observation.
+
+ Magnetic effects in the Ionosphere typically produces directionally dependent \textit{Faraday Rotation} which introduces a phase rotation between the R and L polarization feeds.
+ Polarization delays are calibrated through strongly polarized sources. Calibration is additionally needed to accomodate for leakage between orthogonal polarizations. Both the troposphere and 
+ ionosphere additionally absorbs some of the source signal and contributes to the noise levels in the signal. These can normally be corrected by observing a source of known flux or tipping curve techniques.
+ 
+\subsubsection{Self-calibration}
+ The lack of strong calibrators near observed areas, and the requirements placed on the properties of these calibrations, makes the process of calibrating the rapidly varying 
+ directional effects within the atmosphere a very hard problem. By allowing the individual element gains to be free parameters forms the basis of self-calibration. 
+
+ Self-calibration imposes some restrictions: information about the absolute position, structure and intensity of an observed source is traded
+ for improved signal-to-noise ratios. These effects are greatly reduced by adding additional antennae to the array. The self-calibration problem can
+ be viewed as iteratively improving an initial model by correcting the effects of gain on sky brightness through algorithms such as the Maximum Entropy Method
+ and the CLEAN algorithm. The specification of the initial model does not necessarily have to be very accurate for CLEAN to converge at some point: it may simply 
+ consist of point sources for relatively simple images.
+
+ The H\"ogbom CLEAN algorithm locates (and keeps a list of) the brightest sources in an image in an iterative cycle, subtracting the Point Spread Function from each source until some 
+ thresholding condition is met. The remaining image is termed the residuals. After convolving the found point sources with elliptical function fitted over the Point Spread Function, 
+ the residuals are added to the convolved image, forming the final ''clean" image. Many other variations on the algorithm exist, bringing with them improvements in execution speed and 
+ stability.
+
+ While CLEAN provides a procedural approach to deconvolution the Maximum Entropy Method selects an image that fits the data to within a specified noise level, and is not procedural.
+ The method essentially limits the range of pixel values and focusses these ranges around bright objects. Though CLEAN is usually much faster on smaller simple images, it is prohibatively slow 
+ on large complex images. Under these conditions the Maximum Entropy Method is outright faster.
+
+
 Due to the improvements in execution speed the Inverse Fast Fourier Transform is taken of the visibilities through a process of \textit{convolutional gridding}, which will be detailed in the next section. After that the problem 
-of non-coplanar baselines wide-field imaging will be investigated. Much more on calibration and the role of different effects can be found in Synthesis Imaging II \cite[Lectures 2, 3, 8, 10]{taylor1999synthesis}.
-\subsection{calibration}
-{\color{red}
-Lectures 3, 8 and 10
-
-
-Short integration intervals ensure gains stay relatively constant (worse effects are at edge of field of view). longer integration times only if angular extent of the source is less than primary beam size.
-
-3 Areas of calibration:
-Direct
-Calibrator sources - antennae phase offset \& atmospheric conditions
-Self-calibration
-
-$\tilde V_pq = G_pq(t,v)V_pq + \epsilon_pq + n_pq$
-The gain is an amplitude multiplication and phase shift per antennae. The frequency variation is normally calibrated by observing a bright
-source with a flat spectrum over the observed frequency band. These frequency dependent effects luckly vary slow with time and only one such
-calibration is normally needed per observation.
-
-Calibration is performed per frequency channel and polarization.
-
-Primary beam distribution (l,m) stays constant and is assumed equal for all antennae.
-
-Pointing errors (wind and heat) can be corrected.
-
-Geometrical delays can be calculatated but may suffer from quantization errors. Polarization delays are calibrated through strongly 
-polarized sources. Calibration is additionally needed to accomodate for leakage between orthogonal polarizations.
-
-Timing error will ultimately result in pointing error.
-
-Non-coplanar interferometry requires phase correction due to atmospheric effects. At tropospheric levels this includes both dry (stable) and wet effects (largely variable). The problem grows worse with longer baselines, when the curvature and variations in 
-water-vapor of the atmosphere has to be taken into consideration. Calibration for these wet effects rely heavily on measurements of atmospheric conditions at the seperate interferometer elements.
-
-While tropospheric conditions are largely independent of frequency, Ionospheric effects are dependent on frequency. The electron column densities are measured by high frequency radar examination (an \textit{ionosonde}) or by dual frequency satellite transmission. This effects
-varies with direction.
-
-Troposphere and Ionosphere additionally absorbs some of the source signal and contributes to the noise levels in the signal. These can normally be corrected by observing a source of known flux or tipping curve techniques.
-
-Magnetic effects in the Ionosphere typically produces directionally dependent \textit{Faraday Rotation} which introduces a phase rotation
-between the R and L polarization feeds.
-
-The lack of strong calibrators, and the requirements placed on the properties of these calibrators, near observations make the process of calibrating the rapidly varying directional effects within the atmosphere a very hard problem. By allowing the individual element gains to
-be free parameters forms the basis of self-calibration. 
-
-Self-calibration imposes some restrictions: information about the absolute position, structure and intensity of an observed source is traded
-for improved signal-to-noise ratios. These effects are greatly reduced by adding additional antennae to the array. The self-calibration problem can
-be viewed as iteratively improving an initial model by correcting the effects of gain on sky brightness through algorithms such as the Maximum Entropy Method
-and the CLEAN algorithm. The specification of the initial model does not necessarily have to be very accurate for CLEAN to converge at some point: it may simply consist of point sources for relatively simple images.
-
-The H\"ogbom CLEAN algorithm locates (and keeps a list of) the brightest sources in an image in an iterative cycle, subtracting the Point Spread Function from each source until some thresholding condition is met. The remaining image is termed the residuals. After convolving the found point sources with elliptical function fitted over the Point Spread Function, the residuals are added to the convolved image, forming the final ''clean" image. Many other variations on the algorithm exist, bringing with them improvements in execution speed and stability.
-
-While CLEAN provides a procedural approach to deconvolution the Maximum Entropy Method selects an image that fits the data to within a specified noise level, and is not procedural.
-The method essentially limits the range of pixel values and focusses these ranges around bright objects. Though CLEAN is usually much faster on smaller simple images, it is prohibatively slow on large complex images. Under these conditions the Maximum Entropy Method is outright faster.
-}
-
+of non-coplanar baselines wide-field imaging will be investigated. 
 
 \bibliography{bibfile}
 \bibliographystyle{plain}
