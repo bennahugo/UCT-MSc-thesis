@@ -393,10 +393,10 @@ linear or circular polarizations, with the necessary coordinate system transform
 \end{split}
 \end{equation}
 
-The fundamental assumption here is that all effects on the measured intensities (subject to attenuation by the primary beam of each antenna) are linear and can therefore be written as two-dimensional matricies. Each antenna will additionally have its own 
-set of these effects. They include corrections for Faraday rotation, ionospheric effects, tropospheric effects and pointing error due to weather (wind and heat). These corrections only account for amplitude scaling and phase shifts and can be 
-combined in a layered approach by multiplying several of these Jones terms together (note that the terms may not necessarily commute, so the order of multiplication is important). The different effect effects will be described later when calibration is 
-discussed.
+The fundamental assumption here is that all effects on the measured intensities are linear and can therefore be written as two-dimensional matricies. Each antenna will additionally have its own set of these effects. 
+They include corrections for Faraday rotation, ionospheric effects, tropospheric effects and pointing error due to weather (wind and heat). These corrections only account for amplitude scaling and phase shifts and can be 
+combined in a layered approach by multiplying several of these Jones terms together (note that the terms may not necessarily commute, so the order of multiplication is important). The different effect effects will be described 
+later when calibration is discussed.
 
 \subsection{Array-based observation}
 Each observation will typically extend over a prolonged period of time (over many hours for instance) and collect a large number of visibilities, typically over a large number of channels. As the earth rotates each baseline sweeps out
@@ -472,8 +472,9 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  directional effects within the atmosphere a very hard problem. By allowing the individual element gains to be free parameters forms the basis of self-calibration. 
 
  Self-calibration imposes some restrictions: information about the absolute position, structure and intensity of an observed source is traded
- for improved signal-to-noise ratios. These effects are greatly reduced by adding additional antennae to the array. The self-calibration problem can
- be viewed as iteratively improving an initial model by correcting the effects of gain on sky brightness through algorithms such as the Maximum Entropy Method
+ for improved signal-to-noise ratios. It should be noted that these minimization approaches cannot completely replace the methods of source and polarization calibration mentioned earlier. 
+ The effect of these issues are normally incorporated as explicit jones terms in the model, such as the one mentioned earlier. These effects are greatly reduced by adding additional 
+ antennae to the array. The self-calibration problem can be viewed as iteratively improving an initial model by correcting the effects of gain on sky brightness through algorithms such as the Maximum Entropy Method
  and the CLEAN algorithm. The specification of the initial model does not necessarily have to be very accurate for CLEAN to converge at some point: it may simply 
  consist of point sources for relatively simple images.
 
@@ -486,7 +487,16 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  The method essentially limits the range of pixel values and focusses these ranges around bright objects. Though CLEAN is usually much faster on smaller simple images, it is prohibatively slow 
  on large complex images. Under these conditions the Maximum Entropy Method is outright faster.
 
-
+ Traditional self-calibration, however, assumes that the same apparent sky is sampled by all antennae, and solves only for the direction independent gain terms and consider directional dependent terms as simple effects that 
+ do not vary in time and is identical per antenna. The addition of directional dependencies within the all-sky integral, primarily those caused by the ionosphere and modulation effects by the primary beam, violates this premis. In 
+ the NEWSTAR package traditional the traditional self calibration process includes the following steps \cite{2011A&A...527A.107S}:
+ \begin{enumerate}
+  \item Gain minimization per antenna, and the minimization of the residual amplitudes and phases associated to each individual baseline (\textit{closure errors}) through a least squares approach.
+  \item Model subtraction to form a residual image.
+  \item Imaging, deconvolution and model updating using H\"ogbom CLEAN
+ \end{enumerate}
+ 
+ In reality 
 Due to the improvements in execution speed the Inverse Fast Fourier Transform is taken of the visibilities through a process of \textit{convolutional gridding}, which will be detailed in the next section. After that the problem 
 of non-coplanar baselines wide-field imaging will be investigated. 
 
