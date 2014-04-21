@@ -420,7 +420,7 @@ antennae provide greater flexibility and can cover more baselines. For two dimen
  \end{mdframed}
 \end{figure}
 
-\subsection{Effects on the image and calibration}
+\subsection{Telescope calibration}
 Telescope calibration is regarded as a hard problem in radio astronomy and is filled with heuristical approaches which attempt to correct for, predominantly, those effects which alter the
 incomming electromagnetic wavefronts prior to the process of correlation. It usually deals with both slow and fast-varying effects and is broken into three areas:
 \begin{itemize}
@@ -471,7 +471,7 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  observing a source of known flux or tipping curve techniques.
  
  Correcting for known time-uniform directional effects can be achieved through either a facet-based polyhedron approach or through AW-projection. Using a image-space facet-based approach these directional
- effects are locally corrected for over small portions of the final image, by multiplying with the appropriate inverse Jones matricies. In AW-projection these effects can be corrected for by convolving with
+ effects are locally-invariant and are corrected for over small portions of the final image, by multiplying with the appropriate inverse Jones matricies. In AW-projection these effects can be corrected for by convolving with
  transposed Jones matricies, and this can be integrated to either the convolutional gridding (reverse Fast Fourier Transform) or degridding (forward Fast Fourier Transform) strategies which will be discussed 
  in the next chapter \cite{2011A&A...527A.107S}. Both facet-based and AW-projection approaches will be discussed further in the chapter on non-coplanar wide-field imaging.
  
@@ -512,14 +512,99 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  In reality this simple least-squares gain-adjustment process cannot remove the effects due to polarized beam patterns: rotations and attenuation, as well as the aforementioned effects of the ionosphere, fast-varying tropospheric
  effects and pointing error. These effects are not simply a multiplication in u,v space, but should be thought of as a convolution. Because these effects vary with both direction and time, deconvolving them is an extremely tricky proposition: 
  at every timestep since only a handful of points from these convolving functions are sampled! Several solutions to solve slow-varying Directional Dependent Effects using self-calibration have been proposed. These include pointing self-calibration,
- peeling and the method of differential gains. Peeling is widely tested and involves iteratively removing the effects from the brightest sources, while differential gains solves for the gain effects from bright and faint sources using a mix of
+ peeling and the method of differential gains. Peeling is widely tested and involves iteratively removing the effects from the brightest sources, while differential gains simultaniously solves for the gain effects from bright and faint sources using a mix of
  DFT and traditional FFT-based approaches \cite{2011A&A...527A.107S,2011A&A...527A.108S}.
  
- \section{Convolutional gridding}
+ \section{Imaging through convolutional gridding}
+ A abstract view of imaging, deconvolution and gain correction is shown in figure~\ref{fig_image_cycle}. Experiments performed by Varbanscu et al. \cite{varbanescu2008performance} show that convolutional 
+ gridding accounts for nearly 35.4\% of the computation time, while the inverse process of degridding accounts for 48.74\%. In this chapter we will primarily focus on the convolutional gridding algorithm, optimal
+ convolution functions and a brief overview of the inverse process is given. The next chapter discusses the problem of non-coplanar widefield imaging and the tradeoffs between the various solutions to the 
+ problem. Therefore, the w term is, for the moment, not considered in this discussion.
+ \begin{figure}
+ \begin{mdframed}
+ \centering
+ \begin{tikzpicture}[font=\tiny]
+    \draw (0,0) rectangle (1.5,1) node at (0.75,0.5) {Antennae};
+    \draw[->] (1.5,0.5) -- (2,0.5);
+    \draw (2,0) rectangle (4,1) node at (3,0.5) {Interferometer};
+    \draw[->] (4,0.5) -- (4.5,0.5);
+    \draw (4.5,0) rectangle (6.5,1) node at (5.5,0.6) {Gain \&} node at (5.5,0.4) {DDE correction};
+    \draw[->] (6.5,0.5) -- (7,0.5);
+    \draw (7,0) rectangle (9,1) node at (8,0.5) {$V - V_{model}$};
+    \draw[->] (8,1) -- (8,2);
+    \draw (7,2) rectangle (9,3) node at (8,2.5) {Gridding};
+    \draw[->] (8,3) -- (8,4) node[pos=.5, right]{Dirty $V_i^s$};
+    \draw (7,4) rectangle (9,5) node at (8,4.5) {IFFT};
+    \draw[->] (7,4.5) -- (6,4.5) node[pos=.5, above]{Dirty $I_i^s$};
+    \draw (3,4.5) -- (4.5,4) -- (6,4.5) -- (4.5,5) -- cycle node at (4.5,4.5) {Converged};
+    \draw[->] (3,4.5) -- (2,4.5);
+    \draw (0,4) rectangle (2,5) node at (1,4.5) {Deconv. \& Update};
+    \draw[->] (1,4) -- (1,3) node[pos=.5, right]{$I_{model}^s$};
+    \draw (0,2) rectangle (2,3) node at (1,2.5) {FFT};
+    \draw[->] (2,2.5) -- (3,2.5) node[pos=.5, above]{$V_{model}^s$};
+    \draw (3,2) rectangle (6,3) node at (4.5,2.5) {Degridding};
+    \draw[->] (5,2) -- (5,1) node[pos=.5, right]{$V_{model}$};
+    \draw[->] (4.5,5) -- (4.5,6) node[pos=.5, right]{CLEAN $I_m^s$};
+    \draw[style=thick] (4.4,6.1) -- (4.6,6.1);
+    \draw[style=thick] (4.3,6.2) -- (4.7,6.2);
+    \draw[->] (5,-1) -- (5,0) node[pos=.5, right]{A priori knowledge};
+ \end{tikzpicture}
+ \caption[Imaging pipeline]{The traditional imaging and deconvolution cycle. At the start of the cycle the data is flagged by the observer and known calibration and gain terms are provided.
+ We presume that the calibration terms will include corrections for Directionally Dependent Effects (per frequency, time step and antenna). An Inverse Fast Fourier Transform is taken after
+ the observed visibilities are uniformly gridded. This dirty sampled image is subsequently deconvolved and the model image updated as per description of the CLEAN algorithm in the previous section.
+ After this an estimate of the CLEANed visibilities are obtained through an FFT and degridding process. Normally several iterations of this expensive self-calibration cycle is required to converge to
+ a final image of reasonable quality.}
+ \label{fig_image_cycle}
+ \end{mdframed}
+ \end{figure}
  
-Due to the improvements in execution speed the Inverse Fast Fourier Transform is taken of the visibilities through a process of \textit{convolutional gridding}, which will be detailed in the next section. After that the problem 
-of non-coplanar baselines wide-field imaging will be investigated. 
-
+ Exploiting the computational efficiency of Cooley-Tukey Fast Fourier Transform and its inverse to compute the forward and inverse Discrete Fourier Transforms requires, amongst other considerations, that
+ the input is regularly sampled. This sampling is achieved through the process of convolutional gridding. In essense the algorithm can be broken down to four steps as illustrated in figure~\ref{fig_gridding}:
+ \begin{enumerate}
+  \item The individual complex visibilities are convolved with a highly oversampled function C(u,v). This process spreads them out accross a much wider area in u,v space.
+  \item Afterwards the u,v space is regularly sampled.
+  \item The image is computed through an Inverse Fast Fourier Transform
+  \item A correcting function is applied to the sampled image.
+ \end{enumerate}
+ \begin{figure}
+  \begin{mdframed}
+   \begin{tikzpicture}[font=\tiny]
+    \filldraw[fill=red!20] (4.50,1.75) rectangle (5.25,2.5);
+    \filldraw[fill=blue!20] (3.75,2.75) rectangle (4.50,3.50);
+    \filldraw[fill=green!20] (5.50,4.75) rectangle (6.25,5.5);
+    \draw[step=0.25,gray,thin] (3,1.5) grid (7,5.5);
+    \draw[red] node at (0,0.25) {data at continuous coords (per baseline, per channel):};
+    \draw node at (6.5,0.25) {\dots};
+    \draw[step=1,black] (3,0) grid (6,0.5);
+    \draw node at (3.5,0.25) {$u_0,v_0,\mathbb{C}$};
+    \draw node at (4.5,0.25) {$u_1,v_1,\mathbb{C}$};
+    \draw node at (5.5,0.25) {$u_2,v_2,\mathbb{C}$};
+    \draw[->] (3.5,0.5) -- (5-0.125,2.25-0.125);
+    \draw[->] (4.5,0.5) -- (4.25-0.125,3.25-0.125);
+    \draw[->] (5.5,0.5) -- (6-0.125,5.25-0.125);
+    \draw[->,gray] (3,1.5) -- (8,1.5) node[below,pos=0.5]{u};
+    \draw[->,gray] (3,1.5) -- (3,6.5) node[left,pos=0.5]{v};
+   \end{tikzpicture}
+   \caption[Illustration of convolutional gridding]{Each observed visibility (per frequency channel and baseline) is centered at a precomputed coordinate in u,v space and is convolved with 
+    some densely sampled function C and binned in a regularly spaced grid. This process essentially spreads each visibility out over a larger area in u,v space. The convolution function is typically sampled
+    up to 100 times more regularly than the grid itself \cite{varbanescu2008performance}. It should be clear that this is no ordinary convolution as discussed earlier. The fact that the u,v coordinates may vary 
+    significantly per baseline may result in two overlapping regions (this poses a problem when parallelizing the algorithm, as will be discussed later on). After all the observed visibilities have been gridded an 
+    Inverse Fast Fourier Transform is performed and a correcting function is applied. Each polarization term is typically gridded and transformed to its own, independent, image.}
+   \label{fig_gridding}
+  \end{mdframed}
+ \end{figure}
+ Typically the u,v plane is only sparcely sampled as the earth rotates the baselines in u,v space as discussed earlier. This subsampling has the effect of multiplying the observed visibilities with a sampling function. It is also
+ not uncommon to find that the u,v space is not uniformly sampled, as pointed out earlier, and that most of the samples are concentrated towards the center of the plane. It is convenient to weigh each sample with its neighbourhood density 
+ (the number of visibilities in a neighborhood of grid cells) when sampling sources with both large- and small-scale structure. Natural sampling (typically a weight equal to 1) is used to detect faint sources. After fourier transform
+ (by the convolution theorem) the transform of the sampling function is convolved with the image. In image space it is also generally referred to as the Point Spread Function or ``Dirty Beam''. It is possible to remove
+ the effects of the Point Spread Function through deconvolving with the CLEAN algorithm, but deconvolution generally requires a sufficient number of samples to obtain a satisfactory inverse \cite{taylor1999synthesis}.
+ 
+ This sampled observed visibility plane is then convolved with a densely sampled convolution function. 
+ 
+ It is possible to combine these operations into 
+ \begin{equation*}
+  I^s_{dirty} = ([I(l,m)*\mathcal{F}^{-1}\{PSF(u,v)\}]\cdot\mathcal{F}^{-1}\{C(u,v)\}) * \mathcal{F}^{-1}\{III(u,v)\}
+ \end{equation*}
 \bibliography{bibfile}
 \bibliographystyle{plain}
 \end{document}          
