@@ -380,6 +380,7 @@ formulation and its implications for calibration \cite{2011A&A...527A.106S,2011A
 linear or circular polarizations, with the necessary coordinate system transformations added):
 
 \begin{equation}
+\label{eqn_RIME}
 \begin{split}
     V_{pq} &= G_p(t,\upsilon)\left(\int_{-\infty}^{\infty}\int_{-\infty}^{\infty}D_p(l,m,t,\upsilon)BK_{pq}D_q(l,m,t,\upsilon)^H\frac{dldm}{\sqrt{1-l^2-m^2}}\right)G_q(t,\upsilon)\\
 	  &\text{where }K = e^{-2\pi i(u_{pq}l+v_{pq}m+w_{pq}(n-1))}
@@ -450,22 +451,34 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  \end{mdframed}
 \end{figure}
 
- The delay tracking center is, itself, not free from error either. Antenna pointing errors can be corrected by keeping sensor data for every antenna. These errors are predominantly due to
- the antenna's suseptability to wind and the effects of heat on the material of the antenna. Special instrumentation like tiltmeters can monitor changes in pointing direction and with fast
- feedback these can be used to track changes in antenna pointing. Other problems such as inadequite timing resolution, quantization errors in the calculation and correction of geometrical 
+ The delay tracking center is, itself, not free from error either. These errors are predominantly due to the antenna's suseptability to wind, the effects of heat on 
+ the surface of the antenna or errors made by the equipment used to mechanically stear the reflectors. Special instrumentation like tiltmeters can monitor changes in pointing 
+ direction and with fast feedback these can be used to track changes in antenna pointing. Other effects such as those of reflector deformation are less well-studied and can significantly
+ alter the beam patterns the antennae. Additional problems such as inadequite timing resolution, quantization errors in the calculation and correction of geometrical 
  delays, and synchronization will also result in pointing error.
 
- Large arrays typically also require phase correction due to other atmospheric effects. At tropospheric levels this includes both dry (stable) and wet effects (largely variable). The problem grows worse with longer baselines, when the 
- curvature, and variations in water-vapor, of the atmosphere has to be taken into consideration. Calibration for these wet effects rely heavily on measurements of atmospheric conditions at the seperate interferometer elements.
+ Large arrays typically also require phase correction due to other atmospheric effects. At tropospheric levels this includes both dry (stable) and wet effects (largely variable). The problem grows worse with longer baselines and higher
+ frequencies, when the curvature, and variations in water-vapor, of the atmosphere has to be taken into consideration. Calibration for these wet effects rely heavily on measurements of atmospheric conditions at the seperate interferometer elements.
  This data is normally stored as additional tables of information and accompany observations.
 
- While tropospheric conditions are largely independent of frequency, Ionospheric effects are dependent on frequency. The electron column densities are measured by high frequency radar examination (an \textit{ionosonde}) or by dual 
+ Another high altitude atmospheric effect dependent on frequency are the Ionospheric phase delay effects ($\propto \upsilon^{-1}$). The electron column densities are measured by high frequency radar examination (an \textit{ionosonde}) or by dual 
  frequency satellite transmission. These effects additionally vary with direction, as the electron density in the ionosphere is not constant over the entire field of view. The frequency dependency of the ionospheric term is 
  normally calibrated by observing a bright source with a flat spectrum over the observed frequency band. These frequency dependency luckily vary slowly with time and only one such calibration is normally needed per observation.
 
- Magnetic effects in the Ionosphere typically produces directionally dependent \textit{Faraday Rotation} which introduces a phase rotation between the R and L polarization feeds.
- Polarization delays are calibrated through strongly polarized sources. Calibration is additionally needed to accomodate for leakage between orthogonal polarizations. Both the troposphere and 
- ionosphere additionally absorbs some of the source signal and contributes to the noise levels in the signal. These can normally be corrected by observing a source of known flux or tipping curve techniques.
+ Magnetic effects in the Ionosphere typically produces directionally dependent \textit{Faraday Rotation} which introduces a phase rotation between the R and L polarization feeds and additionally
+ varies with frequency as well ($\propto \upsilon^{-2}$). Polarization delays are calibrated through strongly polarized sources. Calibration is additionally needed to accomodate for leakage between 
+ orthogonal polarizations. Both the troposphere and ionosphere additionally absorbs some of the source signal and contributes to the noise levels in the signal. These can normally be corrected by 
+ observing a source of known flux or tipping curve techniques.
+ 
+ Correcting for known time-uniform directional effects can be achieved through either a facet-based polyhedron approach or through AW-projection. Using a image-space facet-based approach these directional
+ effects are locally corrected for over small portions of the final image, by multiplying with the appropriate inverse Jones matricies. In AW-projection these effects can be corrected for by convolving with
+ transposed Jones matricies, and this can be integrated to either the convolutional gridding (reverse Fast Fourier Transform) or degridding (forward Fast Fourier Transform) strategies which will be discussed 
+ in the next chapter \cite{2011A&A...527A.107S}. Both facet-based and AW-projection approaches will be discussed further in the chapter on non-coplanar wide-field imaging.
+ 
+ Another approach is to subtract the directionally dependent effects directly from the observed visibilities, before correcting for the directional independent effects at the model
+ subtraction phase. Such an approach corrects these effects individually per model source and is equivalent to evaluating equation~\ref{eqn_RIME} for a set of discrete sources. This
+ direct fourier transform approach is computationally prohibative, when compared to the convolution gridding approaches, coupled with either W-projection-based or faceting techniques, although
+ it has the advantage of being much more accurate \cite{2011A&A...527A.107S}.
  
 \subsubsection{Self-calibration}
  The lack of strong calibrators near observed areas, and the requirements placed on the properties of these calibrations, makes the process of calibrating the rapidly varying 
@@ -496,7 +509,14 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
   \item Imaging, deconvolution and model updating using H\"ogbom CLEAN
  \end{enumerate}
  
- In reality 
+ In reality this simple least-squares gain-adjustment process cannot remove the effects due to polarized beam patterns: rotations and attenuation, as well as the aforementioned effects of the ionosphere, fast-varying tropospheric
+ effects and pointing error. These effects are not simply a multiplication in u,v space, but should be thought of as a convolution. Because these effects vary with both direction and time, deconvolving them is an extremely tricky proposition: 
+ at every timestep since only a handful of points from these convolving functions are sampled! Several solutions to solve slow-varying Directional Dependent Effects using self-calibration have been proposed. These include pointing self-calibration,
+ peeling and the method of differential gains. Peeling is widely tested and involves iteratively removing the effects from the brightest sources, while differential gains solves for the gain effects from bright and faint sources using a mix of
+ DFT and traditional FFT-based approaches \cite{2011A&A...527A.107S,2011A&A...527A.108S}.
+ 
+ \section{Convolutional gridding}
+ 
 Due to the improvements in execution speed the Inverse Fast Fourier Transform is taken of the visibilities through a process of \textit{convolutional gridding}, which will be detailed in the next section. After that the problem 
 of non-coplanar baselines wide-field imaging will be investigated. 
 
