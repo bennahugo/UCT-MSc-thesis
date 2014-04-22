@@ -477,8 +477,8 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  
  Another approach is to subtract the directionally dependent effects directly from the observed visibilities, before correcting for the directional independent effects at the model
  subtraction phase. Such an approach corrects these effects individually per model source and is equivalent to evaluating equation~\ref{eqn_RIME} for a set of discrete sources. This
- direct fourier transform approach is computationally prohibative, when compared to the convolution gridding approaches, coupled with either W-projection-based or faceting techniques, although
- it has the advantage of being much more accurate \cite{2011A&A...527A.107S}.
+ \textit{Direct Fourier Transform} approach (explained in the next section) is computationally prohibative, when compared to the convolution gridding approaches, coupled with either 
+ W-projection-based or faceting techniques, although it has the advantage of being much more accurate \cite{2011A&A...527A.107S}.
  
 \subsubsection{Self-calibration}
  The lack of strong calibrators near observed areas, and the requirements placed on the properties of these calibrations, makes the process of calibrating the rapidly varying 
@@ -513,10 +513,18 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  effects and pointing error. These effects are not simply a multiplication in u,v space, but should be thought of as a convolution. Because these effects vary with both direction and time, deconvolving them is an extremely tricky proposition: 
  at every timestep since only a handful of points from these convolving functions are sampled! Several solutions to solve slow-varying Directional Dependent Effects using self-calibration have been proposed. These include pointing self-calibration,
  peeling and the method of differential gains. Peeling is widely tested and involves iteratively removing the effects from the brightest sources, while differential gains simultaniously solves for the gain effects from bright and faint sources using a mix of
- DFT and traditional FFT-based approaches \cite{2011A&A...527A.107S,2011A&A...527A.108S}.
+ Direct Fourier Transform and traditional Discrete Fourier Transform-based approaches \cite{2011A&A...527A.107S,2011A&A...527A.108S}.
  
  \section{Imaging through convolutional gridding}
- A abstract view of imaging, deconvolution and gain correction is shown in figure~\ref{fig_image_cycle}. Experiments performed by Varbanscu et al. \cite{varbanescu2008performance} show that convolutional 
+ There is generally two techniques used to transforming between the observed visibilities and the (dirty) image. Either a brute force Direct Fourier Transform is taken where each grid point is approximated through a brute-force
+ evaluation over all the observed visibilities (M of them in total). This approach requires on the order of $O(N^2M) \approx O(N^4)$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large number of visibilities \cite[Lecture 7]{taylor1999synthesis}. The second approach is to 
+ interpolate the data onto a regularly sampled grid, by filtering with a two-dimensional convolution function, in order to use the Fast Fourier Transform to approximate the results obtained through taking a Direct Fourier Transform. This Fast Fourier Transform has a computational complexity of $O(N^2\log_2{N})$.
+ Two dimensional filtering typically requires $O(MC^2)$ operations (where C is the size of each dimension of a square filter). For very large filters this operation is prohibatively expensive. However, by using linearly seperable filters
+ as mentioned previously the complexity of the operation is reduced to $O(MC) \approx O(N^3)$ for a filter with its number of taps roughly equal to $N$ and visibilities covering most of the u,v space \cite{smith1997scientist}. If both the image size is small and the number of visibilities 
+ are small the Direct Fourier Transform may be faster than the convolutional gridding approach. However, this will not generally be true for very large arrays such as the SKA or its predicessors that are currently under construction, 
+ considering the sheer number of baselines involved.
+ 
+ An abstract view of imaging, deconvolution and gain correction is shown in figure~\ref{fig_image_cycle}. Experiments performed by Varbanscu et al. \cite{varbanescu2008performance} show that convolutional 
  gridding accounts for nearly 35.4\% of the computation time, while the inverse process of degridding accounts for 48.74\%. In this chapter we will primarily focus on the convolutional gridding algorithm, optimal
  convolution functions and a brief overview of the inverse process is given. The next chapter discusses the problem of non-coplanar widefield imaging and the tradeoffs between the various solutions to the 
  problem. Therefore, the w term is, for the moment, not considered in this discussion.
@@ -599,7 +607,9 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  (by the convolution theorem) the transform of the sampling function is convolved with the image. In image space it is also generally referred to as the Point Spread Function or ``Dirty Beam''. It is possible to remove
  the effects of the Point Spread Function through deconvolving with the CLEAN algorithm, but deconvolution generally requires a sufficient number of samples to obtain a satisfactory inverse \cite{taylor1999synthesis}.
  
- This sampled observed visibility plane is then convolved with a densely sampled convolution function. 
+ This sampled observed visibility plane is then convolved with a densely sampled convolution function. The primary goal of this convolution is to limit the aliasing energy outside the support region of the convolving function, as well as 
+ the effects of using gridding and the Fast Fourier Transform, instead of the Direct Fourier Transform. Depending on the metrics used to define ``optimal gridding function'' these may vary from a simple truncated sinc or exponential function \cite[Lecture 7]{taylor1999synthesis} to prolate spheriodal functions
+ and approximations to these functions, such as the Keiser Bessel function \cite{jackson1991selection}.
  
  It is possible to combine these operations into 
  \begin{equation*}
