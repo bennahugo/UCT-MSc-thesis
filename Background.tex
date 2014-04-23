@@ -107,8 +107,7 @@ For linear systems the following theorems are true (stated without proof):
 
 In general the convolution is known as filtering, the cross-correlation can be seen as ``time averaging between two signals'' and signal shifting essentially shifts the directional cosine (as seen in the next section) and electrically
 stears the telescope. The two dimensional versions of convolution, cross-correlation, the fourier transform and its inverse are analoguous to their one dimensional counterparts. The two dimensional fourier transform first transforms
-over one axis and then transforms the output on the second axis. Two-dimensional convolution is similar provided the filter is seperable, meaning $h[m,n]=h_1[m]h_2[n]$. This last statement provides a significant speed improvement. More 
-on this later on.
+over one axis and then transforms the output on the second axis.
 \section{Measuring flux with a single element telescope}
 Some of the most important measurements of a celestrial object includes the object's angular size, position (according to some celestrial coordinate system) and the \textit{flux} density over a 
 frequency spectrum of the object. The flux density is measured as the power per square meter per unit frequency, falling on a surface, normal to the direction of the source. This flux 
@@ -515,17 +514,22 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  peeling and the method of differential gains. Peeling is widely tested and involves iteratively removing the effects from the brightest sources, while differential gains simultaniously solves for the gain effects from bright and faint sources using a mix of
  Direct Fourier Transform and traditional Discrete Fourier Transform-based approaches \cite{2011A&A...527A.107S,2011A&A...527A.108S}.
  
- \section{Imaging through convolutional gridding}
- There is generally two techniques used to transforming between the observed visibilities and the (dirty) image. Either a brute force Direct Fourier Transform is taken where each grid point is approximated through a brute-force
- evaluation over all the observed visibilities (M of them in total). This approach requires on the order of $O(N^2M) \approx O(N^4)$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large number of visibilities \cite[Lecture 7]{taylor1999synthesis}. The second approach is to 
- interpolate the data onto a regularly sampled grid, by filtering with a two-dimensional convolution function, in order to use the Fast Fourier Transform to approximate the results obtained through taking a Direct Fourier Transform. This Fast Fourier Transform has a computational complexity of $O(N^2\log_2{N})$.
- Two dimensional filtering typically requires $O(MC^2)$ operations (where C is the size of each dimension of a square filter). For very large filters this operation is prohibatively expensive. However, by using linearly seperable filters
- as mentioned previously the complexity of the operation is reduced to $O(MC) \approx O(N^3)$ for a filter with its number of taps roughly equal to $N$ and visibilities covering most of the u,v space \cite{smith1997scientist}. If both the image size is small and the number of visibilities 
+ \section{The imaging and deconvolution cycle}
+ There are generally two techniques used to approximate the fourier transforms between the observed visibilities and the (dirty) image. Either a brute force Direct Fourier Transform is taken where each grid point is approximated through a brute-force
+ evaluation over all the observed visibilities (M of them in total). This approach requires on the order of $O(N^2M) \approx O(N^4)$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large number of visibilities. This approach
+ has the advantage of being highly parallel requiring no atomic operations. Atomic operations are generally required whenever two parallel processes attempt to update the same memory location simultaniously, and this update operation requires separate memory reads and writes. This ensures
+ that the changes made by the first process is not overridden by the second. This algorithm is simply stated as a summation of complex multiplications over the entire grid in the image space \cite[Lecture 7]{taylor1999synthesis}:
+ \begin{equation}
+  (\forall \text{polarizations})(\forall l,m) I_{p}(l,m) = \frac{1}{M}\sum_{k=1}^{M}{V_p'(u_k,v_k)e^{2\pi i (u_kl,v_km)}}
+ \end{equation}
+
+ The second approach is to interpolate the data onto a regularly sampled grid with a two-dimensional convolution function, as is required when using the Fast Fourier Transform to approximate the transformations. A Fast Fourier Transform has a computational complexity of $O(N^2\log_2{N})$, while
+ convolutional gridding typically requires $O(MC^2) \approx O(N^2C^2)$ operations (where C is the size of each dimension of a square filter) for large numbers of visibilities. If both the image size is small and the number of visibilities 
  are small the Direct Fourier Transform may be faster than the convolutional gridding approach. However, this will not generally be true for very large arrays such as the SKA or its predicessors that are currently under construction, 
- considering the sheer number of baselines involved.
+ considering the sheer number of baselines involved, as well as the typical grid sizes involved.
  
  An abstract view of imaging, deconvolution and gain correction is shown in figure~\ref{fig_image_cycle}. Experiments performed by Varbanscu et al. \cite{varbanescu2008performance} show that convolutional 
- gridding accounts for nearly 35.4\% of the computation time, while the inverse process of degridding accounts for 48.74\%. In this chapter we will primarily focus on the convolutional gridding algorithm, optimal
+ gridding accounts for nearly 35.4\% of the computation time, while the inverse process of degridding accounts for 48.74\% of a simple gridding and degridding cycle. In this chapter we will primarily focus on the convolutional gridding algorithm, optimal
  convolution functions and a brief overview of the inverse process is given. The next chapter discusses the problem of non-coplanar widefield imaging and the tradeoffs between the various solutions to the 
  problem. Therefore, the w term is, for the moment, not considered in this discussion.
  \begin{figure}
@@ -566,7 +570,7 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  \end{mdframed}
  \end{figure}
  
- Exploiting the computational efficiency of Cooley-Tukey Fast Fourier Transform and its inverse to compute the forward and inverse Discrete Fourier Transforms requires, amongst other considerations, that
+ Exploiting the computational efficiency of the Cooley-Tukey Fast Fourier Transform and its inverse to compute the forward and inverse Discrete Fourier Transforms requires, amongst other considerations, that
  the input is regularly sampled. This sampling is achieved through the process of convolutional gridding. In essense the algorithm can be broken down to four steps as illustrated in figure~\ref{fig_gridding}:
  \begin{enumerate}
   \item The individual complex visibilities are convolved with a highly oversampled function C(u,v). This process spreads them out accross a much wider area in u,v space.
@@ -595,7 +599,7 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
    \end{tikzpicture}
    \caption[Illustration of convolutional gridding]{Each observed visibility (per frequency channel and baseline) is centered at a precomputed coordinate in u,v space and is convolved with 
     some densely sampled function C and binned in a regularly spaced grid. This process essentially spreads each visibility out over a larger area in u,v space. The convolution function is typically sampled
-    up to 100 times more regularly than the grid itself \cite{varbanescu2008performance}. It should be clear that this is no ordinary convolution as discussed earlier. The fact that the u,v coordinates may vary 
+    up to 100 times more regularly than the grid itself \cite{varbanescu2008performance,cornwell2007impact}. It should be clear that this is not the standard convolution as discussed earlier. The fact that the u,v coordinates may vary 
     significantly per baseline may result in two overlapping regions (this poses a problem when parallelizing the algorithm, as will be discussed later on). After all the observed visibilities have been gridded an 
     Inverse Fast Fourier Transform is performed and a correcting function is applied. Each polarization term is typically gridded and transformed to its own, independent, image.}
    \label{fig_gridding}
@@ -607,9 +611,10 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  (by the convolution theorem) the transform of the sampling function is convolved with the image. In image space it is also generally referred to as the Point Spread Function or ``Dirty Beam''. It is possible to remove
  the effects of the Point Spread Function through deconvolving with the CLEAN algorithm, but deconvolution generally requires a sufficient number of samples to obtain a satisfactory inverse \cite{taylor1999synthesis}.
  
- This sampled observed visibility plane is then convolved with a densely sampled convolution function. The primary goal of this convolution is to limit the aliasing energy outside the support region of the convolving function, as well as 
- the effects of using gridding and the Fast Fourier Transform, instead of the Direct Fourier Transform. Depending on the metrics used to define ``optimal gridding function'' these may vary from a simple truncated sinc or exponential function \cite[Lecture 7]{taylor1999synthesis} to prolate spheriodal functions
- and approximations to these functions, such as the Keiser Bessel function \cite{jackson1991selection}.
+ This sampled observed visibility plane is then convolved with a densely sampled convolution function. The primary goal of this convolution is to interpolate each visibility, but may also limit the aliasing energy outside the support 
+ region of the convolving function, as well as limit the interpolation error introduced by using convolutional gridding, instead of the Direct Fourier Transform. Depending on the metrics used to define ``optimal gridding function'' these may vary from a simple truncated sinc or exponential function 
+ \cite[Lecture 7]{taylor1999synthesis} to prolate spheriodal functions and approximations to these functions, such as the Keiser Bessel function \cite{jackson1991selection}. Sze Tan \cite{tan1986aperture} describes derives functions that out-perform prolate spheriodal functions
+ on the basis of minimizing aliasing energy, as well as providing an opportunity to trade off the order of interpolation over the area for which the convolution error is small.
  
  It is possible to combine these operations into 
  \begin{equation*}
