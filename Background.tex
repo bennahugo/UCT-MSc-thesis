@@ -475,9 +475,9 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  in the next chapter \cite{2011A&A...527A.107S}. Both facet-based and AW-projection approaches will be discussed further in the chapter on non-coplanar wide-field imaging.
  
  Another approach is to subtract the directionally dependent effects directly from the observed visibilities, before correcting for the directional independent effects at the model
- subtraction phase. Such an approach corrects these effects individually per model source and is equivalent to evaluating equation~\ref{eqn_RIME} for a set of discrete sources. This
- \textit{Direct Fourier Transform} approach (explained in the next section) is computationally prohibative, when compared to the convolution gridding approaches, coupled with either 
- W-projection-based or faceting techniques, although it has the advantage of being much more accurate \cite{2011A&A...527A.107S}.
+ subtraction phase. Such an approach corrects these effects individually per model source and is equivalent to evaluating equation~\ref{eqn_RIME} for a set of discrete sources. These
+ analytical approaches are computationally prohibative, when compared to the convolution gridding approaches, coupled with either W-projection-based or faceting techniques, although 
+ it has the advantage of being much more accurate \cite{2011A&A...527A.107S}.
  
 \subsubsection{Self-calibration}
  The lack of strong calibrators near observed areas, and the requirements placed on the properties of these calibrations, makes the process of calibrating the rapidly varying 
@@ -485,44 +485,43 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
 
  Self-calibration imposes some restrictions: information about the absolute position, structure and intensity of an observed source is traded
  for improved signal-to-noise ratios. It should be noted that these minimization approaches cannot completely replace the methods of source and polarization calibration mentioned earlier. 
- The effect of these issues are normally incorporated as explicit jones terms in the model, such as the one mentioned earlier. These effects are greatly reduced by adding additional 
+ The effect of these issues are normally incorporated as explicit Jones terms in the model, such as the one mentioned earlier. These effects are greatly reduced by adding additional 
  antennae to the array. The self-calibration problem can be viewed as iteratively improving an initial model by correcting the effects of gain on sky brightness through algorithms such as the Maximum Entropy Method
  and the CLEAN algorithm. The specification of the initial model does not necessarily have to be very accurate for CLEAN to converge at some point: it may simply 
- consist of point sources for relatively simple images.
+ consist of point sources for relatively simple images. Convergence is, however, not guarenteed.
 
  The H\"ogbom CLEAN algorithm locates (and keeps a list of) the brightest sources in an image in an iterative cycle, subtracting the Point Spread Function from each source until some 
  thresholding condition is met. The remaining image is termed the residuals. After convolving the found point sources with elliptical function fitted over the Point Spread Function, 
  the residuals are added to the convolved image, forming the final ''clean" image. Many other variations on the algorithm exist, bringing with them improvements in execution speed and 
  stability.
 
- While CLEAN provides a procedural approach to deconvolution the Maximum Entropy Method selects an image that fits the data to within a specified noise level, and is not procedural.
+ While CLEAN provides a procedural approach to deconvolution, the Maximum Entropy Method selects an image that fits the data to within a specified noise level, and is not procedural.
  The method essentially limits the range of pixel values and focusses these ranges around bright objects. Though CLEAN is usually much faster on smaller simple images, it is prohibatively slow 
  on large complex images. Under these conditions the Maximum Entropy Method is outright faster.
 
- Traditional self-calibration, however, assumes that the same apparent sky is sampled by all antennae, and solves only for the direction independent gain terms and consider directional dependent terms as simple effects that 
+ Traditional self-calibration, however, assumes that the same ``apparent sky'' is sampled by all antennae, and solves only for the direction independent gain terms. They consider directional dependent terms as simple effects that 
  do not vary in time and is identical per antenna. The addition of directional dependencies within the all-sky integral, primarily those caused by the ionosphere and modulation effects by the primary beam, violates this premis. In 
- the NEWSTAR package traditional the traditional self calibration process includes the following steps \cite{2011A&A...527A.107S}:
+ the NEWSTAR package the traditional self calibration process includes the following steps \cite{2011A&A...527A.107S}:
  \begin{enumerate}
   \item Gain minimization per antenna, and the minimization of the residual amplitudes and phases associated to each individual baseline (\textit{closure errors}) through a least squares approach.
   \item Model subtraction to form a residual image.
   \item Imaging, deconvolution and model updating using H\"ogbom CLEAN
  \end{enumerate}
  
- In reality this simple least-squares gain-adjustment process cannot remove the effects due to polarized beam patterns: rotations and attenuation, as well as the aforementioned effects of the ionosphere, fast-varying tropospheric
- effects and pointing error. These effects are not simply a multiplication in u,v space, but should be thought of as a convolution. Because these effects vary with both direction and time, deconvolving them is an extremely tricky proposition: 
- at every timestep since only a handful of points from these convolving functions are sampled! Several solutions to solve slow-varying Directional Dependent Effects using self-calibration have been proposed. These include pointing self-calibration,
- peeling and the method of differential gains. Peeling is widely tested and involves iteratively removing the effects from the brightest sources, while differential gains simultaniously solves for the gain effects from bright and faint sources using a mix of
- Direct Fourier Transform and traditional Discrete Fourier Transform-based approaches \cite{2011A&A...527A.107S,2011A&A...527A.108S}.
+ In reality this simple least-squares gain-adjustment process cannot remove the effects due to polarized beam patterns, beam rotations and attenuation, as well as the aforementioned effects of the ionosphere and fast-varying tropospheric
+ effects. These directionally dependant effects are not simply a multiplication in u,v space, but should be thought of as a convolution. Because these effects vary with both direction and time, deconvolving them is an extremely tricky proposition: 
+ at every timestep since only a handful of points from these convolving functions are sampled! More recently several solutions to solve slow-varying Directional Dependent Effects using self-calibration have been proposed. These include pointing self-calibration,
+ peeling, the method of differential gains and other compressive sensing techniques (like the analytical solution descibed in \cite{hardy2013direct}). Peeling is a slightly modified version of traditional self-calibration and is widely tested. It involves iteratively removing the effects from the brightest sources, while 
+ differential gains simultaniously solves for the gain effects from bright and faint sources using a mix of Direct Fourier Transform and traditional Discrete Fourier Transform-based approaches \cite{2011A&A...527A.107S,2011A&A...527A.108S}.
  
  \section{The imaging and deconvolution cycle}
  There are generally two techniques used to approximate the fourier transforms between the observed visibilities and the (dirty) image. Either a brute force Direct Fourier Transform is taken where each grid point is approximated through a brute-force
- evaluation over all the observed visibilities (M of them in total). This approach requires on the order of $O(N^2M) \approx O(N^4)$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large number of visibilities. This approach
- has the advantage of being highly parallel requiring no atomic operations. Atomic operations are generally required whenever two parallel processes attempt to update the same memory location simultaniously, and this update operation requires separate memory reads and writes. This ensures
- that the changes made by the first process is not overridden by the second. This algorithm is simply stated as a summation of complex multiplications over the entire grid in the image space \cite[Lecture 7]{taylor1999synthesis}:
+ evaluation over all the observed visibilities (M of them in total). This approach requires on the order of $O(N^2M) \approx O(N^4)$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large number of visibilities. A basic co-planar analytical 
+ algorithm boils down to a summation of complex multiplications over the entire grid in the image space \cite[Lecture 7]{taylor1999synthesis}: 
  \begin{equation}
   (\forall \text{polarizations})(\forall l,m) I_{p}(l,m) = \frac{1}{M}\sum_{k=1}^{M}{V_p'(u_k,v_k)e^{2\pi i (u_kl,v_km)}}
  \end{equation}
-
+ 
  The second approach is to interpolate the data onto a regularly sampled grid with a two-dimensional convolution function, as is required when using the Fast Fourier Transform to approximate the transformations. A Fast Fourier Transform has a computational complexity of $O(N^2\log_2{N})$, while
  convolutional gridding typically requires $O(MC^2) \approx O(N^2C^2)$ operations (where C is the size of each dimension of a square filter) for large numbers of visibilities. If both the image size is small and the number of visibilities 
  are small the Direct Fourier Transform may be faster than the convolutional gridding approach. However, this will not generally be true for very large arrays such as the SKA or its predicessors that are currently under construction, 
@@ -532,7 +531,7 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  gridding accounts for nearly 35.4\% of the computation time, while the inverse process of degridding accounts for 48.74\% of a simple gridding and degridding cycle. In this chapter we will primarily focus on the convolutional gridding algorithm, optimal
  convolution functions and a brief overview of the inverse process is given. The next chapter discusses the problem of non-coplanar widefield imaging and the tradeoffs between the various solutions to the 
  problem. Therefore, the w term is, for the moment, not considered in this discussion.
- \begin{figure}
+ \begin{figure}[h]
  \begin{mdframed}
  \centering
  \begin{tikzpicture}[font=\tiny]
@@ -540,7 +539,7 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
     \draw[->] (1.5,0.5) -- (2,0.5);
     \draw (2,0) rectangle (4,1) node at (3,0.5) {Interferometer};
     \draw[->] (4,0.5) -- (4.5,0.5);
-    \draw (4.5,0) rectangle (6.5,1) node at (5.5,0.6) {Gain \&} node at (5.5,0.4) {DDE correction};
+    \draw (4.5,0) rectangle (6.5,1) node at (5.5,0.5) {Gain correction};
     \draw[->] (6.5,0.5) -- (7,0.5);
     \draw (7,0) rectangle (9,1) node at (8,0.5) {$V - V_{model}$};
     \draw[->] (8,1) -- (8,2);
@@ -562,10 +561,10 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
     \draw[->] (5,-1) -- (5,0) node[pos=.5, right]{A priori knowledge};
  \end{tikzpicture}
  \caption[Imaging pipeline]{The traditional imaging and deconvolution cycle. At the start of the cycle the data is flagged by the observer and known calibration and gain terms are provided.
- We presume that the calibration terms will include corrections for Directionally Dependent Effects (per frequency, time step and antenna). An Inverse Fast Fourier Transform is taken after
- the observed visibilities are uniformly gridded. This dirty sampled image is subsequently deconvolved and the model image updated as per description of the CLEAN algorithm in the previous section.
- After this an estimate of the CLEANed visibilities are obtained through an FFT and degridding process. Normally several iterations of this expensive self-calibration cycle is required to converge to
- a final image of reasonable quality.}
+ An Inverse Fast Fourier Transform is taken after the observed visibilities are uniformly gridded. This dirty sampled image is subsequently deconvolved and the model image updated as per 
+ described in the previous section. After this an estimate of the deconvolved visibilities are obtained through an FFT and degridding process, depending on the approach taken. Normally several iterations 
+ of this expensive self-calibration cycle is required to converge to a final image of reasonable quality. The directionally dependent effects can be reduced during either gridding 
+ or degridding processes for an FFT-based approach. Analytical methods may vary significantly from this illustration.}
  \label{fig_image_cycle}
  \end{mdframed}
  \end{figure}
@@ -578,7 +577,7 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
   \item The image is computed through an Inverse Fast Fourier Transform
   \item A correcting function is applied to the sampled image.
  \end{enumerate}
- \begin{figure}
+ \begin{figure}[h]
   \begin{mdframed}
    \begin{tikzpicture}[font=\tiny]
     \filldraw[fill=red!20] (4.50,1.75) rectangle (5.25,2.5);
@@ -609,17 +608,23 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  not uncommon to find that the u,v space is not uniformly sampled, as pointed out earlier, and that most of the samples are concentrated towards the center of the plane. It is convenient to weigh each sample with its neighbourhood density 
  (the number of visibilities in a neighborhood of grid cells) when sampling sources with both large- and small-scale structure. Natural sampling (typically a weight equal to 1) is used to detect faint sources. After fourier transform
  (by the convolution theorem) the transform of the sampling function is convolved with the image. In image space it is also generally referred to as the Point Spread Function or ``Dirty Beam''. It is possible to remove
- the effects of the Point Spread Function through deconvolving with the CLEAN algorithm, but deconvolution generally requires a sufficient number of samples to obtain a satisfactory inverse \cite{taylor1999synthesis}.
+ the effects of the Point Spread Function through deconvolution, but deconvolution generally requires a sufficient number of samples to obtain a satisfactory inverse \cite{taylor1999synthesis}.
  
  This sampled observed visibility plane is then convolved with a densely sampled convolution function. The primary goal of this convolution is to interpolate each visibility, but may also limit the aliasing energy outside the support 
  region of the convolving function, as well as limit the interpolation error introduced by using convolutional gridding, instead of the Direct Fourier Transform. Depending on the metrics used to define ``optimal gridding function'' these may vary from a simple truncated sinc or exponential function 
- \cite[Lecture 7]{taylor1999synthesis} to prolate spheriodal functions and approximations to these functions, such as the Keiser Bessel function \cite{jackson1991selection}. Sze Tan \cite{tan1986aperture} describes derives functions that out-perform prolate spheriodal functions
+ \cite[Lecture 7]{taylor1999synthesis} to prolate spheriodal functions and approximations to these functions, such as the Keiser Bessel function \cite{jackson1991selection}. Sze Tan \cite{tan1986aperture} derives functions that out-perform prolate spheriodal functions
  on the basis of minimizing aliasing energy, as well as providing an opportunity to trade off the order of interpolation over the area for which the convolution error is small.
  
  It is possible to combine these operations into 
  \begin{equation*}
   I^s_{dirty} = ([I(l,m)*\mathcal{F}^{-1}\{PSF(u,v)\}]\cdot\mathcal{F}^{-1}\{C(u,v)\}) * \mathcal{F}^{-1}\{III(u,v)\}
  \end{equation*}
+ \section{The problem of non-coplanar baselines and wide-field imaging}
+ Evaluating a direct 3D analytical solution over an image cube with n layers soon becomes intractable for large images, specifically in terms of sheer memory requirements for storing these layers. Over a three dimensional cube, M (the number of visibilities),
+ will be reasonably sparcely sampled, and the number of complex multiplications needed per visibility is estimated to be $\frac{4\lambda B_{max}^3}{D^4}$ \cite{yashar2009tdp}. However, the approach remains embarisingly parallel and can
+ be scalled over multiple multicore accelerators. A detailed comparison between the throughput achievable by using an analytical approach, compared to convolutional gridding approaches have not been for multicore accelerators \cite{hardy2013direct}.
+ 
+ 
 \bibliography{bibfile}
 \bibliographystyle{plain}
 \end{document}          
