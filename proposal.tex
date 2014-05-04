@@ -1,0 +1,54 @@
+\documentclass[a4paper,11pt,two column]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.7in]{geometry}
+\usepackage{tablefootnote}
+\usepackage{abstract}
+\usepackage{enumerate}
+    \makeatletter
+    \let\@fnsymbol\@arabic
+    \makeatother
+\begin{document}
+\twocolumn[{
+\centering
+{\LARGE \textbf{GPU-accelerated facet-based convolutional gridding}}\\
+{\large \textbf{The problem of non-coplanar widefield imaging in radio astronomy}}\\
+Benjamin Hugo\thanks{bennahugo@aol.com}\\
+Supervised by: James Gain\thanks{jgain@cs.uct.ac.za} and Oleg Smirnov\thanks{osmirnov@gmail.com}\\[0.5cm]
+}]
+\saythanks
+\section{Introduction}
+Modern radio astronomy observes electromagnetic emissions with wavelengths typically around one million times longer than that of visible light, and is subsequently able to observe phenonma that is 
+invisible at the wavelengths of visible light. Since its birth in the early 20th century, research has been largely driven towards attaining higher resolution imaging over wider fields of view. Modern 
+radio astronomy, for the most part, places a large emphasis on aperture synthesis. In essence this process combines the collecting capacity of many smaller apertures to provide an equivalent
+resolution to a single very large aperture. Unfortunately, as the underlying array grows larger, the combined output data rates grows quadratically. Coupled with the requirements of producing
+high resolution images, and the associated problems of telescope calibration and image deconvolution, through several cycles of convolutional gridding and degridding, accelerating the imaging 
+process is of vital importance in large arrays such as LOFAR and the Square Kilometer Array.
+
+Previous research has shown that convolutional gridding consumes nearly 35.4\% of this cycle, with its degridding counterpart consuming 48.74\%. Research into GPU-acceleration of the gridding 
+process suffers from one serious issue: excessive memory requirements of current correcting techniques associated with widefield imaging and non-coplanar arrays. These techniques are 
+geared towards limiting the effects of Fresnel distortion introduced in non-coplanar arrays, as well as the problems associated with imaging wide fields of view on the celestial sphere, 
+and are well understood. The techniques include w-projection, snapshots and faceting (or combinations of these). Previous research has focused on combining the gridding step with w-projection, but has
+found that high resolution grids are too memory intensive to be placed in the limited memory of current GPUs.
+
+We propose the use of facet-based gridding, which splits the gridding step up into many smaller facets. These can be combined to approximate the celestial sphere. Although older 
+literature cautions that this approach is an order of magnitude more computationally expensive than its counterparts, it may not be a problem for the modern highly parallel GPU
+architectures where computational power far outweighs memory transfer bandwidths.
+\section{Aims}
+Our research aims to achieve four key objectives:
+\begin{enumerate}[i)]
+ \item \textbf{Compare quality of images produced by facet-based approaches to well-known software}\\
+ Although the primary goal of this research is on acceleration, it cannot be at the expense of quality. This first step will compare the resulting image obtained from a serial (Numeric Python) facet-based implementation to those results produced by current radio astronomy packages, including
+ CASApy. Literature on faceting is scarce in comparison to approaches such as W-projection, necessitating this first step.
+ \item \textbf{Implement an optimized faceted convolutional gridding in C++}\\
+ This will be achieved using OpenMP and AVX vector intrinsics where applicable. It will serve as a reasonable baseline for performance comparisons of a GPU-based version and previous research, particularly
+ that of Romein and Muscat.
+ \item \textbf{Implement a GPU-based faceted convolutional grider in CUDA}\\
+ The GPU version will be based on the best algorithm in the literature; that by Romein, but will include faceting. Other approaches involved pre-sorting the data, but considering the sheer quantity of data points in
+ a long observation this approach has been shown to be inferior to that put forward by Romein.
+ \item \textbf{Include W-projection algorithm in both CPU and GPU gridders}\\
+ The W-projection algorithm (Cornwell et al.) may be implemented in either visibility or the image space. In the image space the approach is known as W-stacking. The combination of faceting and w-projection provides a
+ trade off between memory requirements and seam reduction (as suggested by Cornwell).
+\end{enumerate}
+
+\end{document}
