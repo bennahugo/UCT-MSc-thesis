@@ -1,7 +1,22 @@
 \documentclass[a4paper,11pt,two column]{article}
 
 \usepackage[utf8]{inputenc}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{mdframed}
+\usepackage{color}
+\usepackage{listing}
+\usepackage{wrapfig}
+\usepackage[parfill]{parskip}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage[font={small}]{caption}
+\usepackage{marvosym}
 \usepackage[margin=0.7in]{geometry}
+
 \usepackage{tablefootnote}
 \usepackage{abstract}
 \usepackage{enumerate}
@@ -18,37 +33,47 @@ Supervised by: James Gain\thanks{jgain@cs.uct.ac.za} and Oleg Smirnov\thanks{osm
 }]
 \saythanks
 \section{Introduction}
-Modern radio astronomy observes electromagnetic emissions with wavelengths typically around one million times longer than that of visible light, and is subsequently able to observe phenonma that is 
-invisible at the wavelengths of visible light. Since its birth in the early 20th century, research has been largely driven towards attaining higher resolution imaging over wider fields of view. Modern 
-radio astronomy, for the most part, places a large emphasis on aperture synthesis. In essence this process combines the collecting capacity of many smaller apertures to provide an equivalent
-resolution to a single very large aperture. Unfortunately, as the underlying array grows larger, the combined output data rates grows quadratically. Coupled with the requirements of producing
-high resolution images, and the associated problems of telescope calibration and image deconvolution, through several cycles of convolutional gridding and degridding, accelerating the imaging 
-process is of vital importance in large arrays such as LOFAR and the Square Kilometer Array.
+\subsection{Context}
+Modern radio astronomy observes electromagnetic emissions from black bodies and magnetic processes with wavelengths typically around one million times longer than that of visible light, and is subsequently 
+able to observe phenonma that is invisible at the wavelengths of visible light. Since its birth in the early 20th century, research has been largely driven towards building telescopes with higher resolving capability. Modern radio astronomy, for the most part, places a large emphasis on aperture synthesis. In essence this process combines the collecting capacity of many smaller apertures to provide an equivalent
+resolving capability to that of a single very large aperture \cite{christiansenradiotelescopes}. 
 
-Previous research has shown that convolutional gridding consumes nearly 35.4\% of this cycle, with its degridding counterpart consuming 48.74\%. Research into GPU-acceleration of the gridding 
-process suffers from one serious issue: excessive memory requirements of current correcting techniques associated with widefield imaging and non-coplanar arrays. These techniques are 
-geared towards limiting the effects of Fresnel distortion introduced in non-coplanar arrays, as well as the problems associated with imaging wide fields of view on the celestial sphere, 
-and are well understood. The techniques include w-projection, snapshots and faceting (or combinations of these). Previous research has focused on combining the gridding step with w-projection, but has
-found that high resolution grids are too memory intensive to be placed in the limited memory of current GPUs.
+Each antennae pair in such an array samples the sky in the fourier domain, and an image of the sky can be obtained through fourier inversion. One technique commonly employed is that of convolutional gridding and 
+fast fourier transforms. This approach is typically about two orders of magnitude faster than computing each image pixel directly \cite[Lecture 7]{taylor1999synthesis}, especially when considering large visibility datasets. As telescope arrays grow larger, 
+the size of these datasets grow quadratically with the number of elements of the array. Coupled with the problems of telescope calibration and image deconvolution, through several cycles of convolutional gridding and degridding, 
+accelerating the imaging process is of vital importance in large arrays such as LOFAR and the Square Kilometer Array.
 
-We propose the use of facet-based gridding, which splits the gridding step up into many smaller facets. These can be combined to approximate the celestial sphere. Although older 
-literature cautions that this approach is an order of magnitude more computationally expensive than its counterparts, it may not be a problem for the modern highly parallel GPU
-architectures where computational power far outweighs memory transfer bandwidths.
-\section{Aims}
-Our research aims to achieve four key objectives:
+Both convolutional gridding and its inverse, convolutional degridding, can be parallelized and is suitable for processing on massively multicore architectures such as General Purpose GPUs. Although convolutional gridding 
+has been implemented on GPUs in past research (for example \cite{romein2012efficient}), the grid sizes required by the Square Kilometer Array cannot easily be fitted in the onboard memory of current GPU accelerators. This problem can be mittigated by facet-based
+imaging, where each image is split into multiple smaller facets, and computed independently of eachother. When combined these facets give an approximation to the celestrial sphere. 
+
+Two additional benefits to faceting are the removal of time-invariant (or slowly variant) directionally dependent effects and the effects introduced by widefield non-coplanar baselines imaging \cite{cornwell1992radio,2011A&A...527A.107S}. The slow varying directional dependent effects, 
+such as those introduced by the ionosphere and antenna beam patterns can be approximated for small facets and subsequently removed. The fourier relationship between the observed visibilities and true sky is additionally only defined for images over a small regions of the celestial sphere. 
+Imaging wider fields of view introduces distortions in the image, which are significantly worsened when the observing antennae are not coplanar. Large two-dimensional arrays such as the Square Kilometer Array suffers from these distortions and requires the use of facets, snapshotting or 
+w-projection (or any combination of these). Although facet-based imaging may be slower than w-projection, it has more flexible memory requirements, and may be of greater use to the Square Kilometer Array.
+\subsection{Aims}
+Our research aims to achieve two key objectives:
 \begin{enumerate}[i)]
- \item \textbf{Compare quality of images produced by facet-based approaches to well-known software}\\
- Although the primary goal of this research is on acceleration, it cannot be at the expense of quality. This first step will compare the resulting image obtained from a serial (Numeric Python) facet-based implementation to those results produced by current radio astronomy packages, including
- CASApy. Literature on faceting is scarce in comparison to approaches such as W-projection, necessitating this first step.
- \item \textbf{Implement an optimized faceted convolutional gridding in C++}\\
- This will be achieved using OpenMP and AVX vector intrinsics where applicable. It will serve as a reasonable baseline for performance comparisons of a GPU-based version and previous research, particularly
- that of Romein and Muscat.
+ \item \textbf{Implement an optimized CPU-based faceted convolutional gridder in C++}\\
+  This will be achieved using OpenMP and AVX vector intrinsics where applicable. It will serve as a reasonable baseline for performance comparisons of a GPU-based version and previous research.
  \item \textbf{Implement a GPU-based faceted convolutional grider in CUDA}\\
- The GPU version will be based on the best algorithm in the literature; that by Romein, but will include faceting. Other approaches involved pre-sorting the data, but considering the sheer quantity of data points in
- a long observation this approach has been shown to be inferior to that put forward by Romein.
- \item \textbf{Include W-projection algorithm in both CPU and GPU gridders}\\
- The W-projection algorithm (Cornwell et al.) may be implemented in either visibility or the image space. In the image space the approach is known as W-stacking. The combination of faceting and w-projection provides a
- trade off between memory requirements and seam reduction (as suggested by Cornwell).
+  The GPU version will be based on the most work-efficient GPU gridding algorithm in the literature, but will modified to include faceting instead of w-projection.
 \end{enumerate}
 
+\subsection{Research question}
+ 
+\section{Literature review}
+
+\section{Procedures and methodology}
+\subsection{Research design}
+\subsection{Data sources}
+\subsection{Validity}
+ To ensure that the images produced by our gridder are correct they will be compared to the dirty images produced by well-known radio imaging toolsets, such as the Common Astronomy Software 
+ Applications (CASA) \footnote{Freely available form \url{casa.nrao.edu}}.
+ Literature on faceting is scarce in comparison to approaches such as W-projection, necessitating this first step.
+\subsection{Resources required}
+ 
+\section{Work plan}
+\bibliography{proposal}
+\bibliographystyle{plain}
 \end{document}
