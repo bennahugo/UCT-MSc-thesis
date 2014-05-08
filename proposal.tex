@@ -1,7 +1,7 @@
-\documentclass[a4paper,11pt,two column]{article}
+\documentclass[a4paper, two column]{article}
 
 \usepackage[utf8]{inputenc}
-
+\usepackage{multicol}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{tikz}
@@ -33,47 +33,123 @@ Supervised by: James Gain\thanks{jgain@cs.uct.ac.za} and Oleg Smirnov\thanks{osm
 }]
 \saythanks
 \section{Introduction}
-\subsection{Context}
+\subsection{Problem Context}
 Modern radio astronomy observes electromagnetic emissions from black bodies and magnetic processes with wavelengths typically around one million times longer than that of visible light, and is subsequently 
-able to observe phenonma that is invisible at the wavelengths of visible light. Since its birth in the early 20th century, research has been largely driven towards building telescopes with higher resolving capability. Modern radio astronomy, for the most part, places a large emphasis on aperture synthesis. In essence this process combines the collecting capacity of many smaller apertures to provide an equivalent
-resolving capability to that of a single very large aperture \cite{christiansenradiotelescopes}. 
+able to observe phenonma that is invisible at the wavelengths of visible light. Since its birth in the early 20th century, research has been largely driven towards building telescopes with higher resolving capability. 
+In modern radio astronomy this is achieved through aperture synthesis. In essence this process combines the collecting capacity between pairs of smaller apertures to provide an equivalent
+resolving capability to that of a single very large aperture. This is achieved by taking short time averages between outputs from these antennae pairs through a process known as signal correlation \cite{christiansenradiotelescopes}. 
 
-Each antennae pair in such an array samples the sky in the fourier domain, and an image of the sky can be obtained through fourier inversion. One technique commonly employed is that of convolutional gridding and 
-fast fourier transforms. This approach is typically about two orders of magnitude faster than computing each image pixel directly \cite[Lecture 7]{taylor1999synthesis}, especially when considering large visibility datasets. As telescope arrays grow larger, 
-the size of these datasets grow quadratically with the number of elements of the array. Coupled with the problems of telescope calibration and image deconvolution, through several cycles of convolutional gridding and degridding, 
-accelerating the imaging process is of vital importance in large arrays such as LOFAR and the Square Kilometer Array.
+Each antennae pair in such an array samples the sky in the fourier domain, and an image of the sky can be obtained through fourier inversion of all these ``visibility'' samples. See figure~\ref{FIG_APERTURE_SYNTH}. One technique commonly employed is that of convolutional gridding and 
+fast fourier transforms. This approach approximates an area on the celestrial sphere by a tangent plane and is typically about two orders of magnitude faster than computing each image pixel directly \cite[Lecture 7]{taylor1999synthesis}, especially when 
+considering large visibility datasets. As telescope arrays grow larger, the size of these datasets grow quadratically with the number of elements of the array. Coupled with the problems of telescope calibration and image deconvolution, through several cycles of 
+convolutional gridding and degridding, accelerating the imaging process is of vital importance in large arrays such as LOFAR and the Square Kilometer Array.
+
+\begin{figure}
+ \begin{mdframed}
+ \centering
+ \includegraphics[width=0.8\textwidth]{lmn_uvw.png}
+ \caption[The relation between image space and visibilities]{The relation between the measured sampled visibility function (u,v,w space) and the projected source on the unit ``celestial'' sphere (l,m,n space). Image taken from Synthesis Imaging II \cite{taylor1999synthesis}.}
+  \label{FIG_APERTURE_SYNTH}
+ \end{mdframed}
+\end{figure}
 
 Both convolutional gridding and its inverse, convolutional degridding, can be parallelized and is suitable for processing on massively multicore architectures such as General Purpose GPUs. Although convolutional gridding 
 has been implemented on GPUs in past research (for example \cite{romein2012efficient}), the grid sizes required by the Square Kilometer Array cannot easily be fitted in the onboard memory of current GPU accelerators. This problem can be mittigated by facet-based
-imaging, where each image is split into multiple smaller facets, and computed independently of eachother. When combined these facets give an approximation to the celestrial sphere. 
+imaging, where each image is split into multiple smaller facets, and computed independently of eachother. 
 
-Two additional benefits to faceting are the removal of time-invariant (or slowly variant) directionally dependent effects and the effects introduced by widefield non-coplanar baselines imaging \cite{cornwell1992radio,2011A&A...527A.107S}. The slow varying directional dependent effects, 
-such as those introduced by the ionosphere and antenna beam patterns can be approximated for small facets and subsequently removed. The fourier relationship between the observed visibilities and true sky is additionally only defined for images over a small regions of the celestial sphere. 
-Imaging wider fields of view introduces distortions in the image, which are significantly worsened when the observing antennae are not coplanar. Large two-dimensional arrays such as the Square Kilometer Array suffers from these distortions and requires the use of facets, snapshotting or 
-w-projection (or any combination of these). Although facet-based imaging may be slower than w-projection, it has more flexible memory requirements, and may be of greater use to the Square Kilometer Array.
+This image-based faceting approach is described by Cornwell and Perley \cite{cornwell1992radio} and involves dividing the celestial sphere into small approximating planes (in other words the sphere is approximated by a polyhedron). 
+As normal convolutional gridding is only useful to approximate small areas on the sphere the use of facets, w-projection \cite{cornwell2005w} or snapshots (a series of short-time observations) are 
+necessary to facilitate imaging wide fields of view (especially at low frequencies, like those observed by LOFAR). 
+
+The associated problem of imaging using non-coplanar baselines significantly worsens the distortions caused by gridding large fields of view. In non-east-west one-dimensional arrays the 
+Earth's rotation slowly rotates the vector direction between two telescopes (baseline) through multiple heights. Although W-projection can be integrated into convolutional gridding, and is known to be significantly faster than facet-based approaches, faceting has lower memory requirements 
+than computing the entire image in a single step, and is a more feasible approach for large arrays such as the Square Kilometer Array. The additional computational demands of faceting can be significantly reduced if the celestial sphere is only sparsely imaged. In this situation the majority
+of the facets are concentrated around sources, while the rest of the image is not computed. This is known as ``targetted'' faceting.
+
+A third benefit to faceting is the removal of time-invariant (or slowly variant) directionally dependent effects \cite{2011A&A...527A.107S}. The slow-varying directional dependent effects, such as those introduced by the 
+ionosphere and antenna beam patterns can be approximated over small facets and subsequently removed. The effects are modeled as a set of Jones matricies \cite{2011A&A...527A.106S}, whose inverses are applied to the output of each antenna. Because these terms are locally invarent over small 
+facets they can be corrected for before convolutional gridding. The general relation between the image space and the sampled coherence function is given by the measurement equation (equation~\ref{eqn_RIME}). In a facet-based approach
+the directionally dependant effects is moved out of the integral, provided the facets are small enough.
+
+\begin{figure*}
+\begin{mdframed}
+\begin{equation}
+\label{eqn_RIME}
+\begin{split}
+    V_{pq} &= G_p(t,\upsilon)\left(\int_{-\infty}^{\infty}\int_{-\infty}^{\infty}D_p(l,m,t,\upsilon)BK_{pq}D_q(l,m,t,\upsilon)^H\frac{dldm}{\sqrt{1-l^2-m^2}}\right)G_q(t,\upsilon)\\
+	  &\text{where }K = e^{-2\pi i(u_{pq}l+v_{pq}m+w_{pq}(n-1))}
+    \left[\begin{array}{c c}
+     1 & 0 \\
+     0 & 1 \\
+    \end{array}\right]\\
+	 &\text{and the G terms are the direction-independent effects,}\\
+	 &\text{while the E terms are dependent on the direction of the source in l,m space}\\
+ 	 &J^H:=\bar J^T \text{ indicates the Hermitian transpose (the transpose of a complex conjugate matrix)}\\ 
+ 	 &\text{if }w(n-1)\approx 0\text{ the relation is an ordanary 2D fourier transformation}
+\end{split}
+\end{equation}
+\end{mdframed}
+\end{figure*}
+
+Faceting has been the defacto standard in the Astronomical Image Processing System (AIPS) task ``IMAGR'' \cite{AIPS113} when it comes to imaging fields of view, and is still 
+widely used in newer toolkits such as the Common Astronomy Software Applications (CASA) \footnote{Freely available form \url{casa.nrao.edu}}. 
 \subsection{Aims}
-Our research aims to achieve two key objectives:
+Our research aims to achieve the following key objectives:
 \begin{enumerate}[i)]
  \item \textbf{Implement an optimized CPU-based faceted convolutional gridder in C++}\\
   This will be achieved using OpenMP and AVX vector intrinsics where applicable. It will serve as a reasonable baseline for performance comparisons of a GPU-based version and previous research.
  \item \textbf{Implement a GPU-based faceted convolutional grider in CUDA}\\
   The GPU version will be based on the most work-efficient GPU gridding algorithm in the literature, but will modified to include faceting instead of w-projection.
+ \item \textbf{Create a distributed solution using the Message Passing Interface}\\
+  The sheer size of both a purely parallel CPU version and a GPU version of the faceted gridder can benefit from additional parallelism offered by even a small cluster.
 \end{enumerate}
-
 \subsection{Research question}
- 
+ {\color{red}TODO}
 \section{Literature review}
-
-\section{Procedures and methodology}
-\subsection{Research design}
-\subsection{Data sources}
-\subsection{Validity}
- To ensure that the images produced by our gridder are correct they will be compared to the dirty images produced by well-known radio imaging toolsets, such as the Common Astronomy Software 
- Applications (CASA) \footnote{Freely available form \url{casa.nrao.edu}}.
- Literature on faceting is scarce in comparison to approaches such as W-projection, necessitating this first step.
-\subsection{Resources required}
+ Both convolutional gridding and faceting are well-understood problems. Convolutional gridding (throughly detailed in Synthesis Imaging II \cite{taylor1999synthesis}) is not only used in radio astronomy, but in other fields such as 
+ medical imaging as well (see for example Jackson et al. \cite{jackson1991selection}). Although it is possible to do faceting on both separate image-space planes \cite{cornwell1992radio} or a single plane as with so-called ``uv-facets'' \cite{AIPS113}, we opted to support targeted 
+ faceting by faceting in the image space. If the entire image is faceted in a full-image faceting mode of operation, the facets have to be joined into a final image, once they have been deconvolved, degridded, corrected for amplitude and phase error and regridded for several operations. 
+ This operation is well-understood and is implemented in the FLATN task in classical AIPS. The image space transformation is discussed by Sault et al. \cite{sault1996approach}.
  
+ In order to use an Inverse Fast Fourier Transform between the sampled ``visibilities'' and the image, one first has to sample the visibilities onto a regular grid. Convolutional gridding takes each visibility (per frequency channel, time step and baseline) 
+ and interpolates it onto a grid. The interpolation is achieved by multiplication with a convolution function. When antenna polarization is taken into account there can be up to 4 separate grids onto which these visibilities are sampled. In this research we will
+ use the optimal gridding convolution function approximation of Sze Tan \cite{tan1986aperture}. Here ``optimal'' is defined in terms of minimizing aliasing energy outside the gridded area and minimizing the interpolation error between gridding and the brute force per-pixel
+ imaging (also known as the ``Direct'' fourier transform).
+ 
+ The co-planar convolutional gridding algorithm and Fast Fourier Transform has a combined complexity of $O(MC^2) + O(N^2\log_2{N})$, where M is the number of observed visibilities, N is the size of one of the grid dimensions and C is the size of one of the convolution kernel 
+ dimensions. For long observations $M\approx N^2$. This is still much faster than the direct approach which has a complexity of $O(N^4)$. When faceting is added to the gridding algorithm it can fast become computationally prohibative to do a completely faceted image. In both directions 
+ the number of facets required is approximately $N_{poly}=2B_{max}\lambda/fD^2$, where $B_{max}$ is the length of the longest baseline, $D$ is the the diameter of the antennae reflectors and $f << 1$ \cite{taylor1999synthesis}. It should be said that this approach is typically
+ still less memory intensive than gridding several height planes and taking a three-dimensional Fast Fourier Transform and less memory intensive and faster than directly computing each voxel \cite{yashar2009tdp}. See figure~\ref{IMG_PERFORMANCE_COMPARISON} for a comparitive plot.
+ \begin{figure}
+  \includegraphics[width=0.45\textwidth]{performance_faceting.png}
+  \caption{Plots of computational cost (floating point operations per second vs. antenna diameter D) of several schemes including w-projection and hybrid faceting and w-projection. Image taken from an analysis by Yashar and Kemball \cite{yashar2009tdp}.}
+  \label{IMG_PERFORMANCE_COMPARISON}
+ \end{figure}
+
+ As one may expect, this convolutional gridding requires atomic operations when parallelized. Romein \cite{romein2012efficient} suggests a novel approach which limits the number of atomic operations required by a GPU gridding process, by accumulating
+ the contribution to each grid cell in registers. This approach outperforms all other parallel gridding approaches, including presorting, but suffers from convolution function weight lookups and GPU memory size for large images \cite{muscat2014high}.
+ A faceting approach is currently necessary to mitigate the latter. It is estimated that the images produced from observations on the SKA may contain up to $10^{10}$ pixels \cite{cornwell2012wide}. If each grid is to be computed using single precision floating point
+ aritmetic this will amount to 37.25 GiB of GPU memory on storing the grid for a single polarization average. Fast fourier transformation and the possible storage of convolution kernels may require additional memory. 
+ 
+ According to Cornwell and Perley \cite{cornwell1992radio} image-space faceting requires phase shifting (multiplying with a complex exponential) each visibility to the facet center and rotating each facet in order to 
+ be tangential to the sphere at the facet center. This transformation is achieved by a simple 3x3 rotation matrix, as is done in IMAGR \cite{AIPS113} and is necessary to avoid additional distortions in the field of view \cite[pg. 395]{taylor1999synthesis}. To the best of our knowledge 
+ a faceted convolutional gridder has not yet been implemented on GPUs, although Golap et al. \cite{golap2001parallelization} has made some effort in parallelizing facet imaging, facet deconvolution and re-projection onto a common tangent plane.
+ 
+ Any parallel work-distribution strategy that involves faceting will not be as simple as convolving visibilities onto a set of grids. Because these grids are typically comparitively small, the majority of the uv-coverage will fall outside the grid being processed. This will cause 
+ excessive branch divergence and will subsequently be very slow. We propose that the visibilities are ``binned'' according to the facets that they do contribute to. This will ensure that both global memory accesses and branch divergence is kept to a minimum. Each group of threads will
+ work on a particular grid, where each thread monitors strided grid locations, but maintains coalesced memory access patterns. This is in accordance to the access pattern put forward by Romein \cite{romein2012efficient} and minimizes atomic accesses and makes use of the plentiful fast 
+ register memory on current GPUs. The facets and associated visibility information can then be distributed accross multiple GPUs, ensuring course-grained parallelization.
+\section{Methodology}
+\subsection{Research design}
+{\color{red}TODO}
+\subsection{Data sources}
+{\color{red}TODO}
+\subsection{Validity}
+ To ensure that the images produced by our gridder are correct they will be compared to the dirty images produced by well-known radio imaging toolsets, such as CASA. 
+\subsection{Resources required} 
+{\color{red}TODO}
 \section{Work plan}
+{\color{red}TODO}
 \bibliography{proposal}
 \bibliographystyle{plain}
 \end{document}
