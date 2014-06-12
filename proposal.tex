@@ -31,18 +31,15 @@ Benjamin Hugo\thanks{bennahugo@aol.com}\\
 Supervised by: James Gain\thanks{jgain@cs.uct.ac.za} and Oleg Smirnov\thanks{osmirnov@gmail.com}\\[0.5cm]
 }]
 \saythanks
-\section{Introduction}
-\subsection{Problem Context}
-Modern radio astronomy observes electromagnetic emissions from black bodies and magnetic processes with wavelengths typically around one million times longer than that of visible light, and is subsequently 
-able to observe phenonma that is invisible at the wavelengths of visible light. Since its birth in the early 20th century, research has been largely driven towards building telescopes with higher resolving capability. 
-In modern radio astronomy this is achieved through aperture synthesis. In essence this process combines the resolving capacity of smaller apertures to provide an equivalent
-resolving capability to that of a single very large aperture. This is achieved by taking short time averages between the outputs from pairs of antennae, through a process known 
-as signal correlation \cite{christiansenradiotelescopes,taylor1999synthesis}. 
+\section{Context}
+Modern radio astronomy observes electromagnetic emissions with wavelengths typically around one million times longer than that of visible light, and astronomers are subsequently 
+able to observe phenonma that are scattered by the intersteller medium, at the wavelengths of visible light. Since its birth in the early 20th century, research has been largely 
+driven towards building telescopes with higher resolving capability. In modern radio astronomy this is achieved through aperture synthesis, which combines the resolving capacity 
+of smaller apertures to provide an equivalent resolving capability to that of a single, much larger aperture \cite{christiansenradiotelescopes}.
 
-Each antennae pair in such an array samples the sky in the Fourier domain, and an image of the sky can be obtained through Fourier inversion of all these ``visibility'' samples. See figure~\ref{FIG_APERTURE_SYNTH}. One technique commonly employed is that of convolutional gridding and 
-Fast Fourier Transforms. This approach approximates an area on the celestrial sphere by a tangent plane and is typically about two orders of magnitude faster than computing each image pixel directly \cite[Lecture 7]{taylor1999synthesis}, especially when 
-considering large visibility datasets. As telescope arrays grow larger, the size of these datasets grow quadratically with the number of elements of the array. Coupled with the problems of telescope calibration and image deconvolution, which may take several cycles of 
-convolutional gridding and degridding, accelerating the imaging process is of vital importance in large arrays such as LOFAR and the Square Kilometer Array.
+In imaging mode the goal is to densely sample these electromagnetic wavefronts (assumed planar when arriving at the antennae) in a local coordinate framework, and through inversion 
+determine the intensities of the emitting sources. These intensities are visualized as an ``image'' of the sky. The image is assumed to be a small region on a unit sphere, with no 
+contributing emission sources within the sphere. Refer to figure~\ref{FIG_APERTURE_SYNTH}.
 
 \begin{figure}[h]
  \begin{mdframed}
@@ -53,18 +50,47 @@ convolutional gridding and degridding, accelerating the imaging process is of vi
  \end{mdframed}
 \end{figure}
 
-Both convolutional gridding and its inverse, convolutional degridding, can be parallelized and is suitable for processing on massively multicore architectures such as General Purpose GPUs. Although convolutional gridding 
-has been implemented on GPUs in past research (for example \cite{romein2012efficient}), the grid sizes required by the Square Kilometer Array cannot easily be fitted in the onboard memory of current GPU accelerators. This problem can be mittigated by facet-based
-imaging, where each image is split into multiple smaller facets, and computed independently of eachother. 
+Obviously it will be impractical to construct an array of telescopes to completely sample this local coordinate frame in a single instant. Instead, as the earth slowly rotates, the 
+relative direction between pairs of antenna sweeps out eliptical paths through the local coordinate space. Provided that the observation is long enough (usually made over several hours), 
+and that the antennae keep pointing towards the same position in the sky, enough of the electromagnetic interference can be collected to distinguish even faint sources from 
+background noise.
 
-This image-based faceting approach is described by Cornwell and Perley \cite{cornwell1992radio} and involves dividing the celestial sphere into small approximating planes (in other words the sphere is approximated by a polyhedron). 
-As normal convolutional gridding is only useful to approximate small areas on the sphere, the use of facets, w-projection \cite{cornwell2005w} or snapshots (a series of short-time observations) is 
-necessary to facilitate imaging wide fields of view. This is especially true at low frequencies, like those observed by LOFAR. 
+That said, in reality the space is only densely sampled around the origin and only a single plane is considered when inverting the samples to an image. This requires all the direction 
+vectors (or ``baselines'') between pairs of antennae to stay on the same plane for the duration of an observation. However, to observe the sky at lower declinations (at an angle close to
+the horizon) arrays with elements both parallel and perpendicular to the rotation of the earth must be used. The baselines of these two-dimensional arrays do not remain planar over the duration
+of a single observation and cause image distortions.
 
-The associated problem of imaging using non-coplanar baselines significantly worsens the distortions (see figure~\ref{FIG_3D_DISTORTIONS}) caused by gridding large fields of view. In non-east-west two-dimensional arrays the 
-Earth's rotation slowly rotates the vector direction between two telescopes (a ``baseline'') through multiple heights. Although corrective W-projection can be integrated into convolutional gridding, and is known to be significantly faster than facet-based approaches, faceting has lower memory requirements 
-than computing the entire image in a single step. Faceting is therefore a more feasible approach for large arrays such as the Square Kilometer Array. The additional computational demands of faceting can be significantly reduced if the celestial sphere is only sparsely imaged. In this situation the majority
-of the facets are concentrated around sources, while the rest of the image is not computed. This is known as ``targetted'' faceting.
+To add to this problem of non-coplanar baselines, the computational complexity of the inversion process requires that the areas on the unit celestial sphere be approximated by a flat plane. This 
+plane approximation to the celestial sphere is only valid in a small area around the tangent point (the pointing centre of the telescope). When imaging wider fields of views the curvature of the sky
+can no longer be ignored. Under these conditions the distortions caused by non-coplanar baselines are intensified and other techniques must be employed to remove these effects. These techniques are
+reasonably expensive, both in terms of extra memory and computational requirements, which makes the already-expensive synthesis process even more costly. Collectively the problem is known as the 
+\textit{problem of non-coplanar widefield imaging} \cite{taylor1999synthesis}. 
+
+This forms the problem context of our research. The exact details of the inversion process, as well as a short litterature survey will be discussed next.
+
+\section{Method}
+The inversion process mentioned earlier refers to the inversion of the fourier relation between the sampling and imaging spaces. Each telescope measures the contribution from each source (its intensity) as the cosine 
+between the pointing direction and source direction. See figure~\ref{FIG_COSINES}. To measure most of the incoming energy the signal integration between pairs of antennae alluded to earlier measures two voltages: a cosine 
+with no phase offset and a cosine with a phase offset (or equivalently a signal delay) of 90 degrees - a sine term. Each visibility sample in the local antenna coordinate frame is expressed as a sum of cosine and sine 
+contributions from multiple sources (a fourier series) \cite{taylor1999synthesis}.
+
+There are very fast algorithms for taking the inverse fourier transform (Cooley-Tukey for instance), but they require that the visibilies are sampled at regular intervals. This is not true of real observations. 
+To overcome this issue the visibilities are resampled onto a regular grid by ``interpolating'' each visibility onto possibly multiple grid cells. This is done by multiplying each visiblity term with a precomputed, oversampled, 
+function and adding these values back onto the grid. This process is known as \textit{convolutional gridding}. The inverse process known as \textit{convolutional degridding} attempts to predict the original sampled 
+visibilities by summing over the weighted grid cells (the opposite of the gridding process) \cite{taylor1999synthesis}.
+
+The other, more accurate, approach to doing the inversion which does not require doing convolutional gridding, is to compute the intensity of each pixel directly (a sum over all the visibility terms). This approach is infeasible
+(complexity of O($N^4$) and a memory requirement of up to O($N^3$) when taking non-coplanar widefield imaging corrections into account). This approach is, however, trivial to parallelize. Convolutional gridding has
+a complexity of roughly O($N^2\log_2{N}$) + O($N^2C^2$), where $C^2$ is the number of cells in the precomputed gridding function \cite[Lecture 7]{taylor1999synthesis}.
+
+Both convolutional gridding and its inverse, convolutional degridding, can be parallelized and are suitable for processing on massively multicore architectures such as General Purpose GPUs. Although convolutional gridding 
+has been implemented on GPUs in past research (for example \cite{romein2012efficient}), the grid sizes required by the Square Kilometer Array cannot be fitted in the onboard memory of current GPU accelerators. This problem 
+can be mittigated by facet-based imaging, where each image is split into multiple smaller facets, and computed independently of eachother. 
+
+This image-based faceting approach \cite{cornwell1992radio} involves dividing the celestial sphere into small approximating planes (in other words the sphere is approximated by a polyhedron). 
+As normal convolutional gridding is only useful to approximate small areas on the sphere, the use of 3D-correcting methods such as facets, w-projection \cite{cornwell2005w} or snapshots (a series 
+of short-time observations) is necessary to facilitate overcomming the problem of imaging wide fields of view. See figure~\ref{FIG_3D_DISTORTIONS} for an illustration of these distortions and the 
+results of applying corrective faceting and w-projection. 
 
 \begin{figure}[h]
  \begin{mdframed}
@@ -79,26 +105,6 @@ A third benefit to faceting is the removal of time-invariant (or slowly variant)
 ionosphere and antenna beam patterns can be approximated over small facets and subsequently removed. The effects are modeled as a set of Jones matricies \cite{2011A&A...527A.106S}, whose inverses are applied to the output of each antenna. Because these terms are locally invarent over small 
 facets, they can be corrected for before convolutional gridding. The general relation between the image space and the sampled coherence function is given by the measurement equation (equation~\ref{eqn_RIME}). In a facet-based approach
 the directionally dependant effects is moved out of the integral, provided the facets are small enough.
-
-\begin{figure*}
-\begin{mdframed}
-\begin{equation}
-\label{eqn_RIME}
-\begin{split}
-    V_{pq}(u,v,w) &= G_p(t,\upsilon)\left(\int_{-\infty}^{\infty}\int_{-\infty}^{\infty}D_p(l,m,t,\upsilon)BK_{pq}D_q(l,m,t,\upsilon)^H\frac{dldm}{\sqrt{1-l^2-m^2}}\right)G_q(t,\upsilon)\\
-	  &\text{where }K = e^{-2\pi i(u_{pq}l+v_{pq}m+w_{pq}(n-1))}
-    \left[\begin{array}{c c}
-     1 & 0 \\
-     0 & 1 \\
-    \end{array}\right]\\
-	 &\text{and the G terms are the direction-independent effects,}\\
-	 &\text{while the E terms are dependent on the direction of the source in l,m space}\\
- 	 &J^H:=\bar J^T \text{ indicates the Hermitian transpose (the transpose of a complex conjugate matrix)}\\ 
- 	 &\text{if }w(n-1)\approx 0\text{ the relation is an ordanary 2D Fourier transformation}
-\end{split}
-\end{equation}
-\end{mdframed}
-\end{figure*}
 
 Faceting has been the defacto standard in the Astronomical Image Processing System (AIPS) task ``IMAGR'' \cite{AIPS113} when it comes to imaging fields of view, and is still 
 widely used in newer toolkits such as the Common Astronomy Software Applications (CASA) \footnote{Freely available from \url{casa.nrao.edu}}. 
