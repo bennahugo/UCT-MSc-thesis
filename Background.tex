@@ -256,7 +256,7 @@ now replace the cosine term in equation~\ref{eqn_cosine_correlation} by $e^{-2\p
 
 The next issue are the effects of limited \textit{bandwidth}, $\Delta\upsilon$, in correlators. Since it is computationally infeasible to sample an infinite spectrum of frequencies, only a select number of channels are sampled. This
 band is normally shifted down to \textit{baseband} ($\upsilon=0$) and filtered appropriately with a lowpass filter to reduce aliasing, refer to figure~\ref{fig_bandwidth}. The baseline is normally measured in wavelengths and therefore depends on the
-center frequency through the well-known relation $\upsilon=\frac{c}{\lambda}$. Unfortunately this has a negative impact on the fringe pattern of the correlator; the fringe is modulated by a sinc-function for a rectangular band. This has
+center frequency through the well-known relation $\upsilon=\frac{c}{\lambda}$. Unfortunately this has a negative impact on the fringe pattern of the correlator; for a rectangular frequency band the fringe is modulated by a sinc-function. This has
 the effect of tapering the fringe which again reduces the effective area of the interferometric telescope. The obvious solution is to observe only narrow spectra. The fringe additionally depends on the delay term and oscilates in time. Normally this is not a problem. However, with exceedingly long baselines such as those in \textit{Very Long Baseline Interferometry}, where the baselines may span continents (see Middelberg et al. \cite{middelberg2008high} for a detailed overview), the local oscilator term is usually varied 
 by a delay tracking computer, which essentially stops any fringe oscilation (known as \textit{fringe stopping}) \cite{taylor1999synthesis}.
 \begin{figure}
