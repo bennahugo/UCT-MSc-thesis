@@ -21,58 +21,76 @@
 
 \begin{document}
 \maketitle
-\chapter{Introduction to Radio Astronomy}
+\tableofcontents
+\chapter{Background}
 The focus of our work can best be summarized as accelerating the removal of artifacts introduced by creating widefield images from the measurements taken by radio telescopes. 
-In this chapter a high level overview\footnote{It is important to stress that radio astronomy is a cross-section of many disciplines including astronomy, physics, 
-electrical engineering and increasingly high performance and distributed computing. The following texts provide further insight to those coming from a computing background:
+In this chapter we give the reader a ``grand tour'' \footnote{It is important to stress that radio astronomy is a cross-section of many disciplines including astronomy, physics, 
+electrical engineering and increasingly high performance and distributed computing. The following texts provide further insight to those coming from a computing background (I recommend 
+reading the first three texts in order before moving to synthesis imaging):
 \begin{itemize}
- \item \textit{Antennas: Fundamentals, Design, Measurement (third, Blake \& Long)} serves as a good introductionary text on general [communications] radio antennae design from an electrical engineering perspective.
- \item \textit{Radiotelescopes (Christiansen \& H\"ogbom)} gives insight into the historic development of radiotelescopes from the 1930s through the 1960s, with a focus on telescope design, interferometry and a 
- good introduction to radio astronomy.
- \item \textit{A Scientist and Engineer's guide to Digital Signals Processing (Steven Smith)}\cite{smith1997scientist}. Available freely at \url{http://www.dspguide.com/}. An easy introduction to core digital 
- signals processing techniques, which cover sampling theory, introductory filter design and a good starter on the practical use of Fourier transforms.
- \item \textit{Synthesis Imaging In Radio Astronomy II (Taylor et al.)}. A very useful collection of lectures on synthesis imaging, covering the domain of radio astronomical imaging in its entirety.
- \item \textit{Interferometry and Synthesis in Radio Astronomy (second, Thompson, Moran \& Swenson)} covers the imaging pipeline in its entirety and serves as a valueble reference.
+ \item \textit{Antennas: Fundamentals, Design, Measurement} \cite{blake2009antennas} serves as a good introductionary text on general [communications] radio antennae design from an electrical engineering perspective. Chapters 1 through 4
+ are very insightful.
+ \item \textit{A Scientist and Engineer's guide to Digital Signals Processing} \cite{smith1997scientist}. Available freely at \url{http://www.dspguide.com/}. A must-read introduction to core digital 
+ signals processing techniques, which cover sampling theory, introductory filter design and a good starter on the practical uses of Fourier transforms.
+ \item \textit{Radiotelescopes} \cite{christiansenradiotelescopes} gives insight into the historic development of radiotelescopes from the 1930s through the 1960s, with a focus on telescope design, interferometry and a 
+ good introduction to the field of radio astronomy. The book is in the public domain and freely available from \url{https://archive.org/details/Radiotelescopes}.
+ \item \textit{Synthesis Imaging In Radio Astronomy II} \cite{taylor1999synthesis}. A very useful (and beginner-friendly) collection of lectures on synthesis imaging, covering the domain of radio astronomical imaging 
+ in its entirety.
+ \item \textit{Interferometry and Synthesis in Radio Astronomy} \cite{thompson2008interferometry} covers the imaging pipeline in great detail from correlation through calibration, cleaning
+ and beyond. A very valuable reference.
 \end{itemize}
-} of radio telescopes is given, including a discussion on what is being measured, how these telescopes work and ultimately how these 
+} of radio telescopes, including a discussion on what is being measured, how these telescopes work and ultimately how these 
 measurements are related to images of the radio sky. We will then look at how to correct the distortions introduced when imaging over wider fields of view and finally on 
 the technologies we will use to accelerate this widefield imaging process.
-\section{Radio telescopes}
+\section{Introduction to Radio astronomy}
 \subsection{Electromagnetic radiation}
 Just as with visible light, radio waves are a form of electromagnetic radiation (consisting of waves with electrical and perpendicular magnetic components) which propagate through free space at the speed 
-of light. We can conveniently measure these waves with telescopes of various form at either ground-level or from planetary orbit. This electromagnetic energy can be emitted by both thermal and non-thermal sources. 
-The intensity of the radiation emited from thermal sources is determined by both the temperature of the source and the measured frequency. On the other hand a good example of non-thermal emission is the 
-synchrotron emmision by relativistic electrons accelerated through magnetic fields. A significant portion of radio astronomy focusses on the non-thermal sources. These are generally very intense sources of 
+of light. Recall from elementary physics that the frequency and wavelength of a wave is related:
+\begin{equation*}
+ \nu = \frac{v}{\lambda}
+\end{equation*}
+where:\\
+$\nu$ is the frequency,\\
+$\lambda$ is the wavelength and\\
+$v$ is the velocity of the propagation of the wave in some propagation medium\\
+
+In a vacuum, far away from obstacles (\textit{free space}) electromagnetic waves propagate at a constant velocity, $c\approx 3\text{x}10^8$. This velocity is only slightly reduced
+when propagating though most other media.
+
+We can conveniently measure these waves with telescopes of various form at either ground-level or from planetary orbit. This electromagnetic energy can be emitted by both thermal and non-thermal sources. 
+The intensity of the radiation emitted from thermal sources is determined by both the temperature of the source and the measured frequency. On the other hand a good example of non-thermal emission is the 
+synchrotron emission by relativistic electrons accelerated through magnetic fields. A significant portion of radio astronomy focus on the non-thermal sources. These are generally very intense sources of 
 electromagnetic radiation and are very far away. We can make the simplifying assumption here that radio sources emit this radiation outward uniformly in all directions (they are \textit{isotropic}) 
 and that the distances over which they travel are far enough to consider them planar by the time they reach the observing telescope.
 
-One would expect that, because radio waves, just like visible light, is electromagntic radiation it will be subject to the same optical phenonima as light: reflection, refraction (bending as these waves propagate
+One would expect radio waves to have the same optical properties as visible light, since it too is a form of electromagnetic radiation. These are respectively reflection, refraction (bending as these waves propagate
 through mediums of different densities), diffraction and interference. The last two phenomena are of particular importance in our discussion on radio telescopes and can only be described using
-physical optics. Interference can either be constructive or destructive by nature. When two or more waves collide the resulting wave will be the sum of the colliding waves. If the incoming waves are perfectly 
-in phase (their crests line up perfectly) the resulting wave will have the amplitude of the contributing waves. However, if they are out of phase the resulting wave may have significantly reduced amplitude. 
-As for diffraction, Huygen's principle states that each point on an incoming wavefront (either planar or curved) acts as a point source of its own. The secondary waves produced by each of these point sources 
+physical optics. Interference can either be constructive or destructive by nature. When two or more waves collide the resulting wave will be the sum total of the colliding waves. If the incoming waves are perfectly 
+in phase (their crests line up perfectly) the resulting wave will have the combined amplitude of the contributing waves. However, if they are out of phase the resulting wave may have significantly reduced amplitude. 
+As for diffraction, Huygens' principle states that each point on an incoming wavefront (either planar or curved) acts as a point source on its own. The secondary waves produced by each of these point sources 
 propagates forward radially and a new wavefront is formed where they experience maximum constructive interference. 
 
-In free space (a vacuum with no obstacles) the total energy along the wavefront is conserved as it propagates forward, provided 
-the wavefront if of reasonable extent (significantly longer than a wavelength). This also mean that the energy density (\textit{flux}) 
+In free space the total energy along the wavefront is conserved as it propagates forward, provided 
+the wavefront if of reasonable extent (significantly longer than a wavelength). This also mean that the energy density 
 on each of these wavefronts will decay at a rate proportional to the square of the distance between the front and its emitting source, hence
 the requirement that the emitting source is sufficiently far away from the observing telescope. 
 
-When these waves propagate through some medium other that a vacuum this directional loss is not the only form of attenuation. In the atmosphere, depending on the wavelength, some particles such as oxygen and 
-water vapour will absorb and scatter a significant portion of the incomming energy (especially at shorter wavelengths). At the very 
-long wavelengths the charged ionosphere is effectively opaque and acts as a good reflector. This may be ideal when trying to transmit 
-signals very far beyond the horizon, but makes astronomical observation impossible.  Due to these additional attenuation factors ground-based 
-observation is effectively limited to the spectrum of visible light and the, vastly wider, radio band. Most of the in-between 
+When these waves propagate through some medium other that a vacuum this decrease in directional energy is not the only form of attenuation. In the 
+atmosphere, depending on the wavelength, some particles such as oxygen and water vapour will absorb and scatter a significant portion of the incomming 
+energy (especially at shorter wavelengths). At the very long wavelengths the charged ionosphere is effectively opaque and acts as a good reflector. This may 
+be ideal when trying to transmit signals very far beyond the horizon, but makes astronomical observation impossible.  Due to these additional attenuation 
+factors ground-based observation is effectively limited to the spectrum of visible light and the, vastly wider, radio band. Most of the in-between 
 infrared spectrum is only observable at high altitudes and under dry conditions, see Figure~\ref{fig_radio_window}. 
 
-Aside of the optical properties of electromagnetic waves and attenuation is the direction of propagation of each point on the incoming wavefront. If most of the energy of each wave is strongly 
+In addition to the optical properties of electromagnetic waves and their attenuation one has to consider the direction of propagation of each point on the incoming wavefront. If most of the energy of each wave is strongly 
 directional the wave is said to be \textit{polarized}. For polarized emissions the path traced by a single point of either electrical or magnetic component will be highly regular. It will 
 remain in a single plane (\textit{linear} polarization), will spiral at a fixed radius (\text{circular} polarization) or will spiral eliptically. Circular polarized waves can be thought 
 of as the combination of two perpendicular linearly polarized waves of equal strength (if the two wavefronts are not equally strong the resultant polarization will be eliptical). We can draw on an 
 application of this property from an everyday context: in the visible spectrum sunglasses will filter out all light except vertically polarized light, in order to reduce glare. A single-feed radio 
 antenna will similarly measure a single directional component, and will therefore only useful in measuring strongly polarized sources. Such antennae are not useful for general observations, save for 
-those of pulsars. In most contexts it is more useful to have two perpendicular feeds (a dipole comes to mind) in order to fully describe the incoming wavefront (or at least the electric component thereof). 
-When the energy measured by both feeds are roughly equal the emitting source is said to be \textit{unpolarized}.
+those of pulsars. In most contexts it is more useful to have two perpendicular feeds (a dipole comes to mind) in order to fully describe the incoming wavefront (or at least the electric component thereof)
+of the field parallel to the dipole. When the energy measured by both feeds are roughly equal the emitting source is said to 
+be \textit{unpolarized}.
 
 \begin{figure}[ht]
  \begin{mdframed}
@@ -88,7 +106,8 @@ In the early 1930s Karl Jansky's observation of radio electromagnetic radiation 
 the spectrum. Since those early days we have seen significant increases in the sensitivity and size of these radio telescopes. We will start off explaining broadly how a single element telescope works, before 
 moving onto the topic of aperture synthesis with array-based telescopes.
 
-\subsection{Antennae and measurement}
+\subsection{Radio antennae}
+\subsubsection{Overview}
 Maxwell's set of partial differential equations (1873) is one of the most elegant ways of explaining the relationship between electrical and magnetic fields, and how these can propagate at the speed of light 
 though free space. In summary they state that a when current flows, a magnetic field is created in the surrounding space. When this magnetic field is varied an accompaning perpendicular electrical field is formed, varying
 at the same frequency as the magnetic field, which in turn varies at the frequency at which the underlying current changes. Not only does this mean that antennae can generate electromagnetic fields and transmit signals (provided
@@ -138,11 +157,13 @@ may experience significant destructive interference.
 
 The gain, $G$, of the antenna is defined as the ratio of radiation intensity collected in a given direction (as when emitted by a highly 
 directional source), to the intensity that would have been obtained when receiving from an isotropic source. This definition includes feed losses
-due to ordinary resistance and is direction sensitive. For our discussion on radio telescopes, however it is much more useful to think in terms of 
+due to ordinary resistance and is obviously direction dependent. For our discussion on radio telescopes, however it is much more useful to think in terms of 
 the effective area of the antenna. This is defined in terms of the gain of the antenna, as:
 \begin{equation*}
  A_e = \frac{G\lambda^2}{4\pi}
 \end{equation*}
+Assuming absolutely no losses in the measured electric density this effective area will approach the geometric area of telescope in the direction
+of maximum constructive interference. 
 
 It is worth pointing out that these radiating patterns are measured in the far field of the antenna (at distances at least $\frac{2D^2}{\lambda}$ from
 the antenna where $D$ is the diameter of the aperture) to avoid any near-field reactive effects. The gain of an antenna must therefore be seen as a 
@@ -167,8 +188,10 @@ they are smaller than the primary beam, the resolution of finer details depend s
 telescope:
 
 \begin{equation*}
- \text{angular resolution} \propto \frac{\lambda}{D}, D \text{ is the aperture diameter}
+ \text{angular resolution} \propto \frac{\lambda}{D}
 \end{equation*}
+where:\\
+  D \text{ is the aperture diameter}\\
 
 Small telescopes will smear finer detail, and point sources right next to each other may not be discernible. The angular resolution is
 an indication of the minimum distance at which two point sources can be separated and still be discernible. This sheds some light on astronomers'
@@ -210,73 +233,52 @@ away from the observer the absorption line will appear to shift to a lower frequ
 apparent shifts can be used to track, for example, the angular velocity of galaxies: detected hydrogen in one side of the galaxy will blue shift as it moves 
 towards the observer, while the other side will red shift as it moves away from the observer.
 
-The flux density is measured as the power per square meter per unit frequency, falling on a surface, normal to the direction of the source. This flux 
-density of sources is often a very small value and the Jansky (abbreviated Jy) serves as the unit of measure \cite{christiansenradiotelescopes,wilson2009tools}:
+\subsubsection{Measurement}
+The energy available at the output terminals of a single aperture antenna will be roughly proportional to the electrical intensity per unit area per unit frequency on the 
+collected planar wavefront. This is the electrical flux density measured in units $S = Wm^{-2}Hz^{-1}$. It is useful to remind the reader that power is proportional to the square voltage and may 
+practically be used interchangeably.
 
+The single antenna telescope measures its power over a limited bandwidth and effective area $A_e$ as explained earlier. Assuming
+no attenuation or delays are introduced by the atmosphere and that the antenna measures two complementary polarizations, this 
+means the total power measured by the telescope when pointed in the direction of a single point source is: 
 \begin{equation*}
- 1 Jy := 10^{-26}Wm^{-2}Hz^{-1}
+W = A_e.S.\Delta\nu
 \end{equation*}
 
+At this point it is necessary to introduce a rectangular coordinate system centered on the focus of the antenna, tilted such that w points 
+in the direction of the maximum response, and u and v are the relative horizontal and vertical cutting planes respectively. u, v and w are 
+measured in wavelengths (and is therefore measured in meters). The direction of the a point on the sky (a unit sphere) are given by the 
+direction cosines with regard to the local frame, denoted by l, m and n respectively (note that $l^2 + m^2 + n^2 = 1$). 
+Both $l$ and $m$ may range between $\pm\pi \text{ radians}$ (from horizon to horizon in both directions).
 
-It should be clear that since most sources are extremely faint, the telescopes needed to detect them will be some of the most sensitive instruments ever designed. Although we cannot
-cover antenna theory extensively here, it is essential to briefly relate how the electromagnetic radiation covered earlier, is measured by instrumentation in general, as well as some of the constraints under which
-these measurements are made.
-
-The wave fronts from distant sources can be viewed as planar fronts if the source of the radiation is sufficiently far away. This is not necessarily true for sources within our own galaxy for example. Furthermore 
-if the wavelength is much smaller than the scale of the phenomena the radiation can be viewed as rays. In radio astronomy these measures serve only as rough discriptions of the 
-equations that govern wave propagation, as the wavelengths are significantly longer than in optical systems.  The total flux of a source is then obtained over the solid angle subtended by the 
-source (see figure~\ref{fig_measuring_source_brightness}) as follows \cite{wilson2009tools}:
-
+Now let $\Omega$ be a \textit{small} solid angle subtended by a very small area. This solid angle is measured in square radians (in steradians or ``sr''). A visualization of the measured flux density
+falling on an infinitesimal area of telescope is given in Figure~\ref{fig_measuring_source_brightness}. The flux density measured 
+per steradian over the entire solid angle per unit frequency must then be 
   \begin{equation}
-    S_v := \int_{\Omega_s}{I_v(\theta,\phi)\cos{\theta}d\Omega}
+    p = \int_{\Omega}{A(l,m).I(l,m)\cos{\theta}d\Omega}
   \end{equation}
-  and the infinitesimal power intercepted by an infinitesimal surface is:
-  \begin{equation}
-    dP = I_v\cos{\theta}d\Omega\ d\sigma d\upsilon
-  \end{equation}
-
-  where:\\
-  $dP = $ infinitesimal power (in watts)\\
-  $d\sigma = $ infintesimal area of surface\\
-  $d\upsilon = $ infintesimal bandwidth\\
-  $\theta = $ angle between the direction to $d\Omega$ and normal to the surface\\
-  $I_{v} =$ specific intensity in $Wm^{-2}Hz^{-1}sr^{-1}$ where r is the distance between the source and antenna.\\
-  
+where\\
+  $p$ is traditionally measured in Janskies ($10^{-26}.W.m^{-2}.Hz^{-1}$)\\
+  $I$ is the flux density measured per unit steridian: $I(l,m) := \frac{\Delta S(l,m)}{\Delta\Omega}$\\
 \begin{figure}[ht]
 \begin{mdframed}
  \centering
  \includegraphics[width=0.2\textwidth]{images/measuring_source_brightness.png}
- \caption[Source brightness]{Flux density over a small area per unit frequency \cite{wilson2009tools}.}
+ \caption[Source brightness]{Flux density collected by a small area on the antenna. Image taken from \textit{Tools of radio astronomy}\cite{wilson2009tools}.}
  \label{fig_measuring_source_brightness}
 \end{mdframed}
 \end{figure}
 
-For the sake of simplicity we will only consider a single simple parabollic reflector telescope for now to explain the general concepts of the primary beam and what impact it has on wide-field observations. Synthesis imaging \cite[ch. 3]{taylor1999synthesis} 
-gives a more extensive overview of different antennae optics and mountings. Filled reflector antennas are normally used for $\lambda \geq 1m$, whereas unfilled ``wire'' antennae are frequently used at shorter wavelengths. We can describe
-the operation of these parabollic reflectors using Huygen's principle \cite{christiansenradiotelescopes}: 
-\begin{quote}
-The energy at the focus of the telescope is the sum of the of the contributions from all parts of the incoming wave-front, taking into account the different path lengths and therefore different radio-frequency phases at the focus.
-\end{quote}
+In reality multiple sources will be contributing to this integral. We assume that these radiate independently of each other. We additionally
+downplayed (somewhat ignorantly) the effects of the atmosphere and the radiativity of the antenna (the antenna has an internal temperature which means 
+it radiates heat, and may be thought of as a resistor). We will come back this point when discussing calibration.
 
-The power available for a feed antenna placed at the focal point is proportional to the square intensity of the field of view and is known as the beam of the antenna and varies with the angle of incidence betweeen the the waves and the pointing of
-direction of the antenna, see figure~\ref{diffraction_pattern_and_power_at_focus}. It should therefore be clear the telescope has a limited effective area of view. It turns out that the size of the aperture of the telescope plays a key role
-in the resolving power of the telescope, which is limited by the diffraction patterns as seen in figure~\ref{diffraction_pattern_and_power_at_focus}. Any object larger than the primary beam of the antennae will be aliased to a certain
-extent by the sidelobes shown in figure~\ref{diffraction_pattern_and_power_at_focus}, although the general structure may still be the same:
-
-
-
-Another key observation to take into consideration are the effects of polarization in electomagnetic wavefronts. All electromagnetic radiation can be characterised by a field vector parallel to to the wavefront. This wavefront is said to
-be either elliptically polarized if the field vector traces out an ellipse of constant orientation and eccentricity (linear and circular polirization are special cases of this). On the other hand it may be randomly polarized (or ``unpolarized'') if the field 
-vector changes randomly. To capture the total energy of of the electromagnetic field any antenna should have two independent feeds to resolve any radio wave, where the second feed must be placed at right angles to the first. The first and second feeds will carry, 
-on average equal amounts of power. The total flux density is therefore the sum of both polarized feeds \cite{christiansenradiotelescopes}.
-
-Up to this point we've assumed that the energy measured at the focus point of the telescope is attributed to a single point source. In reality many sources contribute to the specific intensity integral over the solid angle $d\Omega$. These point sources
-are generally accepted to be completely uncorrelated, and therefore the mean squared voltage at each of the antenna feeds is a linear combination from each of these sources (weighted by the effective area function $A(l,m)$) \cite{christiansenradiotelescopes}. In general this requires instrument 
-calibration to be done over all the bright sources in the beam-limited field of view. More on calibration techniques later on.
-
-\section{Interferometric telescopes}
+\subsection{Aperture synthesis with telescope arrays [TODO: severe surgery needed here]}
+{\color{red} TODO: SEVERE ISSUES IN THIS SUB-CHAPTER: REFACTOR COMPLETELY}
+\subsubsection{Overview}
+\subsubsection{Measurement}
 As pointed out in the previous section the angular resolution is constrained to the diameter of the telescope. Unfortunately there are material constraints to the size of an apperture ($\sim 300m$ as pointed out in \cite{wilson2009tools}). The Arecibo Observatory, Puerto Rico is the extreme case 
-of this, see fig~\ref{fig_arecibo}. Luckily the same resolving power may also be obtained by \textit{coherently} combining the feeds from two reflectors, seperated by a straight-line distance, $B$:
+of this. Luckily the same resolving power may also be obtained by \textit{coherently} combining the feeds from two reflectors, seperated by a straight-line distance, $B$:
 \begin{equation*}
  \text{resolving power} \propto \frac{\lambda}{B} \text{ if } D\ll B
 \end{equation*}
@@ -376,8 +378,6 @@ It is worthwhile to note that the correlation, delay and phase compensations can
 known as \textit{FX} correlators. If these power spectra are of high time resolution it is possible to perform surveys focussed on transient detection. Modern arrays such as LOFAR, KAT-7 and MeerKAT (currently under construction) have the capability to perform these searches through
 special \textit{beamforming} modes which may be run concurrently with imaging modes. See Stappers et al. \cite{stappers2011observing} for details on pulsar observation with LOFAR. In this thesis, however, we will focus solely on the imaging pipeline which is discussed in the next section.
 
-\section{The fundamentals of array-based imaging}
-\subsection{The all-sky Radio Interferometric Measurement Equation}
 In the previous section the response, $r$, of a complex correlator was described. The \textit{visibility} is an unnormalized measure of the coherence of an electric field, and is very closely related to the correlator response to the planar wave fronts emitted
 by a source. The magnitude of this coherence has dimensions of flux density as described earlier. The Radio Interferometric Measurement Equation relates between these visibilities and the projection of the source onto the celestial sphere. This projection and measurement
 process is illustracted in figure~\ref{fig_uvw_lmn}. Without loss of generality when extended to the different polarization terms, the relation between the measured visibilities and the image can be defined as:
@@ -459,7 +459,6 @@ They include corrections for Faraday rotation, ionospheric effects, tropospheric
 combined in a layered approach by multiplying several of these Jones terms together (note that the terms may not necessarily commute, so the order of multiplication is important). The different effect effects will be described 
 later when calibration is discussed.
 
-\subsection{Array-based observation}
 Each observation will typically extend over a prolonged period of time (over many hours for instance) and collect a large number of visibilities, typically over a large number of channels. As the earth rotates each baseline sweeps out
 eliptical paths in u,v space, sampling the coherence function at regular intervals. As the number of antennae in the array is increased the number of measured visibilities grow quadratically, since the number of possible baselines between 
 antennae is given as $\frac{n(n-1)}{2}+n$. Adding a small number of antennae to the array can therefore effectively improve the uv coverage. By adding more visibilities in fourier space the quality of the synthesized 
@@ -480,7 +479,7 @@ antennae provide greater flexibility and can cover more baselines. For two dimen
  \end{mdframed}
 \end{figure}
 
-\subsection{Telescope calibration}
+\subsection{Telescope calibration [TODO: some revision and expansion needed]}
 Telescope calibration is regarded as a hard problem in radio astronomy and is filled with heuristical approaches which attempt to correct for, predominantly, those effects which alter the
 incomming electromagnetic wavefronts prior to the process of correlation. It usually deals with both slow and fast-varying effects and is broken into three areas:
 \begin{itemize}
@@ -574,8 +573,67 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  at every timestep since only a handful of points from these convolving functions are sampled! More recently several solutions to solve slow-varying Directional Dependent Effects using self-calibration have been proposed. These include pointing self-calibration,
  peeling, the method of differential gains and other compressive sensing techniques (like the analytical solution descibed in \cite{hardy2013direct}). Peeling is a slightly modified version of traditional self-calibration and is widely tested. It involves iteratively removing the effects from the brightest sources, while 
  differential gains simultaniously solves for the gain effects from bright and faint sources using a mix of Direct Fourier Transform and traditional Discrete Fourier Transform-based approaches \cite{2011A&A...527A.107S,2011A&A...527A.108S}.
- 
- \section{The imaging and deconvolution cycle}
+ \section{Review of core digital signals processing techniques [need revision and simplification]}
+Radio astronomy has its roots in Digital Signals Processing. Before diving into the details of how these telescopes work we refer the reader to the \textit{Scientist and Engineer's guide to Digital Signals Processing} by 
+Steven Smith\footnote{Available freely at \url{http://www.dspguide.com/}}\cite{smith1997scientist} for a detailed, yet simple overview of the field. A (very) brief overview of some of the core terminology is given here.
+
+A signal is simply a description of how one parameter depends on another. A typical example of this is how voltage varies over time. Since the focus in this thesis lie solely in digitized signals, it is necessary to carefully
+define under what circumstances the underlying continuous analog signal can be reconstructed. The Shannon-Nyquest \textit{sampling theorem} forms the cornerstone of Digital Signals Processing. It simply states that the rate at
+which samples are taken from a continuous signal has to be at least twice the highest frequency component of that signal. Such a signal is said to be critically sampled if it obeys this minimum requirement. If the requirement is
+not satisfied the sampled signal is aliased (higher frequencies appear as low frequency com on gradebook and assignments tab yesterday on vula, so I thought I should contact you to know whether this is known to you. I don't know what happened but I had marks before. Thank you!ponents). This can be illustrated through figure~\ref{fig_invalid_sampling}. Aliasing is usually reduced by applying a filter that essentially
+have low responses at frequencies outside a limited \text{passband} of frequencies. This filter is can be something as simple as a windowed sinc function for instance. Although a sharp cutoff frequency is ideal, it should be noted 
+that in reality this is not achieved. Filter frequency responces usually decline over a non-infinitesimal section of the spectrum (this is known as \textit{rolloff}).
+
+\begin{figure}[ht]
+ \begin{mdframed}
+ \centering
+ \includegraphics[width=0.8\textwidth]{images/improper_sampling.png}
+ \caption[Aliasing]{The first signal is sampled at 3 times the highest composing frequency. Its frequency spectrum shows no overlap between sidebands. The second signal is subsampled and higher frequencies overlap lower frequencies
+ in its frequency spectrum. This illustrates a key observation: discarding samples in one domain causes aliasing in the other \cite{smith1997scientist}.}
+ \label{fig_invalid_sampling}
+ \end{mdframed}
+\end{figure}
+
+The next observation is that the propogation of electromagnetic waves and their interactions can be considered as a linear system. This means the signals exhibit three properties: homogeneity, additivity and shift-invariance (the third 
+is a non-compulsory property of linearity). We say that the following are true for such systems:
+
+  \begin{flalign*}
+    &\textbf{ if }x[n] \rightarrow \text{System} \rightarrow y[n] \textbf{ then } k x[n] \rightarrow \text{System} \rightarrow k y[n] \textit{ (homogeneity)}\\
+    &\textbf{ if }x_1[n] \rightarrow \text{System} \rightarrow y_1[n]\textbf{ and }x_2[n] \rightarrow \text{System} \rightarrow y_2[n] \textbf{ then } x_1[n] + x_2[n] \rightarrow \text{System} \rightarrow y_1[n] + y_2[n] \textit{ (additivity)}\\
+    &\textbf{ if }x[n] \rightarrow \text{System} \rightarrow y[n] \textbf{ then } x[n + s] \rightarrow \text{System} \rightarrow y[n + s] \textit{ (shift-invariance)}&
+  \end{flalign*}
+
+Much of the filtering and imaging techniques described in this thesis rely on the theory of fourier transforms. The fourier transform simply decomposes a continuous periodic signal into a series of sinusoidal terms. A detailed description 
+can be found in Smith \cite[ch 8-12,31]{smith1997scientist}, but the general relations between converting between the time and frequency domains (and between the visibility and the intensity spaces as will be described later on) are as follows:
+\begin{equation*}
+  \begin{split}
+    G(f) &= \int_{-\infty}^{\infty}g(x)e^{2\pi ifx}\\
+    g(x) &= \int_{-\infty}^{\infty}G(f)e^{-2\pi ifx}
+  \end{split}
+\end{equation*}
+Here capital letters indicate the Fourier space. We will be using this convention throughout this thesis. It is also possible to do this with discrete signals (indicated with square brackets as per convention). In that case the Cooley-Tukey Fast 
+Fourier Transform algorithm and its inverse is employed to move between these domains. There are highly optimized libraries available for both C++ (FFTW) and CUDA (cuFFT), and these will be extensively used in our implementations.
+
+For linear systems the following theorems are true (stated without proof):
+\begin{equation*}
+  \begin{split}
+    g_1(x)*g_2(x) &:= \int_{-\infty}^{\infty}g_1(t)g_2(x-t)\textit{ (convolution)}\\
+    g_1(x)\star g_2(x) &:= \int_{-\infty}^{\infty}g_1(t)g_2(t+x)\textit{ (cross-correlation)}\\
+    &=g_1^*(-x)*g_2(x)\\
+    \text{Addition Theorem:}\\
+    \mathcal{F}(g_1(x)+g_2(x)) &= G_1(f)+G_2(f)\\
+    \text{Convolution Theorem:}\\
+    \mathcal{F}(g_1(x)*g_2(x)) &=G_1(f).G_2(f)\\
+    \mathcal{F}(g_1(x).g_2(x)) &=G_1(f)*G_2(f)\\
+    \text{Shift Theorem:}\\
+    \mathcal{F}(g(x-\Delta))&=G(f)e^{-2\pi if\Delta}
+  \end{split}
+\end{equation*}
+
+In general the convolution is known as filtering, the cross-correlation can be seen as ``time averaging between two signals'' and signal shifting essentially shifts the directional cosine (as seen in the next section) and electrically
+stears the telescope. The two dimensional versions of convolution, cross-correlation, the fourier transform and its inverse are analoguous to their one dimensional counterparts. The two dimensional fourier transform first transforms
+over one axis and then transforms the output on the second axis. 
+ \section{The imaging and deconvolution pipeline [review and correct]}
  There are generally two techniques used to approximate the fourier transforms between the observed visibilities and the (dirty) image. Either a brute force Direct Fourier Transform is taken where each grid point is approximated through a brute-force
  evaluation over all the observed visibilities (M of them in total). This approach requires on the order of $O(N^2M) \approx O(N^4)$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large number of visibilities. A basic co-planar analytical 
  algorithm boils down to a summation of complex multiplications over the entire grid in the image space \cite[Lecture 7]{taylor1999synthesis}: 
@@ -680,72 +738,17 @@ Much of this overview is based on the litterature of Synthesis Imaging II \cite[
  \begin{equation*}
   I^s_{dirty} = ([I(l,m)*\mathcal{F}^{-1}\{PSF(u,v)\}]\cdot\mathcal{F}^{-1}\{C(u,v)\}) * \mathcal{F}^{-1}\{III(u,v)\}
  \end{equation*}
- \section{The problem of non-coplanar baselines and wide-field imaging}
+ \section{The problem of non-coplanar baselines and wide-field imaging [TODO: still have to be written]}
+ {\color{red} TODO: WRITE THIS CHAPTER}
  Evaluating a direct 3D analytical solution over an image cube with n layers soon becomes intractable for large images, specifically in terms of sheer memory requirements for storing these layers. Over a three dimensional cube, M (the number of visibilities),
  will be reasonably sparcely sampled, and the number of complex multiplications needed per visibility is estimated to be $\frac{4\lambda B_{max}^3}{D^4}$ \cite{yashar2009tdp}. However, the approach remains embarisingly parallel and can
  be scalled over multiple multicore accelerators. A detailed comparison between the throughput achievable by using an analytical approach, compared to convolutional gridding approaches have not been for multicore accelerators \cite{hardy2013direct}.
-
-%  \section{Review of core signals processing techniques}
-% Radio astronomy has its roots in Digital Signals Processing. Before diving into the details of how these telescopes work we refer the reader to the \textit{Scientist and Engineer's guide to Digital Signals Processing} by 
-% Steven Smith\footnote{Available freely at \url{http://www.dspguide.com/}}\cite{smith1997scientist} for a detailed, yet simple overview of the field. A (very) brief overview of some of the core terminology is given here.
-% 
-% A signal is simply a description of how one parameter depends on another. A typical example of this is how voltage varies over time. Since the focus in this thesis lie solely in digitized signals, it is necessary to carefully
-% define under what circumstances the underlying continuous analog signal can be reconstructed. The Shannon-Nyquest \textit{sampling theorem} forms the cornerstone of Digital Signals Processing. It simply states that the rate at
-% which samples are taken from a continuous signal has to be at least twice the highest frequency component of that signal. Such a signal is said to be critically sampled if it obeys this minimum requirement. If the requirement is
-% not satisfied the sampled signal is aliased (higher frequencies appear as low frequency com on gradebook and assignments tab yesterday on vula, so I thought I should contact you to know whether this is known to you. I don't know what happened but I had marks before. Thank you!ponents). This can be illustrated through figure~\ref{fig_invalid_sampling}. Aliasing is usually reduced by applying a filter that essentially
-% have low responses at frequencies outside a limited \text{passband} of frequencies. This filter is can be something as simple as a windowed sinc function for instance. Although a sharp cutoff frequency is ideal, it should be noted 
-% that in reality this is not achieved. Filter frequency responces usually decline over a non-infinitesimal section of the spectrum (this is known as \textit{rolloff}).
-% 
-% \begin{figure}[ht]
-%  \begin{mdframed}
-%  \centering
-%  \includegraphics[width=0.8\textwidth]{images/improper_sampling.png}
-%  \caption[Aliasing]{The first signal is sampled at 3 times the highest composing frequency. Its frequency spectrum shows no overlap between sidebands. The second signal is subsampled and higher frequencies overlap lower frequencies
-%  in its frequency spectrum. This illustrates a key observation: discarding samples in one domain causes aliasing in the other \cite{smith1997scientist}.}
-%  \label{fig_invalid_sampling}
-%  \end{mdframed}
-% \end{figure}
-% 
-% The next observation is that the propogation of electromagnetic waves and their interactions can be considered as a linear system. This means the signals exhibit three properties: homogeneity, additivity and shift-invariance (the third 
-% is a non-compulsory property of linearity). We say that the following are true for such systems:
-% 
-%   \begin{flalign*}
-%     &\textbf{ if }x[n] \rightarrow \text{System} \rightarrow y[n] \textbf{ then } k x[n] \rightarrow \text{System} \rightarrow k y[n] \textit{ (homogeneity)}\\
-%     &\textbf{ if }x_1[n] \rightarrow \text{System} \rightarrow y_1[n]\textbf{ and }x_2[n] \rightarrow \text{System} \rightarrow y_2[n] \textbf{ then } x_1[n] + x_2[n] \rightarrow \text{System} \rightarrow y_1[n] + y_2[n] \textit{ (additivity)}\\
-%     &\textbf{ if }x[n] \rightarrow \text{System} \rightarrow y[n] \textbf{ then } x[n + s] \rightarrow \text{System} \rightarrow y[n + s] \textit{ (shift-invariance)}&
-%   \end{flalign*}
-% 
-% Much of the filtering and imaging techniques described in this thesis rely on the theory of fourier transforms. The fourier transform simply decomposes a continuous periodic signal into a series of sinusoidal terms. A detailed description 
-% can be found in Smith \cite[ch 8-12,31]{smith1997scientist}, but the general relations between converting between the time and frequency domains (and between the visibility and the intensity spaces as will be described later on) are as follows:
-% \begin{equation*}
-%   \begin{split}
-%     G(f) &= \int_{-\infty}^{\infty}g(x)e^{2\pi ifx}\\
-%     g(x) &= \int_{-\infty}^{\infty}G(f)e^{-2\pi ifx}
-%   \end{split}
-% \end{equation*}
-% Here capital letters indicate the Fourier space. We will be using this convention throughout this thesis. It is also possible to do this with discrete signals (indicated with square brackets as per convention). In that case the Cooley-Tukey Fast 
-% Fourier Transform algorithm and its inverse is employed to move between these domains. There are highly optimized libraries available for both C++ (FFTW) and CUDA (cuFFT), and these will be extensively used in our implementations.
-% 
-% For linear systems the following theorems are true (stated without proof):
-% \begin{equation*}
-%   \begin{split}
-%     g_1(x)*g_2(x) &:= \int_{-\infty}^{\infty}g_1(t)g_2(x-t)\textit{ (convolution)}\\
-%     g_1(x)\star g_2(x) &:= \int_{-\infty}^{\infty}g_1(t)g_2(t+x)\textit{ (cross-correlation)}\\
-%     &=g_1^*(-x)*g_2(x)\\
-%     \text{Addition Theorem:}\\
-%     \mathcal{F}(g_1(x)+g_2(x)) &= G_1(f)+G_2(f)\\
-%     \text{Convolution Theorem:}\\
-%     \mathcal{F}(g_1(x)*g_2(x)) &=G_1(f).G_2(f)\\
-%     \mathcal{F}(g_1(x).g_2(x)) &=G_1(f)*G_2(f)\\
-%     \text{Shift Theorem:}\\
-%     \mathcal{F}(g(x-\Delta))&=G(f)e^{-2\pi if\Delta}
-%   \end{split}
-% \end{equation*}
-% 
-% In general the convolution is known as filtering, the cross-correlation can be seen as ``time averaging between two signals'' and signal shifting essentially shifts the directional cosine (as seen in the next section) and electrically
-% stears the telescope. The two dimensional versions of convolution, cross-correlation, the fourier transform and its inverse are analoguous to their one dimensional counterparts. The two dimensional fourier transform first transforms
-% over one axis and then transforms the output on the second axis.
- 
+ \section{Data formats [TODO:Still have to be written]}
+ {\color{red} TODO: WRITE THIS CHAPTER}
+ \section{Multicore architectures [TODO:Still have to be written]}
+ {\color{red} TODO: WRITE THIS CHAPTER}
+ \section{Review of previous literature [TODO:Still have to be written]}
+ {\color{red} TODO: WRITE THIS CHAPTER}
 \bibliography{bibfile}
 \bibliographystyle{plain}
 \end{document}          
