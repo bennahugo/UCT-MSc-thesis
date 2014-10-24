@@ -25,15 +25,15 @@
 \chapter{Background}
 The focus of our work can best be summarized as accelerating the removal of artifacts introduced by creating widefield images from the measurements taken by radio telescopes. 
 In this chapter we give the reader a ``grand tour'' \footnote{It is important to stress that radio astronomy is a cross-section of many disciplines including astronomy, physics, 
-electrical engineering and increasingly high performance and distributed computing. The following texts provide further insight to those coming from a computing background (I recommend 
+electrical engineering and, increasingly, high performance and distributed computing. The following texts provide further insight to those coming from a computing background (I recommend 
 reading the first three texts in order before moving to synthesis imaging):
 \begin{itemize}
- \item \textit{Antennas: Fundamentals, Design, Measurement} \cite{blake2009antennas} serves as a good introductionary text on general [communications] radio antennae design from an electrical engineering perspective. Chapters 1 through 4
+ \item \textit{Antennas: Fundamentals, Design, Measurement} \cite{blake2009antennas} serves as a good introductory text on general [communications] radio antenna design from an electrical engineering perspective. Chapters 1 through 4
  are very insightful.
  \item \textit{A Scientist and Engineer's guide to Digital Signals Processing} \cite{smith1997scientist}. Available freely at \url{http://www.dspguide.com/}. A must-read introduction to core digital 
  signals processing techniques, which cover sampling theory, introductory filter design and a good starter on the practical uses of Fourier transforms.
- \item \textit{Radiotelescopes} \cite{christiansenradiotelescopes} gives insight into the historic development of radiotelescopes from the 1930s through the 1960s, with a focus on telescope design, interferometry and a 
- good introduction to the field of radio astronomy. The book is in the public domain and freely available from \url{https://archive.org/details/Radiotelescopes}.
+ \item \textit{Radio telescopes} \cite{christiansenradiotelescopes} gives insight into the historic development of radio telescopes from the 1930s through to the 1960s, with a focus on telescope design, interferometry, measurement and a 
+ good overview of the field of radio astronomy from an engineering perspective. The book is in the public domain and freely available from \url{https://archive.org/details/Radiotelescopes}.
  \item \textit{Synthesis Imaging In Radio Astronomy II} \cite{taylor1999synthesis}. A very useful (and beginner-friendly) collection of lectures on synthesis imaging, covering the domain of radio astronomical imaging 
  in its entirety.
  \item \textit{Interferometry and Synthesis in Radio Astronomy} \cite{thompson2008interferometry} covers the imaging pipeline in great detail from correlation through calibration, cleaning
@@ -41,11 +41,11 @@ reading the first three texts in order before moving to synthesis imaging):
 \end{itemize}
 } of radio telescopes, including a discussion on what is being measured, how these telescopes work and ultimately how these 
 measurements are related to images of the radio sky. We will then look at how to correct the distortions introduced when imaging over wider fields of view and finally on 
-the technologies we will use to accelerate this widefield imaging process.
-\section{Introduction to Radio astronomy}
+the technologies we will use to accelerate this wide-field imaging process.
+\section{Introduction to radio astronomy}
 \subsection{Electromagnetic radiation}
-Just as with visible light, radio waves are a form of electromagnetic radiation (consisting of waves with electrical and perpendicular magnetic components) which propagate through free space at the speed 
-of light. Recall from elementary physics that the frequency and wavelength of a wave is related:
+Just as with visible light, radio waves are a form of electromagnetic radiation (consisting of waves with an electrical and perpendicular magnetic component) which propagate through free space at the speed 
+of light. Recall from elementary physics that the frequency and wavelength of a wave are related:
 \begin{equation*}
  \nu = \frac{v}{\lambda}
 \end{equation*}
@@ -54,102 +54,102 @@ $\nu$ is the frequency,\\
 $\lambda$ is the wavelength and\\
 $v$ is the velocity of the propagation of the wave in some propagation medium\\
 
-In a vacuum, far away from obstacles (\textit{free space}) electromagnetic waves propagate at a constant velocity, $c\approx 3\text{x}10^8$. This velocity is only slightly reduced
-when propagating though most other media.
+In a vacuum and far away from obstacles (\textit{free space}) electromagnetic waves propagate at a constant velocity, $c\approx 3\text{x}10^8m.s^{-1}$. This velocity is only slightly reduced
+when propagating though most other media. We can conveniently measure these wavefronts with telescopes of various form at either ground-level or from planetary orbit. 
 
-We can conveniently measure these waves with telescopes of various form at either ground-level or from planetary orbit. This electromagnetic energy can be emitted by both thermal and non-thermal sources. 
-The intensity of the radiation emitted from thermal sources is determined by both the temperature of the source and the measured frequency. On the other hand a good example of non-thermal emission is the 
-synchrotron emission by relativistic electrons accelerated through magnetic fields. A significant portion of radio astronomy focus on the non-thermal sources. These are generally very intense sources of 
-electromagnetic radiation and are very far away. We can make the simplifying assumption here that radio sources emit this radiation outward uniformly in all directions (they are \textit{isotropic}) 
-and that the distances over which they travel are far enough to consider them planar by the time they reach the observing telescope.
+Electromagnetic energy can be emitted by both thermal and non-thermal sources. The intensity of the radiation emitted from thermal sources is determined by both the temperature of the source and the measured frequency. On the other hand, a good example of non-thermal emission is the 
+synchrotron emission by relativistic electrons accelerated radially through magnetic fields. A significant portion of radio astronomy focuses on the non-thermal sources. These are generally very intense sources of 
+electromagnetic radiation and are very far away. We can make the simplifying assumption here that most radio sources emit their radiation outward uniformly in all directions (they are \textit{isotropic}) 
+and that the distances over which these waves travel are far enough to consider them planar by the time they reach the observing telescope.
 
 One would expect radio waves to have the same optical properties as visible light, since it too is a form of electromagnetic radiation. These are respectively reflection, refraction (bending as these waves propagate
 through mediums of different densities), diffraction and interference. The last two phenomena are of particular importance in our discussion on radio telescopes and can only be described using
 physical optics. Interference can either be constructive or destructive by nature. When two or more waves collide the resulting wave will be the sum total of the colliding waves. If the incoming waves are perfectly 
 in phase (their crests line up perfectly) the resulting wave will have the combined amplitude of the contributing waves. However, if they are out of phase the resulting wave may have significantly reduced amplitude. 
 As for diffraction, Huygens' principle states that each point on an incoming wavefront (either planar or curved) acts as a point source on its own. The secondary waves produced by each of these point sources 
-propagates forward radially and a new wavefront is formed where they experience maximum constructive interference. 
+propagates forward radially and a new wavefront is formed where they experience maximum constructive interference. This explains why even planar waves can seemingly ``bend'' around obstacles.
 
 In free space the total energy along the wavefront is conserved as it propagates forward, provided 
 the wavefront if of reasonable extent (significantly longer than a wavelength). This also mean that the energy density 
 on each of these wavefronts will decay at a rate proportional to the square of the distance between the front and its emitting source, hence
 the requirement that the emitting source is sufficiently far away from the observing telescope. 
 
-When these waves propagate through some medium other that a vacuum this decrease in directional energy is not the only form of attenuation. In the 
+When these waves propagate through some medium other than that of a vacuum the decrease in directional energy is not the only form of attenuation. In the 
 atmosphere, depending on the wavelength, some particles such as oxygen and water vapour will absorb and scatter a significant portion of the incomming 
 energy (especially at shorter wavelengths). At the very long wavelengths the charged ionosphere is effectively opaque and acts as a good reflector. This may 
 be ideal when trying to transmit signals very far beyond the horizon, but makes astronomical observation impossible.  Due to these additional attenuation 
 factors ground-based observation is effectively limited to the spectrum of visible light and the, vastly wider, radio band. Most of the in-between 
 infrared spectrum is only observable at high altitudes and under dry conditions, see Figure~\ref{fig_radio_window}. 
 
-In addition to the optical properties of electromagnetic waves and their attenuation one has to consider the direction of propagation of each point on the incoming wavefront. If most of the energy of each wave is strongly 
-directional the wave is said to be \textit{polarized}. For polarized emissions the path traced by a single point of either electrical or magnetic component will be highly regular. It will 
-remain in a single plane (\textit{linear} polarization), will spiral at a fixed radius (\text{circular} polarization) or will spiral eliptically. Circular polarized waves can be thought 
-of as the combination of two perpendicular linearly polarized waves of equal strength (if the two wavefronts are not equally strong the resultant polarization will be eliptical). We can draw on an 
-application of this property from an everyday context: in the visible spectrum sunglasses will filter out all light except vertically polarized light, in order to reduce glare. A single-feed radio 
-antenna will similarly measure a single directional component, and will therefore only useful in measuring strongly polarized sources. Such antennae are not useful for general observations, save for 
-those of pulsars. In most contexts it is more useful to have two perpendicular feeds (a dipole comes to mind) in order to fully describe the incoming wavefront (or at least the electric component thereof)
-of the field parallel to the dipole. When the energy measured by both feeds are roughly equal the emitting source is said to 
-be \textit{unpolarized}.
+In addition to the optical properties of electromagnetic waves and their attenuation one has to consider the direction of propagation of each point on the incoming wavefront. If most of the energy of these points is strongly 
+directional the wave is said to be \textit{polarized}. For polarized emissions the path traced by each point (of either the electrical or magnetic components) will be highly regular; it will 
+remain in a single plane (\textit{linear} polarization), will spiral at a fixed diameter (\text{circular} polarization) or will spiral elliptically. Circular polarized waves can be thought 
+of as the combination of two perpendicular linearly polarized waves of equal strength (if the two wavefronts are not equally strong the resultant polarization will be eliptical). 
 
+We can draw on an application of this property from an everyday context: in the visible spectrum sunglasses will filter out all light except vertically polarized light, in order to reduce glare. A single-feed radio 
+antenna will similarly measure a single directional component, and will therefore only be useful in measuring strongly polarized sources. Such antennae are not useful for general observations, save for 
+those of pulsars. In most contexts it is more useful to have two perpendicular feeds (a dipole is a simple example) in order to fully describe the incoming wavefront of the field parallel to the dipole (or at least 
+the electric component thereof). When the energy measured by both feeds are roughly equal the emitting source is said to be \textit{unpolarized}. Generally speaking, however, electromagnetic energy from those 
+physical processes observed in radio astronomy are polarized to some extent, save for that of black-body radiation (a black-body is a conceptual near-perfect absorber of electromagnetic energy at any wavelength).
 \begin{figure}[ht]
  \begin{mdframed}
  \centering
  \includegraphics[width=0.6\textwidth]{images/radio_window.png}
- \caption[The radio window]{The radio window - Earth-based radio astronomy is bound to a range of wavelengths between $\lambda\approx 0.2mm$ and $\lambda\approx 20m$ by the molecular absorption bands of oxygen and water at the
- shorter wavelengths and the ionosphere at the long end. The figure shows at what altitude the incoming electromagnetic radiation is attenuated by a factor of 0.5 \cite{wilson2009tools}.}
+ \caption[The radio window]{The radio window - Earth-based radio astronomy is bound to a range of wavelengths between $\lambda\approx 0.2mm$ and $\lambda\approx 20m$, by the molecular absorption bands of oxygen and water at
+ shorter wavelengths and the ionosphere at longer wavelengths. The figure shows at what altitude the incoming electromagnetic radiation is attenuated by a factor of 0.5. Image taken from \textit{Tools of Radio Astronomy}~\cite{wilson2009tools}.}
  \label{fig_radio_window}
  \end{mdframed}
 \end{figure}
 
-In the early 1930s Karl Jansky's observation of radio electromagnetic radiation stemming from galactic sources far outside that of our home solar system have sparked interrest in observing this region of 
-the spectrum. Since those early days we have seen significant increases in the sensitivity and size of these radio telescopes. We will start off explaining broadly how a single element telescope works, before 
-moving onto the topic of aperture synthesis with array-based telescopes.
+In the early 1930s Karl Jansky's observation of radio electromagnetic radiation stemming from galactic sources far outside that of our home solar system sparked the interest in observing this region of 
+the spectrum. Since those early days significant progress has been made towards increasing in the sensitivity and size of these radio telescopes. 
+
+Next we will explore how a single element telescope works, before moving onto the topic of aperture synthesis with array-based telescopes.
 
 \subsection{Radio antennae}
 \subsubsection{Overview}
 Maxwell's set of partial differential equations (1873) is one of the most elegant ways of explaining the relationship between electrical and magnetic fields, and how these can propagate at the speed of light 
-though free space. In summary they state that a when current flows, a magnetic field is created in the surrounding space. When this magnetic field is varied an accompaning perpendicular electrical field is formed, varying
-at the same frequency as the magnetic field, which in turn varies at the frequency at which the underlying current changes. Not only does this mean that antennae can generate electromagnetic fields and transmit signals (provided
-sufficient input power), but in fact any transmitting antenna can be used as a receiver and vice versa (given it is capable of dealing with high voltages and is efficient enough for the particular application). Radio telescopes 
+though free space. In summary they state that a when current flows, a magnetic field is created in the surrounding space. When this magnetic field is varied a accompanying [perpendicular] electrical field is formed. This electrical field 
+varies at the same frequency as the magnetic field, which in turn varies at the frequency at which the underlying current changes. Not only does this mean that antennae can generate electromagnetic fields and transmit signals (provided
+sufficient input power), but in fact that any transmitting antenna can be used as a receiver and vice versa (given it is capable of dealing with high voltages and is efficient enough for the particular application domain). Radio telescopes 
 take the form of receivers and, as with terrestrial radio transmission, the extraterrestrial electromagnetic radiation will induce measurable current in the antenna (much more so at shorter wavelengths 
 because of the opaqueness of the ionosphere at longer wavelengths).
 
-To simplify our discussion we'll only consider directional antenna (a simple parabolic reflector with an axial feed above the center of the parabola is 
+To simplify our discussion we'll only consider directional antennae (a simple parabolic reflector with an axial feed above the center of the parabola is 
 one such choice). Here the parabolic reflector serve either to focus highly directional incoming energy to a single point, or inversely to 
 focus the energy of the transmitter into a very narrow beam. Because the wavelengths of radio waves are the size of man-made objects the geometrical optics 
-(where the waves are considered as rays) used in optical telescopes are of very limited use. It is much more preferable to describe these antennae in terms of 
+(where waves can be considered as rays) used in optical telescopes are of very limited use. It is much more preferable to describe these antennae in terms of 
 physical optics.
 
 Consider, for the moment, that the telescope is suspended in free space with no obstructions in its vicinity (including the ground or supports). If
 we also (in blissful ignorance) discard the effects of the feed between this focus and measuring equipment, then the energy measured at the focus 
 of the parabola should be the sum of contributions across the extent of the collected wavefront. However, instead of focusing all 
-energy at one single point, as one would expect when using geometric optics, an interference pattern is formed, where
+energy at one single point, as one would expect when using geometrical optics, an interference pattern is formed. Here
 distinct beams can discernible (a close analogue to this is the interference pattern formed when light passes through a narrow slit).
 If a cutting plane were to be placed horizontally at the focus of the parabola a single ``primary'' beam of maximum 
-constructive interference will be noticeable, along with several minor lobes to either side of that primary beam (the lobes right 
+constructive interference will be noticed, along with several minor lobes to either side of that primary beam (the lobes right 
 next to the primary beam are appropriately termed ``side'' lobes). Refer to Figure\ref{diffraction_pattern}. A highly directional antenna 
 limits the maximum amplitude of these lobes considerably. It is important to note that an isotropic antenna will not have a single primary 
-lobe, but may have many lobes of equal amplitude. 
+lobe, but may have several main lobes of equal amplitude. 
 
 \begin{figure}[ht]
  \begin{mdframed}
   \centering
   \includegraphics[width=0.4\textwidth]{images/diffraction_pattern.png}
   \includegraphics[width=0.5\textwidth]{images/radiation_pattern.png}
-  \caption[Collection of electromagnetic wave energy and response]{Here the diffraction pattern of a parabolic aperture is 
-  illustrated with a single cutting plane. This is analogous to the diffraction pattern of visible light when passing through 
-  a single narrow slit. Directional antennae form a discernible primary lobe, with several minor lobes of decreasing magnitudes to
-  either side. The beam width of the primary lobe is [usually] defined as at the level where the electric intensity is halved (around $1/\sqrt{2}$).
-  At approximately $\frac{\lambda}{D}$ the ``first null'' appears ($D$ is the diameter of the aperture). This is the first point of complete destructive interference.
-  Images taken from \textit{Radiotelescopes} \cite{christiansenradiotelescopes} and \textit{Synthesis Imaging II} \cite{taylor1999synthesis}
-  (left and right respectively).}
+  \caption[Collection of electromagnetic wave energy and response]{Here the wave pattern of a parabolic aperture is 
+  illustrated with a single cutting plane. The interference pattern created at the focus (illustrated on the right) is analogous to the interference pattern 
+  of visible light when passing through a single narrow slit. Directional antennae form a discernible primary lobe, with several minor lobes of decreasing magnitudes to
+  either side. The beam width of the primary lobe is [usually] defined as at the level where the electric intensity is halved (around $1/\sqrt{2}$ of the maximum response).
+  At approximately $\frac{\lambda}{D}$ the ``first null'' appears ($D$ is the diameter of the aperture). This is the first point of complete destructive interference. When synthesizing
+  an image  of a source which extends beyond the primary beam, one will notice a severe drop in the intensity of its edges. Images taken from \textit{Radiotelescopes} \cite{christiansenradiotelescopes} 
+  and \textit{Synthesis Imaging II} \cite{taylor1999synthesis} (left and right respectively).}
   \label{diffraction_pattern}
  \end{mdframed}
 \end{figure}
 
 When placing the antenna back into a more realistic context: relatively close to the ground and taking the resistance of the feed connecting the antenna
-to measuring equipment into account this radiation pattern changes considerably (what is also referred to the ``absolute'' beam pattern).
+to measuring equipment into account, this radiation pattern changes considerably (what is also referred to the ``absolute'' beam pattern).
 As expected the ground (and any large nearby object will act as a reflector). Although the intensity of the reflection will vary depending
 on how level the surrounding terrain is and its conductivity (dry or wet conditions) it cannot simply be ignored. Because the reflected wave may
 be out of phase (depending on the height of the antenna and its declination) portions of the primary beam (in the vertical direction) 
@@ -158,11 +158,11 @@ may experience significant destructive interference.
 The gain, $G$, of the antenna is defined as the ratio of radiation intensity collected in a given direction (as when emitted by a highly 
 directional source), to the intensity that would have been obtained when receiving from an isotropic source. This definition includes feed losses
 due to ordinary resistance and is obviously direction dependent. For our discussion on radio telescopes, however it is much more useful to think in terms of 
-the effective area of the antenna. This is defined in terms of the gain of the antenna, as:
+the effective area of the antenna. The effective area is defined in terms of the gain of the antenna:
 \begin{equation*}
  A_e = \frac{G\lambda^2}{4\pi}
 \end{equation*}
-Assuming absolutely no losses in the measured electric density this effective area will approach the geometric area of telescope in the direction
+Assuming absolutely no losses occur in the measured electric density or any phase errors are introduced, this effective area will approach the geometric area of telescope in the direction
 of maximum constructive interference. 
 
 It is worth pointing out that these radiating patterns are measured in the far field of the antenna (at distances at least $\frac{2D^2}{\lambda}$ from
@@ -171,14 +171,14 @@ far-field concept.
 
 In addition to the effective collecting area just defined, it must be pointed out that all antennae are only considered 
 effective (depending on application constraints) for a limited spectrum of frequencies (or ``bandwidth''). This may be 
-either a narrow or a wide band frequencies. Note, however, that no real antenna system will cover a perfectly-rectangular band 
+either a narrow or a wide band of frequencies. Note, however, that no real antenna system will cover a perfectly-rectangular band 
 of frequencies. Effective lower and upper bands can be created by applying either analog or digital bandpass filters 
 (a windowed sinc function is a commonly used filtering function). These filters have some finite \textit{rolloff} at both 
 the lower and upper limits of the band and an inevitable trade-off between rolloff and rippling within the passband has to be made. 
 
 Size is one of the factors governing effectiveness when it comes to bandwidth. Although there are no hard and fast rules about the size of antennae, 
 some general rules of thumb are that antennae that are smaller than $0.5\lambda$ are considered electrically small and antennae more than 
-about $100\lambda$ are considered electrically large and are capable of attaining much higher gains (and by implication have increased effective 
+about $100\lambda$ are considered electrically large, and are capable of attaining much higher gains (and by implication have increased effective 
 collecting areas) in the case of directional antennae. 
 
 For astronomical purposes it is \textit{very important} to have an antenna much, much larger than $\lambda$. This is because some 
@@ -201,41 +201,40 @@ never ending pursuit in building larger and larger antennae, as evident by the A
  \begin{mdframed}
  \centering
  \includegraphics[width=0.7\textwidth]{images/arecibo.jpg}
- \caption[Arecibo Observatory]{At a wopping 305m diameter, the telescope at the Arecibo Observatory is the largest single-apperature telescope in the world. Image courtesy of the National Oceanic and Atmospheric Administration (public domain).}
+ \caption[Arecibo Observatory]{At a wopping 305m diameter, the telescope at the Arecibo Observatory is amongst the largest single-apperature telescopes in the world. 
+ Image courtesy of the National Oceanic and Atmospheric Administration (public domain).}
   \label{fig_arecibo}
  \end{mdframed}
 \end{figure}
 
-The variation of intensity over the emitting source and its variation over a band of frequencies are also of
-significant physical importance. Generally speaking, black-bodies (sources that near-perfectly absorb all incoming electromagnetic radiation)
+The variation of intensity over the emitting source and frequency are also of significant physical importance. Generally speaking, black-bodies (sources that near-perfectly absorb all incoming electromagnetic radiation)
 will radiate this energy over a very wide band of the electromagnetic spectrum. Large bodies like planets and stars are generally considered to be of 
-this type. The intensity distribution of black-body emission depends on both the equilibrium temperature of the body and the frequency of emission as we alluded 
+this type. The intensity distribution of black-body emission depends on both the equilibrium temperature of the body and the frequency of emission alluded 
 to earlier. A black-body in equilibrium will [on average] have an emission intensity distribution that roughly follows the Plank 
 distribution (Figure~\ref{fig_plank}). Here astronomers may choose to observe several bands that are widely spaced apart.
 
 \begin{figure}[ht]
  \begin{mdframed}
  \centering
- \includegraphics[width=0.5\textwidth]{images/plank_dist.png}
+ \includegraphics[width=0.4\textwidth]{images/plank_dist.png}
  \caption[Plank distribution]{The radiation intensity distribution for a black body in equilibrium. Taken from \textit{Tools of Radio Astronomy} \cite{wilson2009tools}}
   \label{fig_plank}
  \end{mdframed}
 \end{figure}
 
-This is by no means the only requirement from an astronomical perspective. In order to track the evolution of the universe astronomers may track certain
-very common elements such as neutral hydrogen. To accomplish this they observe very narrow bands, discretized into many, densely spaced 
-channels (essentially forming a spectrometer). Since these common elements absorb electromagnetic radiation at known frequencies ($\lambda = 21 cm$ for neutral hydrogen and
-$\lambda \approx 18 cm$ for hydroxyl). Detecting and tracking these common elements are of importance in measuring the radial velocities through their \textit{Doppler frequency shift}.
-Any city-dweller experience this effect on a daily basis: the siren of an approaching emergency services vehicle will sound more high pitched as that vehicle
-approaches and will decrease in pitch as soon as the vehicle has passed. Similarly these absorption lines will appear to shift to a higher
-frequency if those elements move toward the observer at velocity $v$ (a ``blue shift'' at the wavelength of visible light). When moving 
-away from the observer the absorption line will appear to shift to a lower frequency (a ``red shift'' at the wavelength of visible light). These 
-apparent shifts can be used to track, for example, the angular velocity of galaxies: detected hydrogen in one side of the galaxy will blue shift as it moves 
-towards the observer, while the other side will red shift as it moves away from the observer.
+This is by no means the only requirement from an astronomical perspective. Another may be to track the evolution of the universe. Astronomers are able
+track certain very common elements, such as neutral hydrogen, by observing very narrow bands, discretized into many, densely spaced 
+channels (essentially forming a spectrometer). These common elements absorb electromagnetic radiation at known frequencies ($\lambda = 21 cm$ for neutral hydrogen and
+$\lambda \approx 18 cm$ for hydroxyl). Detecting and tracking these elements are of importance in measuring the radial velocities through their \textit{Doppler frequency shift}.
+Any city-dweller experience this effect on a daily basis: the siren of an approaching emergency services vehicle will be higher pitched as that vehicle
+approaches the observer. The pitch will decrease as soon as the vehicle has passed. Similarly these absorption lines will appear to shift to a higher
+frequency if those elements move toward the observer at a relative velocity $v$ (a ``blue shift''). When moving away from the observer the absorption 
+line will appear to shift to a lower frequency (a ``red shift''). These apparent shifts can be used to track, for example, the angular velocity of 
+galaxies: detected hydrogen in one side of the galaxy will blue shift as it moves towards the observer, while the other side will red shift as it moves away from the observer.
 
 \subsubsection{Measurement}
 The energy available at the output terminals of a single aperture antenna will be roughly proportional to the electrical intensity per unit area per unit frequency on the 
-collected planar wavefront. This is the electrical flux density measured in units $S = Wm^{-2}Hz^{-1}$. It is useful to remind the reader that power is proportional to the square voltage and may 
+collected planar wavefront. This is the electrical flux density, $S$ measured in units $Wm^{-2}Hz^{-1}$. It is useful to remind the reader that power is proportional to the square voltage and may 
 practically be used interchangeably.
 
 The single antenna telescope measures its power over a limited bandwidth and effective area $A_e$ as explained earlier. Assuming
@@ -247,15 +246,15 @@ W = A_e.S.\Delta\nu
 
 At this point it is necessary to introduce a rectangular coordinate system centered on the focus of the antenna, tilted such that w points 
 in the direction of the maximum response, and u and v are the relative horizontal and vertical cutting planes respectively. u, v and w are 
-measured in wavelengths (and is therefore measured in meters). The direction of the a point on the sky (a unit sphere) are given by the 
-direction cosines with regard to the local frame, denoted by l, m and n respectively (note that $l^2 + m^2 + n^2 = 1$). 
+measured in wavelengths (therefore measured in meters). The direction of a point on the sky (a unit sphere) is given by the 
+direction cosines, measured according to the local frame. These cosines are denoted by l, m and n respectively (note that $l^2 + m^2 + n^2 = 1$). 
 Both $l$ and $m$ may range between $\pm\pi \text{ radians}$ (from horizon to horizon in both directions).
 
-Now let $\Omega$ be a \textit{small} solid angle subtended by a very small area. This solid angle is measured in square radians (in steradians or ``sr''). A visualization of the measured flux density
+Now let $\Omega$ be a \textit{small} solid angle subtended by a very small area. This solid angle is measured in square radians (steradians or ``sr''). A visualization of the measured flux density
 falling on an infinitesimal area of telescope is given in Figure~\ref{fig_measuring_source_brightness}. The flux density measured 
 per steradian over the entire solid angle per unit frequency must then be 
   \begin{equation}
-    p = \int_{\Omega}{A(l,m).I(l,m)\cos{\theta}d\Omega}
+    p \approx \int_{\Omega}{A(l,m).I(l,m)\cos{\theta}d\Omega}
   \end{equation}
 where\\
   $p$ is traditionally measured in Janskies ($10^{-26}.W.m^{-2}.Hz^{-1}$)\\
@@ -270,8 +269,8 @@ where\\
 \end{figure}
 
 In reality multiple sources will be contributing to this integral. We assume that these radiate independently of each other. We additionally
-downplayed (somewhat ignorantly) the effects of the atmosphere and the radiativity of the antenna (the antenna has an internal temperature which means 
-it radiates heat, and may be thought of as a resistor). We will come back this point when discussing calibration.
+downplayed (somewhat ignorantly) the effects of the atmosphere and the radiativity of the antenna (the antenna radiates because it has an internal temperature, 
+and may be thought of as a resistor). We will come back this point when discussing calibration.
 
 \subsection{Aperture synthesis with telescope arrays [TODO: severe surgery needed here]}
 {\color{red} TODO: SEVERE ISSUES IN THIS SUB-CHAPTER: REFACTOR COMPLETELY}
