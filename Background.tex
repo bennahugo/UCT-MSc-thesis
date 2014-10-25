@@ -14,6 +14,14 @@
 \usepackage{hyperref}
 \usepackage[font={small}]{caption}
 \usepackage{marvosym}
+%-----------------------------------------------------
+% Drawing packages
+%-----------------------------------------------------
+\usepackage[usenames,dvipsnames]{pstricks}
+\usepackage{epsfig}
+\usepackage{auto-pst-pdf}
+\usepackage{pst-grad} % For gradients
+\usepackage{pst-plot} % For axes
 % Title Page
 \title{Facet-based Imaging}
 \author{Benjamin Hugo}
@@ -59,8 +67,13 @@ when propagating though most other media. We can conveniently measure these wave
 
 Electromagnetic energy can be emitted by both thermal and non-thermal sources. The intensity of the radiation emitted from thermal sources is determined by both the temperature of the source and the measured frequency. On the other hand, a good example of non-thermal emission is the 
 synchrotron emission by relativistic electrons accelerated radially through magnetic fields. A significant portion of radio astronomy focuses on the non-thermal sources. These are generally very intense sources of 
-electromagnetic radiation and are very far away. We can make the simplifying assumption here that most radio sources emit their radiation outward uniformly in all directions (they are \textit{isotropic}) 
-and that the distances over which these waves travel are far enough to consider them planar by the time they reach the observing telescope.
+electromagnetic radiation and are very far away. We can make some simplifying assumptions here:
+\begin{enumerate}
+ \item Most radio sources emit their radiation outward uniformly in all directions (they are \textit{isotropic}),
+ \item Sources have roughly the same brightness over their entire area (they are said to be \textit{quasi-monochromatic}), 
+ \item The emission from any two sources is considered to be uncorrelated, and 
+ \item That the distances over which these waves travel are far enough to consider them planar by the time they reach the observing telescope.
+\end{enumerate}
 
 One would expect radio waves to have the same optical properties as visible light, since it too is a form of electromagnetic radiation. These are respectively reflection, refraction (bending as these waves propagate
 through mediums of different densities), diffraction and interference. The last two phenomena are of particular importance in our discussion on radio telescopes and can only be described using
@@ -305,13 +318,13 @@ $D$ is the diameter of the largest aperture in the array and\\
 $B$ is the length of the longest \textit{baseline} (or the vector defined between the positions of pairs of antennae: 
 either $\vec{b}_{pq}=P_p - P_q$ or $\vec{b}_{pq}=P_q - P_p$ depending on convention)
 
-Since Martin Ryle and his associates made their revolutionary observations using this approach there has been
+Since Martin Ryle and his associates made their pioneering observations using array telescopes there has been
 a significant drive towards building arrays of ever-increasing size. In applications where angular resolution is
 the one of the dominant factors it is even possible to connect up telescopes located on different continents, or even orbiting satellite.
-This is appropriately called \textit{Very Long Baseline Interferometry}. A discuss on what is meant by an interferometer 
-and why array telescopes are referred to as interferometers will follow very shortly (although it may be easy to guess given
-the discussion on single antenna telescopes). Timing and data transport issues then become a major obstacle, and the data is usually 
-physically shipped to a central location. Combination over the Internet (e-VLBI) has only recently become feasible. Keen readers may 
+This is appropriately called \textit{Very Long Baseline Interferometry}. A discussion on what is meant by an interferometer 
+and why array telescopes are referred to as radio interferometers will follow very shortly (although it may be easy to guess given
+the discussion on single antenna telescopes). In VLBI timing and data transport issues then become a major obstacle, and the data is usually 
+physically shipped to a central location. Combination over the Internet (e-VLBI) has only recently become feasible. Avid readers may 
 refer to the survey conducted by Middelberg et al. \cite{middelberg2008high} for a good introductory overview.
 
 \subsubsection{Measurement}
@@ -320,23 +333,90 @@ to as the \textit{spacial coherence} of a source. A simple analogy describing ho
 perspective would be to think of a disturbance in a bowl of water. If the amplitude is measured by two calibrated 
 sensors at the same location, the readings obtained will be exactly equal at any point in time. As the sensors are 
 spaced further and further away from each other, but still equidistant to the source, one would expect the readings to still
-be the same - since the waves propagate outward at the same speed and with the same amplitude. 
+be the same - since the waves propagate outward at the same speed and with the same amplitude. If the best fit between
+the two signals are made it will thus tell the observer how coherently the source is radiating out in all directions.
 
 If this bowl of water analogy is scaled up to monstrous proportions, and the water is replaced with free space, it 
 resembles an array telescope. Since the source is assumed to be sufficiently far away, each electromagnetic wave crest 
 will be measured by two (or more) directional antennae at exactly the same time, provided those antennae point
 towards the same sky position. Waves from directions $L.\cos{\alpha}=n$ will be in phase, but those from
-directions $L.\cos{\alpha} = n + \frac{1}{2}$ will be out of phase ($n\in\mathbb{Z}$). The delay between the arrival
-times is given by $\tau=\frac{\vec{b}\cdot\hat{s}}{c}$.
+directions $L.\cos{\alpha} = n + \frac{1}{2}$ will be out of phase ($n\in\mathbb{Z}$). Here $L$ is the length of the 
+baseline $\vec{b}$ separating any two antennae. The delay between the arrival times is given 
+by $\tau=\frac{\vec{b}\cdot\vec{s}}{c}$. Here $s$ is the direction to the emitting source. See 
+Figure~\ref{fig_interferometer}.
+
+\begin{figure}[ht]
+ \begin{mdframed}
+ \centering
+\psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-5.5175757)(8.341955,5.5175757)
+\definecolor{colour0}{rgb}{0.003921569,0.003921569,0.003921569}
+\definecolor{colour1}{rgb}{0.0,0.047058824,1.0}
+\rput{-226.70288}(-1.2319194,-5.399251){\psarc[linecolor=black, linewidth=0.02, fillstyle=solid,fillcolor=colour0, dimen=outer](0.5495573,-2.9655557){0.6944444}{7.8650684}{7.975039}}
+\rput{-225.20427}(1.9264939,-5.7953396){\psarc[linecolor=black, linewidth=0.02, fillstyle=solid,fillcolor=colour0, dimen=outer](2.1695573,-2.4966667){1.31}{85.28396}{184.43335}}
+\rput{-225.20427}(10.743828,-9.466027){\psarc[linecolor=black, linewidth=0.02, fillstyle=solid,fillcolor=colour0, dimen=outer](7.3422847,-2.4966667){1.31}{85.28396}{184.43335}}
+\psline[linecolor=black, linewidth=0.02, arrowsize=0.05291666666666667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(3.0904665,-0.43575758)(2.1177392,-3.3266666)
+\psline[linecolor=black, linewidth=0.02, arrowsize=0.05291666666666667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(8.245012,-0.4630303)(7.2722845,-3.3539393)
+\psline[linecolor=black, linewidth=0.02, linestyle=dashed, dash=0.17638889cm 0.10583334cm](7.2722845,-3.3266666)(2.5904665,-1.9539394)
+\rput{-19.51438}(1.2411542,0.5933079){\psarc[linecolor=black, linewidth=0.02, dimen=outer](2.3457046,-3.3121789){0.36926407}{33.895622}{125.547806}}
+\psline[linecolor=black, linewidth=0.02, arrowsize=0.05291666666666667cm 2.0,arrowlength=1.4,arrowinset=0.0]{<->}(2.6995573,-3.2171428)(6.766224,-3.2266667)
+\rput[bl](2.5449786,-2.984176){$\alpha$}
+\psline[linecolor=red, linewidth=0.02, arrowsize=0.05291666666666667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(7.270986,-3.312381)(7.213843,-0.4409524)
+\rput[bl](7.070986,-0.32666665){$\vec{s_0}$}
+\psline[linecolor=colour1, linewidth=0.02, arrowsize=0.05291666666666667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(7.7836843,-2.2901587)(8.083684,-1.5473015)
+\rput[bl](8.018605,-2.0726984){$\vec{s}$}
+\psarc[linecolor=black, linewidth=0.02, dimen=outer](7.377335,-2.5481944){0.16736111}{0.0}{131.89452}
+\rput[bl](7.299557,-2.7266667){$\theta$}
+\psline[linecolor=black, linewidth=0.02, arrowsize=0.05291666666666667cm 2.0,arrowlength=1.4,arrowinset=0.0]{<->}(2.4450119,-1.9175757)(2.0086482,-3.2872727)
+\rput[bl](1.4995573,-2.5842423){$\vec{b}\cdot\vec{s}$}
+\rput[bl](4.0086484,-3.7236364){$||\vec{b}|| = L$}
+\rput[bl](0.16622397,-2.3903031){$\tau=\frac{\vec{b}\cdot\vec{s}}{c}$}
+\psline[linecolor=black, linewidth=0.02](2.1177392,-3.8084848)(2.0934968,-4.9721212)(4.493497,-4.9842424)
+\psline[linecolor=black, linewidth=0.02](4.8934965,-4.9842424)(7.2934966,-4.9842424)(7.2934966,-3.7963636)
+\psframe[linecolor=black, linewidth=0.02, fillstyle=solid,fillcolor=colour0, dimen=outer](4.917739,-4.7296968)(4.4813757,-5.2145452)
+\rput[bl](3.9601634,-5.5175757){correlator}
+\end{pspicture}
+}
+  \caption[Array-base observation]{In this simplified illustration of a two antenna array the incoming wavefront being measured is produced
+  by a single source in the direction of $\vec{s}$, offset at an angle $\theta$ from the pointing center of the telescope $\vec{s_0}$.
+  Here it is assumed that the pointing center is also the center of maximum response, where the delay between incoming signals
+  is exactly zero. The \textit{correlator} measures the degree to which the signals measured at the two antennae correspond (
+  both in phase and amplitude), therefore measuring the degree of spacial coherence of the incoming wavefront. For now we can assume
+  the entire radio interferometer is on level ground, and importantly that the measured wavefronts are planar.}
+  \label{fig_interferometer}
+ \end{mdframed}
+\end{figure}
 
 These differences in phase depending on the angle of the incoming wavefront with respect to the pointing center will 
 produce an interference phase pattern that is analogous to Young's double slit experiment, where an interference pattern 
-is formed on a screen when light passes through two small slits separated by a distance $L$ in front of the screen. Here 
-the size of the slits are small in comparison to $L$ and the first null point occur at a distance proportional to 
-$\frac{\lambda}{L}$. from The only major difference here is that the slits are in fact the antennae.
+is formed on a screen when light passes through two small slits (separated by a distance $L$) somewhere in front of the 
+screen. Here the size of the slits are small in comparison to $L$ and the first null point occur at a distance proportional to 
+$\frac{\lambda}{L}$. The only major difference here is that the slits are in fact the antennae.
 
+This interference pattern is not ideal to resolve large structures. One way around this problem is to take an additional 
+delayed measurement at $\tau_{delay}=\frac{\pi}{2}$ radians and combine this ``sine interference pattern'' to the original ``cosine interference pattern''.
+In theory this improves the signal to noise ratio by a factor of roughly $\sqrt{2}$ and it will produce a response pattern
+that is sensitive over a wider range of angles. From this point forward whenever we refer to correlator we will be referring 
+to this \textit{complex} correlator. It is convenient to think of the measurements made by such a complex correlator in terms of
+complex exponentials. Recall Euler's famous identity:
+\begin{equation*}
+ e^{i\theta} = \cos{\theta} + i\sin{\theta}
+\end{equation*}
 
+As the reader may suspect the mathematical treatment of the measurements taken by these array telescopes are analogous
+to that of a single aperture telescope, except that in the single antenna case the telescope measured the cosine modulated
+flux density directly. Here the signals are combined by the external correlator. The mathematical discussion is very similar, 
+but will be that of a complex measurement, instead of only dealing with the real domain.
 
+Up to this point we've assumed that the signal will not vary over time, and that our measurement equipment is perfect; it 
+does not delay or attenuate the collected signal (commonly referred to as the \textit{instrumental gain}). In reality however, 
+this perfection is never attained. At a physical level, sources do vary slightly over time, although we expect their average 
+intensity is centered around some mean. The instrumentation used for measuring will also contribute some variation that have to 
+be corrected for on a regular basis (which will be described in more detail somewhat later on). The correlator should therefore 
+measure the correlation over some period of time in order to produce a reasonably accurate mean of the measured intensity. With 
+this in mind it is important to make yet another assumption about the physical processes being measured: sources \textit{do not} 
+vary significantly from their mean intensity on a day to day basis. It will soon become clear why this last assumption is essential.
 
 For short intervals the correlator response (for a planar wavefront) over all the sources in the effective collection area, projected onto a \textit{baseline} $\vec{b}$, is given as (refer to figure~\ref{fig_cosine_correlator}) \cite{taylor1999synthesis}:
 \begin{equation}
@@ -344,27 +424,6 @@ For short intervals the correlator response (for a planar wavefront) over all th
 r=\Delta\upsilon \int_{\vec{s}}{A(\vec{s})I(\vec{s})\cos{\frac{2\pi\vec{b}\cdot(\vec{s}-\vec{s_0})}{\lambda}}d\Omega}
 \end{equation}
 
-\begin{figure}[ht]
- \begin{mdframed}
- \centering
- \begin{subfigure}[b]{0.3\textwidth}
- \includegraphics[width=\textwidth]{images/phase_center.png}
- \caption{}
- \end{subfigure}
- \begin{subfigure}[b]{0.4\textwidth}
- \includegraphics[width=\textwidth]{images/cosine_correlator.png}
- \caption{}
- \end{subfigure}
- \begin{subfigure}[b]{0.2\textwidth}
- \includegraphics[width=\textwidth]{images/fringe.png}
- \caption{}
- \end{subfigure}
- \caption[Cosine correlator]{(a) Position vectors used in the interferometer response. $\vec{s_0}$ is the \textit{phase tracking center} where $\tau:=0$ \cite{taylor1999synthesis} (b) Simplified diagram of a two-element correlator, combining the output of two elements spaced $B=||\vec{b}||$ appart. The integrator takes the \textit{cross correlation} of the signal 
- from the second telescope and a time-delayed signal from the first telescope over a small period of time \cite{taylor1999synthesis}. (c) The power produced through cross correlation, differs from that of a single element telescope as shown in figure~\ref{diffraction_pattern_and_power_at_focus} and has a response for greater angles than a small single reflector telescope. If $B$ is doubled, 
- the fringe width is halved and the the correlator response for larger angles improves. This process is analoguous to the diffraction of visible light in Young's double-slit experiment. \cite{wilson2009tools}.}
-  \label{fig_cosine_correlator}
- \end{mdframed}
-\end{figure}
 It is easy to see that this correlator ``fringe'' pattern has a major drawback: the correlator is insensitive for $\frac{2\pi\vec{b}\cdot(\vec{s}-\vec{s_0})}{\lambda} = \frac{\pi}{2} \pm n\pi$. To fix this problem correlators typically
 take the form of \textit{complex correlators} where a second correlation is made by introducing a phase delay of $\frac{\pi}{2}$ in the feeds of the antennae. The second correlator is effectively a \textit{sine correlator}. We can
 now replace the cosine term in equation~\ref{eqn_cosine_correlation} by $e^{-2\pi\vec{b}\cdot(\vec{s}-\vec{s_0})/\lambda}$ through the Euler relation between the complex exponential and the polar form of a complex coordinate \cite{taylor1999synthesis}.
