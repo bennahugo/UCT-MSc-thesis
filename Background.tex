@@ -335,7 +335,7 @@ the discussion on single antenna telescopes). In VLBI timing and data transport 
 physically shipped to a central location. Combination over the Internet (e-VLBI) has only recently become feasible. Avid readers may 
 refer to the survey conducted by Middelberg et al. \cite{middelberg2008high} for a good introductory overview.
 
-\subsubsection{Measurement}
+\subsubsection{Mathematical treatment}
 It is also possible to think of arrays using a more physical approach. These telescopes measure what is commonly referred 
 to as the \textit{spacial coherence} of a source. A simple analogy describing how array antennae work from a physical 
 perspective would be to think of a point disturbance in a bowl of water. If the amplitude is measured by two calibrated 
@@ -513,7 +513,10 @@ delay to ensure measurements are taken relative to the pointing center. It may h
 incoming [complex] flux from the direction $\theta$ shown in Figure~\ref{fig_interferometer}:
 \begin{equation}
  \label{EQN_ONE_CORR_RIME}
- p(u,v,w) \approx \int_{sources}{B(\vec{s})e^{2\pi i(\vec{b}\cdot(\vec{s}-\vec{s_0}))}d\Omega}
+ \begin{split}
+ p(u,v,w) &\approx \int_{sources}{B(\vec{s})e^{2\pi i(\vec{b}\cdot(\vec{s}-\vec{s_0}))}d\Omega}\\
+	  &\approx \int\int_{sources}{B(l,m,n)e^{2\pi i(u\Delta l+v\Delta m+w(\sqrt{1-l^2-m^2}-1))}\frac{dldm}{\sqrt{1-l^2-m^2}}}\\
+ \end{split}
 \end{equation}
 
 By no means should this model be taken as a rigirous dirivation, but we will use it none the less (and slightly ammend it 
@@ -535,7 +538,7 @@ a 2x2 matrix of short time averages. Without any loss the flux density average (
 changed to include all four averages. The exponential term then becomes a scalar 2x2 matrix.
 
 The four Stokes paramters are an easy way to describe the polarization of the measured electromagnetic field. These 
-are non-physical quantities, but are an easy way of the degree to which the field is linearly or circularly polarized
+are non-physical quantities, but give an easy way to express the degree to which the field is linearly or circularly polarized
 (and anything inbetween). Each of the parameters Q, U and V are linearly independent and discribe a position on the 
 Poincar\'e Sphere (figure \ref{fig_poincare}). I is the total measured intensity. The coordinates of Q, U and V on 
 those given by:
@@ -586,6 +589,126 @@ For linear orthogonal feeds the relationship is slightly different \cite{2011A&A
     \end{array}\right] = B
 \end{equation}
 
+Equation~\ref{EQN_ONE_CORR_RIME} may thus be rewritten to take multiple polarizations, equipment gains and directional effects into account through a \textit{Jones} matricies 
+formulation presented by Smirnov in a series of papers on this formulation and its implications for calibration \cite{2011A&A...527A.106S,2011A&A...527A.107S,2011A&A...527A.108S}:
+
+\begin{equation}
+\label{eqn_RIME}
+\begin{split}
+    V_{pq} &= G_p(t,\upsilon)\left(\int\int_{sources}D_p(l,m,t,\upsilon)BK_{pq}D_q(l,m,t,\upsilon)^H\frac{dldm}{\sqrt{1-l^2-m^2}}\right)G_q(t,\upsilon)^H\\
+	  &\text{where }K = e^{2\pi i(u_{pq}l+v_{pq}m+w_{pq}(n-1))}
+    \left[\begin{array}{c c}
+     1 & 0 \\
+     0 & 1 \\
+    \end{array}\right]\\
+	 &\text{and the G terms are the direction-independent effects,}\\
+ 	 &\text{while the D terms are dependent on the direction of the source in l,m space}\\
+ 	 &J^H:=\bar J^T \text{ indicates the Hermitian transpose (the transpose of the complex conjugate matrix of all the J indicies)}\\ 
+\end{split}
+\end{equation}
+
+We shall henceforth refer to this relation as the \textit{Radio Interferometric Measurement Equation (RIME)}. 
+The fundamental assumption here is that all effects on the measured intensities are linear and can therefore be 
+written as two-dimensional matricies. Each antenna will additionally have its own set of these effects. They 
+include corrections for Faraday rotation, ionospheric effects, tropospheric effects, the primary beam (and any rotation over 
+long observations) and pointing error due to weather (wind and heat). These corrections only account for amplitude scaling and 
+phase shifts and can be combined in a layered approach by multiplying several of these Jones terms together (note that the terms 
+may not necessarily commute, so the order of multiplication is important). The different effects will be described later 
+when calibration is discussed.
+
+Up to this point the formulation was only made for two element arrays. However, the linearity of the system allows us
+to simply add multiple of these short term averages together. When discussing signal processing aspects more formally
+it will become clear why this may be done. In practice we can correlate the signal between all possible pairs of 
+dishes and reduce afterwards. This means that the data rates produced in correlation grows quadratically with 
+number of antennae (the number of possible baselines). This includes the auto-correlated baselines (correlation 
+of each antenna with itself).
+\begin{equation*}
+  \text{number of baselines } = \frac{n(n-1)}{2} + n
+\end{equation*}
+
+Inquisiting readers may, rightfully, argue that even if many baselines are used the synthesized aperture will be
+very sparsely sampled, especially when discussing very large arrays. In fact only a handful of small points will be 
+sampled during a single integration period - hardly enough to represent a large continuous area! This means that 
+the array telescope will be quite insensitive to very faint sources.
+
+The solution to this problem lies in the beauty of the underpinning model we just developed: the flux measurements
+are \textit{relative}. Recall also that the assumption that the intensity of the sources of electromagnetic radiation 
+\textit{do not vary on a day-to-day basis}. This means an astronomer may fix one end of the baseline, and move the other
+end. Some of the early radio telescope arrays did just this. Although many of the antennae were stationary a handful
+of antennae were placed on tracks. These antennae would be moved to different positions to take multiple observations
+of the sky.
+
+The second, more promising way of achieving this with much larger arrays is to use the rotation of the earth to rotate
+the baselines radially with respect to the rotation axis of the planet. This may sound like a radical concept, but it 
+follows naturally from the way we defined the local coordinate frame in equation~\ref{EQN_RIGHTHANDED_SYSTEM}. If the
+array tracks some point on the sky at some fixed declination over an extended period of time, the change in the hour
+angle will rotate every baseline. This become clearer when recasting the equation from parametric to implicit form. 
+
+Start by obtaining the individual expressions for u,v,w in equation~\ref{EQN_RIGHTHANDED_SYSTEM}. If the expressions
+for u and v are manipulated into the familiar form of an elipse it is easy to show (although tedious) that the following
+relation holds:
+\begin{equation*}
+ u^2 + \left(\frac{v-(L_Z/\lambda)\cos{\delta_0}}{\sin{\delta_0}}\right)^2 = \frac{L_X^2 + L_Y^2}{\lambda^2}
+\end{equation*}
+
+This elipse along the v axis by $\frac{L_Z\cos{\delta_0}}{\lambda}$. The major axis has a length of 
+$\frac{\sqrt{L_X^2 + L_Y^2}}{\lambda}$. It also follows that at low declinations the baselines 
+of a pure east-to-west array will be nearly parallel to the pointing direction of the telsecope.
+Not only will the for-most antenna shadow the antennae behind it, but there will be little coverage of the u, v
+frame.
+
+To make this more concrete consider a ficticious observation with the Extended Very Large Array. The antenna 
+positions for all 27 antennae, baselines and projected tracks are shown in Figure~\ref{fig_evla_observation}. With
+increasing frequency these tracks expand outward. This means that it is possible to effectively increase coverage
+by observing multiple frequencies and averaging them together. However, this will cause some radial smearing when
+images are synthesized. We will come back to this later on.
+
+\begin{figure}[h]
+ \begin{mdframed}
+ \centering
+ \begin{subfigure}[b]{0.3\textwidth}
+  \includegraphics[width=\textwidth]{images/vla.jpg}
+  \caption{}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.3\textwidth}
+  \includegraphics[width=\textwidth]{images/evla_observation/array_config.png}
+  \caption{}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.3\textwidth}
+  \includegraphics[width=\textwidth]{images/evla_observation/5min_snapshot_ncp.png}
+  \caption{}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.3\textwidth}
+  \includegraphics[width=\textwidth]{images/evla_observation/6hr_ncp.png}
+  \caption{}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.3\textwidth}
+  \includegraphics[width=\textwidth]{images/evla_observation/6hr_dec60.png}
+  \caption{}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.3\textwidth}
+  \includegraphics[width=\textwidth]{images/evla_observation/6hr_dec30.png}
+  \caption{}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.3\textwidth}
+  \includegraphics[width=\textwidth]{images/evla_observation/6hr_dec5.png}
+  \caption{}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.3\textwidth}
+  \includegraphics[width=\textwidth]{images/evla_observation/6hr_dec0.png}
+  \caption{}
+ \end{subfigure}
+ \caption[u,v coverage]{Here the eliptical tracks from all baselines of the 27 antennae of the reconfigurable 
+  Extended Very Large Array (National Radio Astronomy Observatory [New Mexico, US]) are shown at different declinations.
+  In (a) a picture of the EVLA taken from \url{http://images.spaceref.com/news/2012/vla-625x412.jpg}. (b) shows the positions of the
+  antennae when the array is in its compact ``D'' configuration. In (c) a 
+  short (``snapshot'') 5min observation at NCP. In (d) a 6 hour observation at NCP. Figures (e)-(h) show 6 hour 
+  observations for $\delta_0$ = $60^{\circ}$, $30^{\circ}$, $5^{\circ}$ and $0^{\circ}$ respectively.}
+  \label{fig_evla_observation}
+ \end{mdframed}
+\end{figure}
+
+
 % It is worthwhile to note that the correlation, delay and phase compensations can also be done in the fourier domain, and in the case of delay compensation this approach makes fractional delay compensation feasible (see Taylor et al. \cite{taylor1999synthesis}). These correlators are effectively 
 % known as \textit{FX} correlators. If these power spectra are of high time resolution it is possible to perform surveys focussed on transient detection. Modern arrays such as LOFAR, KAT-7 and MeerKAT (currently under construction) have the capability to perform these searches through
 % special \textit{beamforming} modes which may be run concurrently with imaging modes. See Stappers et al. \cite{stappers2011observing} for details on pulsar observation with LOFAR. In this thesis, however, we will focus solely on the imaging pipeline which is discussed in the next section.
@@ -614,30 +737,6 @@ For linear orthogonal feeds the relationship is slightly different \cite{2011A&A
 % When the field of view being observed is sufficiently small, $n$ is close to unity and the term $w(n-1) = 0$. Similarly, if the all the antenna are at equal height (\textit{co-planar}) $w=0$ and the term disappears as well. Under 
 % these circumstances equation~\ref{eqn_visibility} is the two dimensional fourier transform of the image. In reality the image is not only affected by the effective area of the comprising elements in the interferometer, but is 
 % subject to incomplete sampling, direction-independent antenna gains, as well as directional effects, such as ionospheric and tropospheric conditions. 
-% 
-% Equation~\ref{eqn_visibility} may thus be rewritten to take multiple polarizations, the gains and directional effects into account through a \textit{Jones} matricies formulation presented by Smirnov in a series of papers on the 
-% formulation and its implications for calibration \cite{2011A&A...527A.106S,2011A&A...527A.107S,2011A&A...527A.108S}. Here the B term is the Stokes parameter matrix as we defined in the previous section (B may represent either
-% linear or circular polarizations, with the necessary coordinate system transformations added):
-% 
-% \begin{equation}
-% \label{eqn_RIME}
-% \begin{split}
-%     V_{pq} &= G_p(t,\upsilon)\left(\int_{-\infty}^{\infty}\int_{-\infty}^{\infty}D_p(l,m,t,\upsilon)BK_{pq}D_q(l,m,t,\upsilon)^H\frac{dldm}{\sqrt{1-l^2-m^2}}\right)G_q(t,\upsilon)^H\\
-% 	  &\text{where }K = e^{-2\pi i(u_{pq}l+v_{pq}m+w_{pq}(n-1))}
-%     \left[\begin{array}{c c}
-%      1 & 0 \\
-%      0 & 1 \\
-%     \end{array}\right]\\
-% 	 &\text{and the G terms are the direction-independent effects,}\\
-% 	 &\text{while the D terms are dependent on the direction of the source in l,m space}\\
-%  	 &J^H:=\bar J^T \text{ indicates the Hermitian transpose (or the transpose of complex conjugate matrix of all the J indicies)}\\ 
-% \end{split}
-% \end{equation}
-% 
-% The fundamental assumption here is that all effects on the measured intensities are linear and can therefore be written as two-dimensional matricies. Each antenna will additionally have its own set of these effects. 
-% They include corrections for Faraday rotation, ionospheric effects, tropospheric effects and pointing error due to weather (wind and heat). These corrections only account for amplitude scaling and phase shifts and can be 
-% combined in a layered approach by multiplying several of these Jones terms together (note that the terms may not necessarily commute, so the order of multiplication is important). The different effect effects will be described 
-% later when calibration is discussed.
 % 
 % Each observation will typically extend over a prolonged period of time (over many hours for instance) and collect a large number of visibilities, typically over a large number of channels. As the earth rotates each baseline sweeps out
 % eliptical paths in u,v space, sampling the coherence function at regular intervals. As the number of antennae in the array is increased the number of measured visibilities grow quadratically, since the number of possible baselines between 
