@@ -22,6 +22,10 @@
 \usepackage{auto-pst-pdf}
 \usepackage{pst-grad} % For gradients
 \usepackage{pst-plot} % For axes
+%-----------------------------------------------------
+%User-defined operators
+%-----------------------------------------------------
+\DeclareMathOperator*{\sinc}{sinc}
 % Title Page
 \title{Facet-based Imaging}
 \author{Benjamin Hugo}
@@ -71,7 +75,8 @@ electromagnetic radiation and are very far away. We can make some simplifying as
 \begin{enumerate}
  \item Most radio sources emit their radiation outward uniformly in all directions (they are \textit{isotropic}),
  \item Sources have roughly the same brightness over their entire area (they are said to be \textit{quasi-monochromatic}), 
- \item The emission from any two sources is considered to be uncorrelated, and 
+ \item The emission from any two astronomical sources (or any two points on a single source) is incoherent: it certainly
+ varies with frequency and to some extent with time.
  \item That the distances over which these waves travel are far enough to consider them planar by the time they reach the observing telescope.
 \end{enumerate}
 
@@ -263,11 +268,12 @@ measured in wavelengths (therefore measured in meters). The direction of a point
 direction cosines, measured according to the local frame. These cosines are denoted by l, m and n respectively (note that $l^2 + m^2 + n^2 = 1$). 
 Both $l$ and $m$ may range between $\pm\pi \text{ radians}$ (from horizon to horizon in both directions).
 
-Now let $\Omega$ be a \textit{small} solid angle subtended by a very small area. This solid angle is measured in square radians (steradians or ``sr''). A visualization of the measured flux density
-falling on an infinitesimal area of telescope is given in Figure~\ref{fig_measuring_source_brightness}. The flux density measured 
+Now let $\Omega$ be a \textit{small} solid angle subtended by a very small area. This solid angle is measured in square radians (steradians or ``sr''). A visualization 
+of the measured flux density falling on an infinitesimal area of telescope is given in Figure~\ref{fig_measuring_source_brightness}. The flux density measured 
 per steradian over the entire solid angle per unit frequency must then be 
   \begin{equation}
     p \approx \int_{\Omega}{A(l,m).I(l,m)\cos{\theta}d\Omega}
+    \label{REF_EQN_SINGLE_ANTENNA}
   \end{equation}
 where\\
   $p$ is traditionally measured in Janskies ($10^{-26}.W.m^{-2}.Hz^{-1}$)\\
@@ -281,9 +287,11 @@ where\\
 \end{mdframed}
 \end{figure}
 
-In reality multiple sources will be contributing to this integral. We assume that these radiate independently of each other. We additionally
-downplayed (somewhat ignorantly) the effects of the atmosphere and the radiativity of the antenna (the antenna radiates because it has an internal temperature, 
-and may be thought of as a resistor). We will come back this point when discussing calibration.
+In reality multiple sources will be contributing to this integral, each at a separate angle to the pointing center. The integral should therefore be taken over 
+all contributing sources. It was assumed that these radiate independently of each other. The effects of the atmosphere and the radiativity of the antenna (the 
+antenna radiates because it has an internal temperature, and may be thought of as a resistor) were also downplayed. We will come back this point when discussing calibration. 
+In reality a small band of frequencies are measured which results in smeering. A more thorough definition of measurement for array based telescopes will be given, since
+those are the ones of primary interrest in this thesis. 
 
 \subsection{Aperture synthesis with array telescopes}
 \subsubsection{Overview}
@@ -330,11 +338,11 @@ refer to the survey conducted by Middelberg et al. \cite{middelberg2008high} for
 \subsubsection{Measurement}
 It is also possible to think of arrays using a more physical approach. These telescopes measure what is commonly referred 
 to as the \textit{spacial coherence} of a source. A simple analogy describing how array antennae work from a physical 
-perspective would be to think of a disturbance in a bowl of water. If the amplitude is measured by two calibrated 
-sensors at the same location, the readings obtained will be exactly equal at any point in time. As the sensors are 
+perspective would be to think of a point disturbance in a bowl of water. If the amplitude is measured by two calibrated 
+sensors at the same location, the readings obtained should be exactly equal at any point in time. As the sensors are 
 spaced further and further away from each other, but still equidistant to the source, one would expect the readings to still
-be the same - since the waves propagate outward at the same speed and with the same amplitude. If the best fit between
-the two signals are made it will thus tell the observer how coherently the source is radiating out in all directions.
+be the same - since the waves propagate outward at the same speed and with the same amplitude. The degree to which
+the two measurements correspond at any point in time will tell the observer how coherently the waves are propagating outward.
 
 If this bowl of water analogy is scaled up to monstrous proportions, and the water is replaced with free space, it 
 resembles an array telescope. Since the source is assumed to be sufficiently far away, each electromagnetic wave crest 
@@ -394,12 +402,12 @@ is formed on a screen when light passes through two small slits (separated by a 
 screen. Here the size of the slits are small in comparison to $L$ and the first null point occur at a distance proportional to 
 $\frac{\lambda}{L}$. The only major difference here is that the slits are in fact the antennae.
 
-This interference pattern is not ideal to resolve large structures. One way around this problem is to take an additional 
-delayed measurement at $\tau_{delay}=\frac{\pi}{2}$ radians and combine this ``sine interference pattern'' to the original ``cosine interference pattern''.
-In theory this improves the signal to noise ratio by a factor of roughly $\sqrt{2}$ and it will produce a response pattern
-that is sensitive over a wider range of angles. From this point forward whenever we refer to correlator we will be referring 
-to this \textit{complex} correlator. It is convenient to think of the measurements made by such a complex correlator in terms of
-complex exponentials. Recall Euler's famous identity:
+Measuring this interference pattern is not ideal to resolve large structures. One way around this problem is to take an additional 
+delayed measurement at $\tau_{delay}=\frac{\pi}{2}$ radians and combine this ``sine interference pattern'' to the original 
+``cosine interference pattern''. In theory this improves the signal to noise ratio by a factor of roughly $\sqrt{2}$ and it will 
+produce a response pattern that is sensitive over a wider range of angles. From this point forward whenever we refer to correlator 
+we will be referring to this \textit{complex} correlator. It is convenient to think of the measurements made by such a complex 
+correlator in terms of the polar form of complex numbers. Recall Euler's famous identity:
 \begin{equation*}
  e^{i\theta} = \cos{\theta} + i\sin{\theta}
 \end{equation*}
@@ -407,113 +415,30 @@ complex exponentials. Recall Euler's famous identity:
 As the reader may suspect the mathematical treatment of the measurements taken by these array telescopes are analogous
 to that of a single aperture telescope, except that in the single antenna case the telescope measured the cosine modulated
 flux density directly. Here the signals are combined by the external correlator. The mathematical discussion is very similar, 
-but will be that of a complex measurement, instead of only dealing with the real domain.
+but will be that of an complex measurement, instead of only dealing with the real domain.
 
 Up to this point we've assumed that the signal will not vary over time, and that our measurement equipment is perfect; it 
 does not delay or attenuate the collected signal (commonly referred to as the \textit{instrumental gain}). In reality however, 
 this perfection is never attained. At a physical level, sources do vary slightly over time, although we expect their average 
 intensity is centered around some mean. The instrumentation used for measuring will also contribute some variation that have to 
 be corrected for on a regular basis (which will be described in more detail somewhat later on). The correlator should therefore 
-measure the correlation over some period of time in order to produce a reasonably accurate mean of the measured intensity. With 
-this in mind it is important to make yet another assumption about the physical processes being measured: sources \textit{do not} 
+measure the correlation over some short period of time in order to produce a reasonably accurate mean of the measured intensity. 
+With this in mind it is important to make yet another assumption about the physical processes being measured: sources \textit{do not} 
 vary significantly from their mean intensity on a day to day basis. It will soon become clear why this last assumption is essential.
 
-For short intervals the correlator response (for a planar wavefront) over all the sources in the effective collection area, projected onto a \textit{baseline} $\vec{b}$, is given as (refer to figure~\ref{fig_cosine_correlator}) \cite{taylor1999synthesis}:
+The coordinate system defined for a single antenna coordinate system will have to be amended slightly to be relative to some fixed
+location (it can be any) and the antennae in an array telescope will be measured relative to this new coordinate frame. Lets assume
+a single antenna is picked as reference point and all the other antennae positions are measured relative to this ``reference 
+antenna''. 
+
+This local [Euclidian] frame has the regular components X, Y, Z. If we use a right-handed system where X points in the direction 
+of the $0^h$ hour hand, at a declination of 0, Y lies on the same plane as X, but points to $18^h$ and Z points straight up 
+towards the North Celestial Pole (NCP), then the baseline is given by the following relation, where $H_0$ and $\delta_0$ is the 
+respective hour angle and declination of the phase reference center and $\lambda$ is the wavelength corresponding to the center 
+frequency of the receiver. Refer to figure~\ref{fig_celestrial_coords} for a visual reference of the unit celestial sphere, and 
+the equatorial and alt-azimuth coordinate systems.
 \begin{equation}
-\label{eqn_cosine_correlation}
-r=\Delta\upsilon \int_{\vec{s}}{A(\vec{s})I(\vec{s})\cos{\frac{2\pi\vec{b}\cdot(\vec{s}-\vec{s_0})}{\lambda}}d\Omega}
-\end{equation}
-
-It is easy to see that this correlator ``fringe'' pattern has a major drawback: the correlator is insensitive for $\frac{2\pi\vec{b}\cdot(\vec{s}-\vec{s_0})}{\lambda} = \frac{\pi}{2} \pm n\pi$. To fix this problem correlators typically
-take the form of \textit{complex correlators} where a second correlation is made by introducing a phase delay of $\frac{\pi}{2}$ in the feeds of the antennae. The second correlator is effectively a \textit{sine correlator}. We can
-now replace the cosine term in equation~\ref{eqn_cosine_correlation} by $e^{-2\pi\vec{b}\cdot(\vec{s}-\vec{s_0})/\lambda}$ through the Euler relation between the complex exponential and the polar form of a complex coordinate \cite{taylor1999synthesis}.
-
-The next issue are the effects of limited \textit{bandwidth}, $\Delta\upsilon$, in correlators. Since it is computationally infeasible to sample an infinite spectrum of frequencies, only a select number of channels are sampled. This
-band is normally shifted down to \textit{baseband} ($\upsilon=0$) and filtered appropriately with a lowpass filter to reduce aliasing, refer to figure~\ref{fig_bandwidth}. The baseline is normally measured in wavelengths and therefore depends on the
-center frequency through the well-known relation $\upsilon=\frac{c}{\lambda}$. Unfortunately this has a negative impact on the fringe pattern of the correlator; for a rectangular frequency band the fringe is modulated by a sinc-function. This has
-the effect of tapering the fringe which again reduces the effective area of the interferometric telescope. The obvious solution is to observe only narrow spectra. The fringe additionally depends on the delay term and oscilates in time. Normally this is not a problem. However, with exceedingly long baselines such as those in \textit{Very Long Baseline Interferometry}, where the baselines may span continents (see Middelberg et al. \cite{middelberg2008high} for a detailed overview), the local oscilator term is usually varied 
-by a delay tracking computer, which essentially stops any fringe oscilation (known as \textit{fringe stopping}) \cite{taylor1999synthesis}.
-\begin{figure}
- \begin{mdframed}
- \centering
- \begin{subfigure}[b]{0.3\textwidth}
- \includegraphics[width=\textwidth]{images/rectangular_band.png}
- \caption{}
- \end{subfigure}
- \begin{subfigure}[b]{0.5\textwidth}
- \includegraphics[width=\textwidth]{images/mixing.png}
- \caption{}
- \end{subfigure}
- \caption[Sampling a limited bandwidth]{(a) illustrates the idealized rectangular responce of the correlator. Due to inevitable filter rolloff this is obviously unatainable \cite{taylor1999synthesis}. (b) For practical
- reasons the signal is shifted to baseband before filtering out higher frequencies. This is achieved by multiplying the signal with a tone produced by a local oscilator (mixing) this shifts the 
- frequency response of the correlator by $\pm\upsilon_{lo}$ \cite{taylor1999synthesis}} 
-  \label{fig_bandwidth}
- \end{mdframed}
-\end{figure}
-
-Up to this point we conveniently only discussed correlator output for a single feed of each antenna in a two element interferometer. The correlator \textit{may} additionally cross-correlate the two polarization feeds to 
-form the following matrix of correlation components between the antennae p \& q (where * indicates the complex conjugate). In instances where all of these components are available may the Stokes parameters (I, V, U and Q) be computed. 
-The equation governing the correlator power response remain the same for the four different polarizations.  \cite{taylor1999synthesis}.
-\begin{equation}
-    \left[\begin{array}{c c}
-     <e_{X_p}e_{X_q}^*> & <e_{X_p}e_{Y_q}^*> \\
-     <e_{Y_p}e_{X_q}^*> & <e_{Y_p}e_{Y_q}^*> \\
-    \end{array}\right] \approx 
-    \left[\begin{array}{c c}
-     I + V & Q + iU \\
-     Q - iU & I - V \\
-    \end{array}\right] = B
-\end{equation}
-Each of the parameters Q, U and V are linearly independent and discribe a position on the Poincar\'e Sphere (figure \ref{fig_poincare}). Their coordinates on the sphere are given by
-\begin{equation}
-  \begin{split}
-    Q &= I\cos{2\chi}\cos{2\psi}\\
-    U &= I\cos{2\chi}\sin{2\psi}\\
-    V &= I\sin{2\chi}\\
-  \end{split}
-\end{equation}
-
-\begin{figure}
- \begin{mdframed}
- \centering
- \includegraphics[width=0.45\textwidth]{images/poincare_sphere.png}
- \caption[The Poincar\'e Sphere]{The Poincar\'e Sphere gives a visualization for the different polarizations an electromagnetic field. The angles $2\psi$ and
- $2\chi$ are the angles in a polar coordinate system, with each point on the sphere corresponding to a unique polarization. At $2\chi=0$ (the equator) the polarizations 
- are either linear (Q) and orthagonal (U). The northern latitudes ($2\chi > 0$) contain right-handed circular polarization, while the southern hemisphere 
- contains the left-handed circular polarizations. $I$ is not linearly independent and describes the total Poynting flux of the electromagnetic wave; $I = E_1^2 + E_2^2$ \cite{wilson2009tools}}
-  \label{fig_poincare}
- \end{mdframed}
-\end{figure}
-
-It is worthwhile to note that the correlation, delay and phase compensations can also be done in the fourier domain, and in the case of delay compensation this approach makes fractional delay compensation feasible (see Taylor et al. \cite{taylor1999synthesis}). These correlators are effectively 
-known as \textit{FX} correlators. If these power spectra are of high time resolution it is possible to perform surveys focussed on transient detection. Modern arrays such as LOFAR, KAT-7 and MeerKAT (currently under construction) have the capability to perform these searches through
-special \textit{beamforming} modes which may be run concurrently with imaging modes. See Stappers et al. \cite{stappers2011observing} for details on pulsar observation with LOFAR. In this thesis, however, we will focus solely on the imaging pipeline which is discussed in the next section.
-
-In the previous section the response, $r$, of a complex correlator was described. The \textit{visibility} is an unnormalized measure of the coherence of an electric field, and is very closely related to the correlator response to the planar wave fronts emitted
-by a source. The magnitude of this coherence has dimensions of flux density as described earlier. The Radio Interferometric Measurement Equation relates between these visibilities and the projection of the source onto the celestial sphere. This projection and measurement
-process is illustracted in figure~\ref{fig_uvw_lmn}. Without loss of generality when extended to the different polarization terms, the relation between the measured visibilities and the image can be defined as:
-\begin{equation}
- \label{eqn_visibility}
- \begin{split}
-  V(u,v,w) &:= \int_{\vec{s}}{A(\vec{s})I(\vec{s})\cos{\frac{2\pi\vec{b}\cdot(\vec{s}-\vec{s_0})}{\lambda}}d\Omega}\\
-	   &= \int_{-\infty}^\infty{\int_{-\infty}^\infty{A(l,m)I(l,m)e^{-2\pi i[ul+vm+w(n-1)]} \frac{dldm}{\sqrt{1-l^2-m^2}}}}\\
-	   &= \int_{-\infty}^\infty{\int_{-\infty}^\infty{A(l,m)I(l,m)e^{-2\pi i[ul+vm+w(\sqrt{1-l^2-m^2}-1)]} \frac{dldm}{\sqrt{1-l^2-m^2}}}}
- \end{split}
-\end{equation}
-
-\begin{figure}[h]
- \begin{mdframed}
- \centering
- \includegraphics[width=0.5\textwidth]{images/lmn_uvw.png}
- \caption[The relation between image space and visibilities]{The relation between the measured spatial coherence function and the source on the unit ``celestial'' sphere, emitting planar waves of radiation \cite{taylor1999synthesis}.}
-  \label{fig_uvw_lmn}
- \end{mdframed}
-\end{figure}
-
-Typically some reference point is used to specify the relative positions of the Antennae. The baseline is then given by the following relation, where $H_0$ and $\delta_0$ is the respective hour angle and declanation of the 
-phase reference center and $\lambda$ is he wavelength corresponding to the center frequency of the receiver as mentioned previously. Refer to figure~\ref{fig_celestrial_coords} for a visual reference of the celestrial 
-sphere, and the equatorial and alt-azimuth coordinate system.
-\begin{equation}
+ \label{EQN_RIGHTHANDED_SYSTEM}
  \left[\begin{array}{c}
      u\\
      v \\
@@ -530,7 +455,25 @@ sphere, and the equatorial and alt-azimuth coordinate system.
      L_Z \\
     \end{array}\right]
 \end{equation}
-
+The direction cosines towards a point on the celestial sphere is still given in relation to this relative u, v, w coordinate frame.
+A similar left-handed convention can just as easily be defined ($\alpha_0$ is the right ascension of the pointing center):
+\begin{equation}
+ \left[\begin{array}{c}
+     u\\
+     v \\
+     w \\
+    \end{array}\right] = \frac{1}{\lambda}
+ \left[\begin{array}{c c c}
+     -\sin{\alpha_0} 			& \cos{\alpha_0}		& 0 \\
+     -\sin{\delta_0}\cos{\alpha_0} 	& -\sin{\delta_0}\sin{\alpha_0}	& \cos{\delta_0}\\
+     \cos{\delta_0}\cos{\alpha_0} 	& \cos{\delta_0}\sin{\alpha_0}	& \sin{\delta_0}\\
+    \end{array}\right]   
+ \left[\begin{array}{c}
+     L_X \\
+     L_Y \\
+     L_Z \\
+    \end{array}\right]
+\end{equation}
 \begin{figure}[h]
  \begin{mdframed}
  \centering
@@ -542,53 +485,179 @@ sphere, and the equatorial and alt-azimuth coordinate system.
  \end{mdframed}
 \end{figure}
 
-When the field of view being observed is sufficiently small, $n$ is close to unity and the term $w(n-1) = 0$. Similarly, if the all the antenna are at equal height (\textit{co-planar}) $w=0$ and the term disappears as well. Under 
-these circumstances equation~\ref{eqn_visibility} is the two dimensional fourier transform of the image. In reality the image is not only affected by the effective area of the comprising elements in the interferometer, but is 
-subject to incomplete sampling, direction-independent antenna gains, as well as directional effects, such as ionospheric and tropospheric conditions. 
+Ignoring the effects of polarization, the directional antenna gain (the beam, as before) and any atmospheric delays and attenuation
+for a moment, the correlator will measure values should be proportional to (stemming directly from equation~\ref{REF_EQN_SINGLE_ANTENNA}):
+\begin{equation*}
+  \begin{split}
+    p(u,v,w) &\approx \left<\int\int_{sources}{E_p(\vec{s})E_q^*(\vec{s'})e^{2\pi i(\vec{b}\cdot\vec{s})}e^{-2\pi i(\vec{b}\cdot\vec{s'})}d\Omega_pd\Omega_q}\right>\\
+	     &\approx \left<\int\int_{sources}{E_p(\vec{s})E_q^*(\vec{s'})e^{2\pi i(\vec{b}\cdot(\vec{s}-\vec{s'}))}d\Omega_pd\Omega_q}\right>\\
+  \end{split}
+\end{equation*}
 
-Equation~\ref{eqn_visibility} may thus be rewritten to take multiple polarizations, the gains and directional effects into account through a \textit{Jones} matricies formulation presented by Smirnov in a series of papers on the 
-formulation and its implications for calibration \cite{2011A&A...527A.106S,2011A&A...527A.107S,2011A&A...527A.108S}. Here the B term is the Stokes parameter matrix as we defined in the previous section (B may represent either
-linear or circular polarizations, with the necessary coordinate system transformations added):
+Here E is the flux density over a small area. The assumption that two sources at differing locations are not strongly correlated (in other words spatially coherent) is
+essential in order to simplify this relationship between flux densities and correlator output. Still assuming both source 
+direction vectors ($\vec{s}$ and $\vec{s'}$) are unit vectors pointing to positions on the unit celestial sphere (sky) this
+assumption implies that $<S_p(\vec{s})S_q^*(\vec{s'})> \neq 0$ only when $\vec{s} = \vec{s'}$. Also note that, since complex fluxes
+are being measured by the correlator, it is necessary to take the short time averages of the complex conjugate (denoted $^{*}$)
+of one of the antennae in order to measure the total flux contributed by both components - otherwise the difference between
+them will be measured! The expression now simplifies to:
+\begin{equation*}
+ p(u,v,w) \approx \int_{sources}{B(\vec{s})e^{2\pi i(\vec{b}\cdot(\vec{s}))}d\Omega}
+\end{equation*}
+where:\\
+$B(\vec{s}) = <E_p(\vec{s})E_q^*(\vec{s})>$\\
 
+Notice that here the expression for p is relative and depends only on the directions of each contributing source. Of course this
+is all relative to the pointing centre of the telescope. We multiply through by a complex exponential. This adds the appropriate 
+delay to ensure measurements are taken relative to the pointing center. It may help to think of this as measuring the
+incoming [complex] flux from the direction $\theta$ shown in Figure~\ref{fig_interferometer}:
 \begin{equation}
-\label{eqn_RIME}
+ \label{EQN_ONE_CORR_RIME}
+ p(u,v,w) \approx \int_{sources}{B(\vec{s})e^{2\pi i(\vec{b}\cdot(\vec{s}-\vec{s_0}))}d\Omega}
+\end{equation}
+
+By no means should this model be taken as a rigirous dirivation, but we will use it none the less (and slightly ammend it 
+along the way).
+
+In reality the fact that the flux is averaged over a small band of frequencies and, additionally, over short periods of 
+time will result in smeared measurements. It is important to emphasize that the baselines between pairs of antennae are 
+\textit{always} measured in terms of wavelength (and by relation frequency) as evident in equation~\ref{EQN_RIGHTHANDED_SYSTEM}.
+If one were to integrate over such limited bandwidth the problem becomes apparent: the correlator response
+is modulated by $\Delta\nu\sinc{\pi\Delta\nu\tau}$ (sinc is defined as $\sinc{x} = \frac{\sin{x}}{x}$). As apparent from
+Figure~\ref{fig_interferometer} $\tau$ depends on the orientation of the baseline with respect to source and the length of the 
+baseline. The correlator response will be maximum only when the source vector is normal to the baseline. Therefore the 
+correlator must compensate for this delay.
+
+Up to this point we conveniently only discussed correlator output for a single feed of each antenna in a two element interferometer.
+Just as in the case of a single element telescope the response from such a correlator will be sensitive to highly directional sources.
+The correlator may therefore additionally correlate all four combinations between the two polarization feeds of each antenna to form 
+a 2x2 matrix of short time averages. Without any loss the flux density average ($B$) in equation~\ref{EQN_ONE_CORR_RIME} can be
+changed to include all four averages. The exponential term then becomes a scalar 2x2 matrix.
+
+The four Stokes paramters are an easy way to describe the polarization of the measured electromagnetic field. These 
+are non-physical quantities, but are an easy way of the degree to which the field is linearly or circularly polarized
+(and anything inbetween). Each of the parameters Q, U and V are linearly independent and discribe a position on the 
+Poincar\'e Sphere (figure \ref{fig_poincare}). I is the total measured intensity. The coordinates of Q, U and V on 
+those given by:
+\begin{equation}
 \begin{split}
-    V_{pq} &= G_p(t,\upsilon)\left(\int_{-\infty}^{\infty}\int_{-\infty}^{\infty}D_p(l,m,t,\upsilon)BK_{pq}D_q(l,m,t,\upsilon)^H\frac{dldm}{\sqrt{1-l^2-m^2}}\right)G_q(t,\upsilon)^H\\
-	  &\text{where }K = e^{-2\pi i(u_{pq}l+v_{pq}m+w_{pq}(n-1))}
-    \left[\begin{array}{c c}
-     1 & 0 \\
-     0 & 1 \\
-    \end{array}\right]\\
-	 &\text{and the G terms are the direction-independent effects,}\\
-	 &\text{while the D terms are dependent on the direction of the source in l,m space}\\
- 	 &J^H:=\bar J^T \text{ indicates the Hermitian transpose (or the transpose of complex conjugate matrix of all the J indicies)}\\ 
+Q &= I\cos{2\chi}\cos{2\psi}\\
+U &= I\cos{2\chi}\sin{2\psi}\\
+V &= I\sin{2\chi}\\
 \end{split}
 \end{equation}
 
-The fundamental assumption here is that all effects on the measured intensities are linear and can therefore be written as two-dimensional matricies. Each antenna will additionally have its own set of these effects. 
-They include corrections for Faraday rotation, ionospheric effects, tropospheric effects and pointing error due to weather (wind and heat). These corrections only account for amplitude scaling and phase shifts and can be 
-combined in a layered approach by multiplying several of these Jones terms together (note that the terms may not necessarily commute, so the order of multiplication is important). The different effect effects will be described 
-later when calibration is discussed.
-
-Each observation will typically extend over a prolonged period of time (over many hours for instance) and collect a large number of visibilities, typically over a large number of channels. As the earth rotates each baseline sweeps out
-eliptical paths in u,v space, sampling the coherence function at regular intervals. As the number of antennae in the array is increased the number of measured visibilities grow quadratically, since the number of possible baselines between 
-antennae is given as $\frac{n(n-1)}{2}+n$. Adding a small number of antennae to the array can therefore effectively improve the uv coverage. By adding more visibilities in fourier space the quality of the synthesized 
-image is improved, because the effects of the limited sampling can be more effectively removed from the produced image as is explained in the section on convolutional gridding.
-
-The uniform and wide coverage of the entire u,v space (the size of which is determined by the required angular resolution), can normally be attained using only east-west baselines, except at very low declanations (less than about $30^o$) at the horizon. At low declanations baselines 
-with a component sufficiently parallel to the Earths axis (non East-West) are needed. Such a two dimensional array have baseline components which don't remain co-planar over long observations and require the l and m components being small enough to 
-ensure $(\sqrt{1 - l^2 - m^2} - 1)w \approx 0$. See figure~\ref{fig_VLBA_uv} for an illustration of the uv-coverage attained by the VLBA array. The spacing in such an East-West array is of high importance
-in ensuring the uniform sampling of the u,v space. Spacing the antennas uniformly for instance will result in many redundant coverages by the shorter baselines. Other designs include movable
-antennae provide greater flexibility and can cover more baselines. For two dimensional arrays reducing redundancy becomes even more challenging as eluded to in Synthesis Imaging II \cite[Lecture 2]{taylor1999synthesis}.
-
-\begin{figure}[h]
- \begin{mdframed}
- \centering
- \includegraphics[width=0.5\textwidth]{images/eliptical_sampling.png}
- \caption[VLBA uv-coverage]{The sampling patterns of the ten antennae of the VLBA at 4 different declanations. The best coverage is attained at greater declanations}
-  \label{fig_VLBA_uv}
- \end{mdframed}
+\begin{figure}
+\begin{mdframed}
+\centering
+\includegraphics[width=0.45\textwidth]{images/poincare_sphere.png}
+\caption[The Poincar\'e Sphere]{The Poincar\'e Sphere gives a visualization for the different polarizations an electromagnetic field. The angles $2\psi$ and
+$2\chi$ are the angles in a polar coordinate system, with each point on the sphere corresponding to a unique polarization. At $2\chi=0$ (the equator) the polarizations
+are either linear (Q) or orthogonal (U). The northern latitudes ($2\chi > 0$) contain right-handed circular polarization, while the southern hemisphere
+contains the left-handed circular polarizations. $I$ is not linearly independent and describes the total flux of the electromagnetic wave: 
+$I = E_1^2 + E_2^2$ \cite{wilson2009tools}}
+\label{fig_poincare}
+\end{mdframed}
 \end{figure}
+
+In instances where all of these components are available will the observer be able to compute the polarization of
+the observed radiation. If the feeds of both antennae are orthogonal circular feeds the relation to
+the the four Stokes parameters is given by
+\begin{equation}
+    \left[\begin{array}{c c}
+     <e_{R_p}e_{R_q}^*> & <e_{R_p}e_{L_q}^*> \\
+     <e_{L_p}e_{R_q}^*> & <e_{L_p}e_{L_q}^*> \\
+    \end{array}\right] \approx 
+    \left[\begin{array}{c c}
+     I + V & Q + iU \\
+     Q - iU & I - V \\
+    \end{array}\right] = B
+\end{equation}
+
+For linear orthogonal feeds the relationship is slightly different \cite{2011A&A...527A.106S}:
+\begin{equation}
+    \left[\begin{array}{c c}
+     <e_{X_p}e_{X_q}^*> & <e_{X_p}e_{Y_q}^*> \\
+     <e_{Y_p}e_{X_q}^*> & <e_{Y_p}e_{Y_q}^*> \\
+    \end{array}\right] \approx 
+    \left[\begin{array}{c c}
+     I + Q & U + iV \\
+     U - iV & I - Q \\
+    \end{array}\right] = B
+\end{equation}
+
+% It is worthwhile to note that the correlation, delay and phase compensations can also be done in the fourier domain, and in the case of delay compensation this approach makes fractional delay compensation feasible (see Taylor et al. \cite{taylor1999synthesis}). These correlators are effectively 
+% known as \textit{FX} correlators. If these power spectra are of high time resolution it is possible to perform surveys focussed on transient detection. Modern arrays such as LOFAR, KAT-7 and MeerKAT (currently under construction) have the capability to perform these searches through
+% special \textit{beamforming} modes which may be run concurrently with imaging modes. See Stappers et al. \cite{stappers2011observing} for details on pulsar observation with LOFAR. In this thesis, however, we will focus solely on the imaging pipeline which is discussed in the next section.
+% 
+% In the previous section the response, $r$, of a complex correlator was described. The \textit{visibility} is an unnormalized measure of the coherence of an electric field, and is very closely related to the correlator response to the planar wave fronts emitted
+% by a source. The magnitude of this coherence has dimensions of flux density as described earlier. The Radio Interferometric Measurement Equation relates between these visibilities and the projection of the source onto the celestial sphere. This projection and measurement
+% process is illustracted in figure~\ref{fig_uvw_lmn}. Without loss of generality when extended to the different polarization terms, the relation between the measured visibilities and the image can be defined as:
+% \begin{equation}
+%  \label{eqn_visibility}
+%  \begin{split}
+%   V(u,v,w) &:= \int_{\vec{s}}{A(\vec{s})I(\vec{s})\cos{\frac{2\pi\vec{b}\cdot(\vec{s}-\vec{s_0})}{\lambda}}d\Omega}\\
+% 	   &= \int_{-\infty}^\infty{\int_{-\infty}^\infty{A(l,m)I(l,m)e^{-2\pi i[ul+vm+w(n-1)]} \frac{dldm}{\sqrt{1-l^2-m^2}}}}\\
+% 	   &= \int_{-\infty}^\infty{\int_{-\infty}^\infty{A(l,m)I(l,m)e^{-2\pi i[ul+vm+w(\sqrt{1-l^2-m^2}-1)]} \frac{dldm}{\sqrt{1-l^2-m^2}}}}
+%  \end{split}
+% \end{equation}
+% 
+% \begin{figure}[h]
+%  \begin{mdframed}
+%  \centering
+%  \includegraphics[width=0.5\textwidth]{images/lmn_uvw.png}
+%  \caption[The relation between image space and visibilities]{The relation between the measured spatial coherence function and the source on the unit ``celestial'' sphere, emitting planar waves of radiation \cite{taylor1999synthesis}.}
+%   \label{fig_uvw_lmn}
+%  \end{mdframed}
+% \end{figure}
+% 
+% When the field of view being observed is sufficiently small, $n$ is close to unity and the term $w(n-1) = 0$. Similarly, if the all the antenna are at equal height (\textit{co-planar}) $w=0$ and the term disappears as well. Under 
+% these circumstances equation~\ref{eqn_visibility} is the two dimensional fourier transform of the image. In reality the image is not only affected by the effective area of the comprising elements in the interferometer, but is 
+% subject to incomplete sampling, direction-independent antenna gains, as well as directional effects, such as ionospheric and tropospheric conditions. 
+% 
+% Equation~\ref{eqn_visibility} may thus be rewritten to take multiple polarizations, the gains and directional effects into account through a \textit{Jones} matricies formulation presented by Smirnov in a series of papers on the 
+% formulation and its implications for calibration \cite{2011A&A...527A.106S,2011A&A...527A.107S,2011A&A...527A.108S}. Here the B term is the Stokes parameter matrix as we defined in the previous section (B may represent either
+% linear or circular polarizations, with the necessary coordinate system transformations added):
+% 
+% \begin{equation}
+% \label{eqn_RIME}
+% \begin{split}
+%     V_{pq} &= G_p(t,\upsilon)\left(\int_{-\infty}^{\infty}\int_{-\infty}^{\infty}D_p(l,m,t,\upsilon)BK_{pq}D_q(l,m,t,\upsilon)^H\frac{dldm}{\sqrt{1-l^2-m^2}}\right)G_q(t,\upsilon)^H\\
+% 	  &\text{where }K = e^{-2\pi i(u_{pq}l+v_{pq}m+w_{pq}(n-1))}
+%     \left[\begin{array}{c c}
+%      1 & 0 \\
+%      0 & 1 \\
+%     \end{array}\right]\\
+% 	 &\text{and the G terms are the direction-independent effects,}\\
+% 	 &\text{while the D terms are dependent on the direction of the source in l,m space}\\
+%  	 &J^H:=\bar J^T \text{ indicates the Hermitian transpose (or the transpose of complex conjugate matrix of all the J indicies)}\\ 
+% \end{split}
+% \end{equation}
+% 
+% The fundamental assumption here is that all effects on the measured intensities are linear and can therefore be written as two-dimensional matricies. Each antenna will additionally have its own set of these effects. 
+% They include corrections for Faraday rotation, ionospheric effects, tropospheric effects and pointing error due to weather (wind and heat). These corrections only account for amplitude scaling and phase shifts and can be 
+% combined in a layered approach by multiplying several of these Jones terms together (note that the terms may not necessarily commute, so the order of multiplication is important). The different effect effects will be described 
+% later when calibration is discussed.
+% 
+% Each observation will typically extend over a prolonged period of time (over many hours for instance) and collect a large number of visibilities, typically over a large number of channels. As the earth rotates each baseline sweeps out
+% eliptical paths in u,v space, sampling the coherence function at regular intervals. As the number of antennae in the array is increased the number of measured visibilities grow quadratically, since the number of possible baselines between 
+% antennae is given as $\frac{n(n-1)}{2}+n$. Adding a small number of antennae to the array can therefore effectively improve the uv coverage. By adding more visibilities in fourier space the quality of the synthesized 
+% image is improved, because the effects of the limited sampling can be more effectively removed from the produced image as is explained in the section on convolutional gridding.
+% 
+% The uniform and wide coverage of the entire u,v space (the size of which is determined by the required angular resolution), can normally be attained using only east-west baselines, except at very low declanations (less than about $30^o$) at the horizon. At low declanations baselines 
+% with a component sufficiently parallel to the Earths axis (non East-West) are needed. Such a two dimensional array have baseline components which don't remain co-planar over long observations and require the l and m components being small enough to 
+% ensure $(\sqrt{1 - l^2 - m^2} - 1)w \approx 0$. See figure~\ref{fig_VLBA_uv} for an illustration of the uv-coverage attained by the VLBA array. The spacing in such an East-West array is of high importance
+% in ensuring the uniform sampling of the u,v space. Spacing the antennas uniformly for instance will result in many redundant coverages by the shorter baselines. Other designs include movable
+% antennae provide greater flexibility and can cover more baselines. For two dimensional arrays reducing redundancy becomes even more challenging as eluded to in Synthesis Imaging II \cite[Lecture 2]{taylor1999synthesis}.
+% 
+% \begin{figure}[h]
+%  \begin{mdframed}
+%  \centering
+%  \includegraphics[width=0.5\textwidth]{images/eliptical_sampling.png}
+%  \caption[VLBA uv-coverage]{The sampling patterns of the ten antennae of the VLBA at 4 different declanations. The best coverage is attained at greater declanations}
+%   \label{fig_VLBA_uv}
+%  \end{mdframed}
+% \end{figure}
 
 \subsection{Telescope calibration [TODO: some revision and expansion needed]}
 Telescope calibration is regarded as a hard problem in radio astronomy and is filled with heuristical approaches which attempt to correct for, predominantly, those effects which alter the
