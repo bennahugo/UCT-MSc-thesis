@@ -295,47 +295,47 @@ those are the ones of primary interrest in this thesis.
 
 \subsection{Aperture synthesis with array telescopes}
 \subsubsection{Overview}
-As pointed out in the previous section the angular resolution is constrained to the diameter of the telescope, and for longer 
+As pointed out in the previous section the angular resolution is constrained to the diameter of the telescope. For longer 
 wavelengths very big directional antennae are needed to achieve good angular resolution. Unfortunately 
 there are material constraints, increased maintenance costs and a lack in steering capacity associated with large telescopes. 
 Luckily it is not essential to build a filled aperture in order to create a reasonably efficient directional antenna. It is 
 also possible to leave out large portions of the antenna aperture to create a directional antennae of significantly 
-reduced weight (and therefore much cheaper to build). The obvious effect is a decrease in effective collecting area
+reduced weight (which is much cheaper to build). The obvious effect is a decrease in effective collecting area
 and therefore decreased sensitivity.
 
 Array telescopes can be thought of as a special case of these unfilled apertures. The very simplest way of creating such
 a telescope will be to simply add the signals from all the receivers together before measurement, in order to form a 
-basic ``total power'' telescope. This can be done only if the signals add together reasonably \textit{coherently}. If they
+basic ``total power'' telescope. This can be done only if the signals added together are reasonably \textit{coherent}. If they
 are significantly out of phase the signals will experience significant destructive interference and the telescope will be
 rendered useless. For the sake of discussion, however, it is assumed that the distances between antennae are fully taken 
 into account: the wavefront collected at different locations will simultaneously arrive at the measurement equipment shortly 
-thereafter, and that the increased impedance associated with longer transmission lines is duly accounted for.
+thereafter, and the increased impedance associated with longer transmission lines is duly accounted for.
 
-Using an array one may therefore be able to ``synthesize'' a single aperture telescope which encompasses the entire array. This
-basic idea is known as aperture synthesis. It does, however pose a serious problem: only some areas will be well covered, whereas
+Using an array one is able to ``synthesize'' a single aperture telescope which encompasses the entire array. This
+basic idea is known as \textit{aperture synthesis}. It does, however pose a serious conundrum: only some areas will be well covered, whereas
 large areas may not be covered at all. As we see later on this produces smearing in the images produced and is a topic of much 
 discussion by itself.
 
-The resolving power obtained from such a synthesized aperture will therefore depend on the distance between the furthest separated 
+The resolving power obtained from such a synthesized aperture depends on the distance between the furthest separated 
 telescopes, and can be expressed as:
 \begin{equation*}
  \text{angular resolution} \propto \frac{\lambda}{B} \text{ if } D\ll B
 \end{equation*}
 where:\\
 $D$ is the diameter of the largest aperture in the array and\\
-$B$ is the length of the longest \textit{baseline} (or the vector defined between the positions of pairs of antennae: 
+$B$ is the length of the longest \textit{baseline} (the vector defined between the positions of pairs of antennae: 
 either $\vec{b}_{pq}=P_p - P_q$ or $\vec{b}_{pq}=P_q - P_p$ depending on convention)
 
 Since Martin Ryle and his associates made their pioneering observations using array telescopes there has been
 a significant drive towards building arrays of ever-increasing size. In applications where angular resolution is
-the one of the dominant factors it is even possible to connect up telescopes located on different continents, or even orbiting satellite.
+the one of the dominant factors it is even possible to connect up telescopes located on different continents, or even orbiting satellites.
 This is appropriately called \textit{Very Long Baseline Interferometry}. A discussion on what is meant by an interferometer 
 and why array telescopes are referred to as radio interferometers will follow very shortly (although it may be easy to guess given
-the discussion on single antenna telescopes). In VLBI timing and data transport issues then become a major obstacle, and the data is usually 
+the discussion on single antenna telescopes). In VLBI timing and data transport issues become major obstacles, and the data is usually 
 physically shipped to a central location. Combination over the Internet (e-VLBI) has only recently become feasible. Avid readers may 
 refer to the survey conducted by Middelberg et al. \cite{middelberg2008high} for a good introductory overview.
 
-\subsubsection{Mathematical treatment}
+\subsubsection{Measurement}
 It is also possible to think of arrays using a more physical approach. These telescopes measure what is commonly referred 
 to as the \textit{spacial coherence} of a source. A simple analogy describing how array antennae work from a physical 
 perspective would be to think of a point disturbance in a bowl of water. If the amplitude is measured by two calibrated 
@@ -350,7 +350,7 @@ will be measured by two (or more) directional antennae at exactly the same time,
 towards the same sky position. Waves from directions $L.\cos{\alpha}=n$ will be in phase, but those from
 directions $L.\cos{\alpha} = n + \frac{1}{2}$ will be out of phase ($n\in\mathbb{Z}$). Here $L$ is the length of the 
 baseline $\vec{b}$ separating any two antennae. The delay between the arrival times is given 
-by $\tau=\frac{\vec{b}\cdot\vec{s}}{c}$. Here $s$ is the direction to the emitting source. See 
+by $\tau=\frac{\vec{b}\cdot\vec{s}}{c}$. Here $\vec{s}$ is the direction to the emitting source. See 
 Figure~\ref{fig_interferometer}.
 
 \begin{figure}[ht]
@@ -399,14 +399,15 @@ Figure~\ref{fig_interferometer}.
 These differences in phase depending on the angle of the incoming wavefront with respect to the pointing center will 
 produce an interference phase pattern that is analogous to Young's double slit experiment, where an interference pattern 
 is formed on a screen when light passes through two small slits (separated by a distance $L$) somewhere in front of the 
-screen. Here the size of the slits are small in comparison to $L$ and the first null point occur at a distance proportional to 
-$\frac{\lambda}{L}$. The only major difference here is that the slits are in fact the antennae.
+screen. Here the size of the slits are small in comparison to both $\lambda$ and $L$. The first null point occur at a distance 
+proportional to $\frac{\lambda}{L}$. The only major difference between the two contexts is that the antennae should be
+viewed as narrow slits.
 
-Measuring this interference pattern is not ideal to resolve large structures. One way around this problem is to take an additional 
+This interference pattern is not ideal when resolving large structures. One way around this problem is to take an additional 
 delayed measurement at $\tau_{delay}=\frac{\pi}{2}$ radians and combine this ``sine interference pattern'' to the original 
 ``cosine interference pattern''. In theory this improves the signal to noise ratio by a factor of roughly $\sqrt{2}$ and it will 
-produce a response pattern that is sensitive over a wider range of angles. From this point forward whenever we refer to correlator 
-we will be referring to this \textit{complex} correlator. It is convenient to think of the measurements made by such a complex 
+produce a response pattern that is sensitive over a wider range of angles. From this point forward whenever referring to the 
+correlator we will be considering the \textit{complex} correlator. It is convenient to think of the measurements made by such a complex 
 correlator in terms of the polar form of complex numbers. Recall Euler's famous identity:
 \begin{equation*}
  e^{i\theta} = \cos{\theta} + i\sin{\theta}
@@ -414,29 +415,30 @@ correlator in terms of the polar form of complex numbers. Recall Euler's famous 
 
 As the reader may suspect the mathematical treatment of the measurements taken by these array telescopes are analogous
 to that of a single aperture telescope, except that in the single antenna case the telescope measured the cosine modulated
-flux density directly. Here the signals are combined by the external correlator. The mathematical discussion is very similar, 
-but will be that of an complex measurement, instead of only dealing with the real domain.
+flux density directly. Instead, here the signals are combined and measured by the external correlator. The mathematical 
+discussion is very similar to that of a single antenna telescope, but will be that of a complex measurement, 
+instead of only dealing with the real domain.
 
-Up to this point we've assumed that the signal will not vary over time, and that our measurement equipment is perfect; it 
+Up to this point it has been assumed that the signal will not vary over time, and that the measurement equipment is perfect; it 
 does not delay or attenuate the collected signal (commonly referred to as the \textit{instrumental gain}). In reality however, 
 this perfection is never attained. At a physical level, sources do vary slightly over time, although we expect their average 
 intensity is centered around some mean. The instrumentation used for measuring will also contribute some variation that have to 
-be corrected for on a regular basis (which will be described in more detail somewhat later on). The correlator should therefore 
+be corrected for on a regular basis (this will be described in more detail somewhat later on). The correlator should therefore 
 measure the correlation over some short period of time in order to produce a reasonably accurate mean of the measured intensity. 
 With this in mind it is important to make yet another assumption about the physical processes being measured: sources \textit{do not} 
 vary significantly from their mean intensity on a day to day basis. It will soon become clear why this last assumption is essential.
 
-The coordinate system defined for a single antenna coordinate system will have to be amended slightly to be relative to some fixed
-location (it can be any) and the antennae in an array telescope will be measured relative to this new coordinate frame. Lets assume
+The coordinate system defined for a single antenna telescope will have to be amended slightly to be relative to some fixed
+location (it can be any) and the antennae in an array will be measured relative to this new coordinate frame. Assume
 a single antenna is picked as reference point and all the other antennae positions are measured relative to this ``reference 
 antenna''. 
 
 This local [Euclidian] frame has the regular components X, Y, Z. If we use a right-handed system where X points in the direction 
-of the $0^h$ hour hand, at a declination of 0, Y lies on the same plane as X, but points to $18^h$ and Z points straight up 
+of the $0^h$ hour hand, at a declination of $0^{\circ}$, Y lies on the same plane as X, but points to $18^h$ and Z points straight up 
 towards the North Celestial Pole (NCP), then the baseline is given by the following relation, where $H_0$ and $\delta_0$ is the 
 respective hour angle and declination of the phase reference center and $\lambda$ is the wavelength corresponding to the center 
 frequency of the receiver. Refer to figure~\ref{fig_celestrial_coords} for a visual reference of the unit celestial sphere, and 
-the equatorial and alt-azimuth coordinate systems.
+the equatorial and alt-azimuth coordinate systems. Here u, v, w are given by:
 \begin{equation}
  \label{EQN_RIGHTHANDED_SYSTEM}
  \left[\begin{array}{c}
@@ -478,15 +480,15 @@ A similar left-handed convention can just as easily be defined ($\alpha_0$ is th
  \begin{mdframed}
  \centering
  \includegraphics[width=0.75\textwidth]{images/equatorial_coords.png}
- \caption[Equatorial and alt-azimuth coordinate system]{The angular coordinates of a point in space is usually measured in terms of declination ($\delta$) and either right-ascension ($\alpha$ or R.A.) or the hour angle ($H$) from the place
- where observations are taken. The first point of Aries (\Aries) is the position of the Sun at the March Equinox. The celestrial equator is simply Earth's equator projected onto the celestial sphere. There is normally a slow precession in the Earth's
+ \caption[Equatorial and alt-azimuth coordinate system]{The angular coordinates of a point in the sky can be measured in terms of declination ($\delta$) and either right-ascension ($\alpha$ or R.A.) or the hour angle ($H$) from the place
+ where observations are taken (a celestial coordinate system). The first point of Aries (\Aries) is the position of the Sun at the March Equinox. The celestrial equator is simply Earth's equator projected onto the celestial sphere. There is normally a slow precession in the Earth's
  axis and this has to be corrected for, based on some reference point in time (an epoch). The last epoch at the time of writing was at noon January 1, 2000. See Radiotelescopes \cite[Appendix 4]{christiansenradiotelescopes} for more information.}
   \label{fig_celestrial_coords}
  \end{mdframed}
 \end{figure}
 
-Ignoring the effects of polarization, the directional antenna gain (the beam, as before) and any atmospheric delays and attenuation
-for a moment, the correlator will measure values should be proportional to (stemming directly from equation~\ref{REF_EQN_SINGLE_ANTENNA}):
+Ignoring the effects of polarization, the directional antenna gain (the beam, as before) and any atmospheric effects
+for a moment, the correlator will measure values proportional to (stemming directly from equation~\ref{REF_EQN_SINGLE_ANTENNA}):
 \begin{equation*}
   \begin{split}
     p(u,v,w) &\approx \left<\int\int_{sources}{E_p(\vec{s})E_q^*(\vec{s'})e^{2\pi i(\vec{b}\cdot\vec{s})}e^{-2\pi i(\vec{b}\cdot\vec{s'})}d\Omega_pd\Omega_q}\right>\\
@@ -507,10 +509,10 @@ them will be measured! The expression now simplifies to:
 where:\\
 $B(\vec{s}) = <E_p(\vec{s})E_q^*(\vec{s})>$\\
 
-Notice that here the expression for p is relative and depends only on the directions of each contributing source. Of course this
-is all relative to the pointing centre of the telescope. We multiply through by a complex exponential. This adds the appropriate 
-delay to ensure measurements are taken relative to the pointing center. It may help to think of this as measuring the
-incoming [complex] flux from the direction $\theta$ shown in Figure~\ref{fig_interferometer}:
+Notice that the expression for p is relative and depends only on the direction of each contributing source. Of course this
+is all relative to the pointing centre of the telescope. We may multiply through by a complex exponential to add the appropriate 
+delay which ensures measurements are taken relative to the pointing center. It may help to think of this as measuring the
+incoming [complex] flux from direction $\theta$ as shown in Figure~\ref{fig_interferometer}:
 \begin{equation}
  \label{EQN_ONE_CORR_RIME}
  \begin{split}
@@ -520,27 +522,28 @@ incoming [complex] flux from the direction $\theta$ shown in Figure~\ref{fig_int
 \end{equation}
 
 By no means should this model be taken as a rigirous dirivation, but we will use it none the less (and slightly ammend it 
-along the way).
+along the way). A more rigorous derivation is given by Romney in \cite{taylor1999synthesis}[ch. 4].
 
 In reality the fact that the flux is averaged over a small band of frequencies and, additionally, over short periods of 
 time will result in smeared measurements. It is important to emphasize that the baselines between pairs of antennae are 
-\textit{always} measured in terms of wavelength (and by relation frequency) as evident in equation~\ref{EQN_RIGHTHANDED_SYSTEM}.
+\textit{always} measured in terms of wavelength (and by relation frequency) as evident from Equation~\ref{EQN_RIGHTHANDED_SYSTEM}.
 If one were to integrate over such limited bandwidth the problem becomes apparent: the correlator response
 is modulated by $\Delta\nu\sinc{\pi\Delta\nu\tau}$ (sinc is defined as $\sinc{x} = \frac{\sin{x}}{x}$). As apparent from
-Figure~\ref{fig_interferometer} $\tau$ depends on the orientation of the baseline with respect to source and the length of the 
+Figure~\ref{fig_interferometer} $\tau$ depends on the orientation of the baseline with respect to source, as well as the length of the 
 baseline. The correlator response will be maximum only when the source vector is normal to the baseline. Therefore the 
 correlator must compensate for this delay.
 
-Up to this point we conveniently only discussed correlator output for a single feed of each antenna in a two element interferometer.
-Just as in the case of a single element telescope the response from such a correlator will be sensitive to highly directional sources.
-The correlator may therefore additionally correlate all four combinations between the two polarization feeds of each antenna to form 
-a 2x2 matrix of short time averages. Without any loss the flux density average ($B$) in equation~\ref{EQN_ONE_CORR_RIME} can be
-changed to include all four averages. The exponential term then becomes a scalar 2x2 matrix.
+Up to this point we conveniently only discussed correlator output between single feed antennae.
+Just as in the case of a single antenna telescope the response from such a correlator will only be sensitive to highly 
+directional sources. The correlator may therefore additionally correlate all four combinations between the two orthogonal 
+feeds of each antenna to form a 2x2 matrix of short time averages. Without any loss of generality the flux density 
+average ($B$) in equation~\ref{EQN_ONE_CORR_RIME} can be replaced to include all four averages. The exponential term 
+then becomes a scalar 2x2 matrix.
 
 The four Stokes paramters are an easy way to describe the polarization of the measured electromagnetic field. These 
-are non-physical quantities, but give an easy way to express the degree to which the field is linearly or circularly polarized
+are non-physical quantities, but they give an easy way to express the degree to which the field is linearly or circularly polarized
 (and anything inbetween). Each of the parameters Q, U and V are linearly independent and discribe a position on the 
-Poincar\'e Sphere (figure \ref{fig_poincare}). I is the total measured intensity. The coordinates of Q, U and V on 
+Poincar\'e Sphere (figure \ref{fig_poincare}). I is the total measured intensity. The coordinates of Q, U and V are
 those given by:
 \begin{equation}
 \begin{split}
@@ -589,8 +592,8 @@ For linear orthogonal feeds the relationship is slightly different \cite{2011A&A
     \end{array}\right] = B
 \end{equation}
 
-Equation~\ref{EQN_ONE_CORR_RIME} may thus be rewritten to take multiple polarizations, equipment gains and directional effects into account through a \textit{Jones} matricies 
-formulation presented by Smirnov in a series of papers on this formulation and its implications for calibration \cite{2011A&A...527A.106S,2011A&A...527A.107S,2011A&A...527A.108S}:
+Equation~\ref{EQN_ONE_CORR_RIME} may thus be rewritten to take multiple polarizations, equipment gains and directional effects into account through a \textit{Jones} matrices 
+formulation presented by Smirnov in a series of papers where he discusses their implications for telescope calibration \cite{2011A&A...527A.106S,2011A&A...527A.107S,2011A&A...527A.108S,2011A&A...531A.159S}:
 
 \begin{equation}
 \label{eqn_RIME}
@@ -609,9 +612,9 @@ formulation presented by Smirnov in a series of papers on this formulation and i
 
 We shall henceforth refer to this relation as the \textit{Radio Interferometric Measurement Equation (RIME)}. 
 The fundamental assumption here is that all effects on the measured intensities are linear and can therefore be 
-written as two-dimensional matricies. Each antenna will additionally have its own set of these effects. They 
-include corrections for Faraday rotation, ionospheric effects, tropospheric effects, the primary beam (and any rotation over 
-long observations) and pointing error due to weather (wind and heat). These corrections only account for amplitude scaling and 
+written as two-dimensional matrices. Each antenna will have its own set of corrections. They 
+include corrections for Faraday rotation, ionospheric effects, tropospheric effects, the primary beam (and any rotation during
+observation) and pointing error due to weather (wind for instance). These corrections only account for amplitude scaling and 
 phase shifts and can be combined in a layered approach by multiplying several of these Jones terms together (note that the terms 
 may not necessarily commute, so the order of multiplication is important). The different effects will be described later 
 when calibration is discussed.
@@ -619,15 +622,15 @@ when calibration is discussed.
 Up to this point the formulation was only made for two element arrays. However, the linearity of the system allows us
 to simply add multiple of these short term averages together. When discussing signal processing aspects more formally
 it will become clear why this may be done. In practice we can correlate the signal between all possible pairs of 
-dishes and reduce afterwards. This means that the data rates produced in correlation grows quadratically with 
-number of antennae (the number of possible baselines). This includes the auto-correlated baselines (correlation 
+antennae and only reduce afterwards. This means that the data rates produced in correlation grows quadratically with 
+number of antennae (ie. the number of possible baselines). This includes the auto-correlated baselines (correlation 
 of each antenna with itself).
-\begin{equation*}
+\begin{equation}
   \text{number of baselines } = \frac{n(n-1)}{2} + n
-\end{equation*}
+\end{equation}
 
-Inquisiting readers may, rightfully, argue that even if many baselines are used the synthesized aperture will be
-very sparsely sampled, especially when discussing very large arrays. In fact only a handful of small points will be 
+Inquisitive readers may rightfully argue that even if many baselines are used to synthesize an aperture it will still be
+very sparsely sampled, especially when considering very large arrays. In fact only a handful of small points will be 
 sampled during a single integration period - hardly enough to represent a large continuous area! This means that 
 the array telescope will be quite insensitive to very faint sources.
 
@@ -638,30 +641,32 @@ end. Some of the early radio telescope arrays did just this. Although many of th
 of antennae were placed on tracks. These antennae would be moved to different positions to take multiple observations
 of the sky.
 
-The second, more promising way of achieving this with much larger arrays is to use the rotation of the earth to rotate
-the baselines radially with respect to the rotation axis of the planet. This may sound like a radical concept, but it 
-follows naturally from the way we defined the local coordinate frame in equation~\ref{EQN_RIGHTHANDED_SYSTEM}. If the
+Another, more promising, way of achieving this with much larger arrays is to use the rotation of the earth to rotate
+the baselines radially with respect to the rotation axis of the planet. This may sound strange, but it 
+follows naturally from the way the local coordinate frame was defined in Equation~\ref{EQN_RIGHTHANDED_SYSTEM}. If the
 array tracks some point on the sky at some fixed declination over an extended period of time, the change in the hour
-angle will rotate every baseline. This become clearer when recasting the equation from parametric to implicit form. 
+angle will rotate every baseline. This becomes clearer when recasting the equation from parametric to implicit form. 
 
 Start by obtaining the individual expressions for u,v,w in equation~\ref{EQN_RIGHTHANDED_SYSTEM}. If the expressions
-for u and v are manipulated into the familiar form of an elipse it is easy to show (although tedious) that the following
+for u and v are manipulated into the familiar form of an ellipse it is easy to show (although tedious) that the following
 relation holds:
 \begin{equation*}
  u^2 + \left(\frac{v-(L_Z/\lambda)\cos{\delta_0}}{\sin{\delta_0}}\right)^2 = \frac{L_X^2 + L_Y^2}{\lambda^2}
 \end{equation*}
 
-This elipse along the v axis by $\frac{L_Z\cos{\delta_0}}{\lambda}$. The major axis has a length of 
-$\frac{\sqrt{L_X^2 + L_Y^2}}{\lambda}$. It also follows that at low declinations the baselines 
+This ellipse is shifted along the v axis by $\frac{L_Z\cos{\delta_0}}{\lambda}$. The major axis has a length of 
+$\frac{2\sqrt{L_X^2 + L_Y^2}}{\lambda}$. It also follows that at low declinations the baselines 
 of a pure east-to-west array will be nearly parallel to the pointing direction of the telsecope.
-Not only will the for-most antenna shadow the antennae behind it, but there will be little coverage of the u, v
-frame.
+Not only will the foremost antenna shadow the antennae behind it, but there will be little coverage of the u, v
+frame and a very weak response if the $\tau$ is not corrected for. One way of improving u,v coverage is to add baselines
+that are sufficiently perpendicular to the rotation of the Earth (as is done in the VLA). These baselines are rotated into
+the w-direction and present a serious problem in imaging. We will come back to this when discussing wide-field imaging.
 
-To make this more concrete consider a ficticious observation with the Extended Very Large Array. The antenna 
-positions for all 27 antennae, baselines and projected tracks are shown in Figure~\ref{fig_evla_observation}. With
+To make this more concrete consider a fictitious observation with the Extended Very Large Array. The antenna 
+positions for all 27 antennae, available baselines and projected tracks are shown in Figure~\ref{fig_evla_observation}. With
 increasing frequency these tracks expand outward. This means that it is possible to effectively increase coverage
 by observing multiple frequencies and averaging them together. However, this will cause some radial smearing when
-images are synthesized. We will come back to this later on.
+images are synthesized.
 
 \begin{figure}[h]
  \begin{mdframed}
