@@ -181,7 +181,8 @@ the effective area of the antenna. The effective area is defined in terms of the
  A_e = \frac{G\lambda^2}{4\pi}
 \end{equation*}
 Assuming absolutely no losses occur in the measured electric density or any phase errors are introduced, this effective area will approach the geometric area of telescope in the direction
-of maximum constructive interference. 
+of maximum constructive interference. In practical application this is never achieved. The effective collecting area of the telescope is limited by a variety of
+factors including, but not limited to, aperture surface deformation, blockage of the collecting area by support structs and the radiating properties of the feed.
 
 It is worth pointing out that these radiating patterns are measured in the far field of the antenna (at distances at least $\frac{2D^2}{\lambda}$ from
 the antenna where $D$ is the diameter of the aperture) to avoid any near-field reactive effects. The gain of an antenna must therefore be seen as a 
@@ -196,8 +197,7 @@ the lower and upper limits of the band and an inevitable trade-off between rollo
 
 Size is one of the factors governing effectiveness when it comes to bandwidth. Although there are no hard and fast rules about the size of antennae, 
 some general rules of thumb are that antennae that are smaller than $0.5\lambda$ are considered electrically small and antennae more than 
-about $100\lambda$ are considered electrically large, and are capable of attaining much higher gains (and by implication have increased effective 
-collecting areas) in the case of directional antennae. 
+about $100\lambda$ are considered electrically large, and are capable of attaining much higher gains in the case of directional antennae.
 
 For astronomical purposes it is \textit{very important} to have an antenna much, much larger than $\lambda$. This is because some 
 of the most important measurements of a celestial object includes the object's angular size, position (according to some celestial 
@@ -229,7 +229,8 @@ The variation of intensity over the emitting source and frequency are also of si
 will radiate this energy over a very wide band of the electromagnetic spectrum. Large bodies like planets and stars are generally considered to be of 
 this type. The intensity distribution of black-body emission depends on both the equilibrium temperature of the body and the frequency of emission alluded 
 to earlier. A black-body in equilibrium will [on average] have an emission intensity distribution that roughly follows the Plank 
-distribution (Figure~\ref{fig_plank}). Here astronomers may choose to observe several bands that are widely spaced apart.
+distribution (Figure~\ref{fig_plank}). Here astronomers may choose to observe several bands that are widely spaced apart. In this \textit{continuum} 
+observations much of the band may be averaged together without introducing error.
 
 \begin{figure}[ht]
  \begin{mdframed}
@@ -242,13 +243,9 @@ distribution (Figure~\ref{fig_plank}). Here astronomers may choose to observe se
 
 This is by no means the only requirement from an astronomical perspective. Another may be to track the evolution of the universe. Astronomers are able
 track certain very common elements, such as neutral hydrogen, by observing very narrow bands, discretized into many, densely spaced 
-channels (essentially forming a spectrometer). These common elements absorb electromagnetic radiation at known frequencies ($\lambda = 21 cm$ for neutral hydrogen and
-$\lambda \approx 18 cm$ for hydroxyl). Detecting and tracking these elements are of importance in measuring the radial velocities through their \textit{Doppler frequency shift}.
-Any city-dweller experience this effect on a daily basis: the siren of an approaching emergency services vehicle will be higher pitched as that vehicle
-approaches the observer. The pitch will decrease as soon as the vehicle has passed. Similarly these absorption lines will appear to shift to a higher
-frequency if those elements move toward the observer at a relative velocity $v$ (a ``blue shift''). When moving away from the observer the absorption 
-line will appear to shift to a lower frequency (a ``red shift''). These apparent shifts can be used to track, for example, the angular velocity of 
-galaxies: detected hydrogen in one side of the galaxy will blue shift as it moves towards the observer, while the other side will red shift as it moves away from the observer.
+channels. These common elements absorb electromagnetic radiation at known frequencies ($\lambda = 21 cm$ for neutral hydrogen and
+$\lambda \approx 18 cm$ for hydroxyl). These are appropriately called \textit{spectral line} observations and here data from different frequency channels
+will be reduced independently.
 
 \subsubsection{Measurement}
 The energy available at the output terminals of a single aperture antenna will be roughly proportional to the electrical intensity per unit area per unit frequency on the 
@@ -256,7 +253,7 @@ collected planar wavefront. This is the electrical flux density, $S$ measured in
 practically be used interchangeably.
 
 The single antenna telescope measures its power over a limited bandwidth and effective area $A_e$ as explained earlier. Assuming
-no attenuation or delays are introduced by the atmosphere and that the antenna measures two complementary polarizations, this 
+no attenuation or delays are introduced by the atmosphere or equipment, and that the antenna measures two complementary polarizations, this 
 means the total power measured by the telescope when pointed in the direction of a single point source is: 
 \begin{equation*}
 W = A_e.S.\Delta\nu
@@ -266,7 +263,7 @@ At this point it is necessary to introduce a rectangular coordinate system cente
 in the direction of the maximum response, and u and v are the relative horizontal and vertical cutting planes respectively. u, v and w are 
 measured in wavelengths (therefore measured in meters). The direction of a point on the sky (a unit sphere) is given by the 
 direction cosines, measured according to the local frame. These cosines are denoted by l, m and n respectively (note that $l^2 + m^2 + n^2 = 1$). 
-Both $l$ and $m$ may range between $\pm\pi \text{ radians}$ (from horizon to horizon in both directions).
+Both $l$ and $m$ may range between $\pm\pi \text{ radians}$.
 
 Now let $\Omega$ be a \textit{small} solid angle subtended by a very small area. This solid angle is measured in square radians (steradians or ``sr''). A visualization 
 of the measured flux density falling on an infinitesimal area of telescope is given in Figure~\ref{fig_measuring_source_brightness}. The flux density measured 
@@ -288,10 +285,19 @@ where\\
 \end{figure}
 
 In reality multiple sources will be contributing to this integral, each at a separate angle to the pointing center. The integral should therefore be taken over 
-all contributing sources. It was assumed that these radiate independently of each other. The effects of the atmosphere and the radiativity of the antenna (the 
-antenna radiates because it has an internal temperature, and may be thought of as a resistor) were also downplayed. We will come back this point when discussing calibration. 
-In reality a small band of frequencies are measured which results in smeering. A more thorough definition of measurement for array based telescopes will be given, since
-those are the ones of primary interrest in this thesis. 
+all contributing sources. It was assumed that these radiate independently of each other. Furthermore, the effects of the atmosphere, specifically frequency 
+dependent delays and phase rotation, as well as tropospheric effects have been disregarded. The pointing accuracy and radiativity properties of the antenna including its internal 
+temperature, polarization leakage, were also downplayed. Some of these effects can be corrected for through direct calibration and model-fitting techniques, 
+but the exact details are beyond the scope of this introductory discussion. Typically calibration can be broken up into three areas:
+\begin{itemize}
+ \item \textbf{Direct calibration} involves data flagging. This type of calibration is normally used to mark broad portions of the data that is known to be invalid, due to for example
+ technical malfunction. Modern radio astronomy software, for example the CASA reduction suite, have tools for performing this type of calibration.
+ \item \textbf{Calibration through known calibrator sources and apriori information} 
+ \item \textbf{Self-calibration processes} are iterative processes which typically involve model fitting algorithms and techniques.
+\end{itemize}
+
+For more details the reader is referred to Synthesis Imaging II \cite[Lectures 3, 5, 8 and 10]{taylor1999synthesis}. In the measurement section of the next chapter
+we will refer to a general model which may be used to describe both atmospheric and antenna terms and can be used for self-calibration processes.
 
 \subsection{Aperture synthesis with array telescopes}
 \subsubsection{Overview}
@@ -616,8 +622,8 @@ written as two-dimensional matrices. Each antenna will have its own set of corre
 include corrections for Faraday rotation, ionospheric effects, tropospheric effects, the primary beam (and any rotation during
 observation) and pointing error due to weather (wind for instance). These corrections only account for amplitude scaling and 
 phase shifts and can be combined in a layered approach by multiplying several of these Jones terms together (note that the terms 
-may not necessarily commute, so the order of multiplication is important). The different effects will be described later 
-when calibration is discussed.
+may not necessarily commute, so the order of multiplication is important). We will come back to exactly how these terms are applied
+when discussing on how the RIME can be inverted.
 
 Up to this point the formulation was only made for two element arrays. However, the linearity of the system allows us
 to simply add multiple of these short term averages together. When discussing signal processing aspects more formally
@@ -713,6 +719,7 @@ images are synthesized.
  \end{mdframed}
 \end{figure}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MORE ABOUT THE CORRELATOR ONCE WE DISCUSSED FOURIER THEORY
 
 % It is worthwhile to note that the correlation, delay and phase compensations can also be done in the fourier domain, and in the case of delay compensation this approach makes fractional delay compensation feasible (see Taylor et al. \cite{taylor1999synthesis}). These correlators are effectively 
 % known as \textit{FX} correlators. If these power spectra are of high time resolution it is possible to perform surveys focussed on transient detection. Modern arrays such as LOFAR, KAT-7 and MeerKAT (currently under construction) have the capability to perform these searches through
@@ -762,101 +769,53 @@ images are synthesized.
 %   \label{fig_VLBA_uv}
 %  \end{mdframed}
 % \end{figure}
-
-\subsection{Telescope calibration [TODO: some revision and expansion needed]}
-Telescope calibration is regarded as a hard problem in radio astronomy and is filled with heuristical approaches which attempt to correct for, predominantly, those effects which alter the
-incomming electromagnetic wavefronts prior to the process of correlation. It usually deals with both slow and fast-varying effects and is broken into three areas:
-\begin{itemize}
- \item \textbf{Direct calibration} involves data flagging. This type of calibration is normally used to mark broad portions of the data that is known to be invalid, due to for example
- technical malfunction. Modern radio astronomy software, for example the CASA family of toolkits, have tools for performing this type of calibration.
- \item \textbf{Calibration through known calibrator sources and apriori information} 
- \item \textbf{Self-calibration processes} are iterative processes which comprise primarily of intensity adjustments in image space and convergence testing in the uv space.
-\end{itemize}
-
-Much of this overview is based on the litterature of Synthesis Imaging II \cite[Lectures 5, 8 and 10]{taylor1999synthesis}.
-
-\subsubsection{Calibration sources}
- Sources with known flux and other apriori information is used to correct telescope gain. Gain correction focusses on reversing amplitude modulation and phase error, and is 
- comprised of, both directionally dependent effects, and directionally independent effects. Gain have to be corrected either for each baseline or per antenna (the latter is 
- preferred, especially since the number of baselines grow quadratically), and the calibration is performed individually per frequency channel and polarization.
  
- Some of the worst effects are apparent far from delay tracking center at the edge of the field of view. At the edges the gain term stays constant for only a short period of time, which
- places a restriction on the integration interval of the correlator. Longer integration times are only permissible if the angular extent of the source is less than the primary beam size.
- This short time averaging, along with limited bandwidth observation are responsible for some of the radial smearing effects seen in images. See figure~\ref{fig_radial_smeering}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CORRECTING THE RIME TERMS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
  
- \begin{figure}[h]
- \begin{mdframed}
- \centering
- \includegraphics[width=0.9\textwidth]{images/radial_smeering.png}
- \caption[The effects of bandwidth and short-time integration]{The effect of higher frequency components in the bandlimited sampling process manifests itself as orthogonal concentric 
- curves in u,v space, while the effects of short time averaging is smearing in a radial direction. The effect becomes more apparent near the edges of the u,v space \cite{middelberg2008high}.}
-  \label{fig_radial_smeering}
- \end{mdframed}
-\end{figure}
-
- The delay tracking center is, itself, not free from error either. These errors are predominantly due to the antenna's suseptability to wind, the effects of heat on 
- the surface of the antenna or errors made by the equipment used to mechanically stear the reflectors. Special instrumentation like tiltmeters can monitor changes in pointing 
- direction and with fast feedback these can be used to track changes in antenna pointing. Other effects such as those of reflector deformation are less well-studied and can significantly
- alter the beam patterns the antennae. Additional problems such as inadequite timing resolution, quantization errors in the calculation and correction of geometrical 
- delays, and synchronization will also result in pointing error.
-
- Large arrays typically also require phase correction due to other atmospheric effects. At tropospheric levels this includes both dry (stable) and wet effects (largely variable). The problem grows worse with longer baselines and higher
- frequencies, when the curvature, and variations in water-vapor, of the atmosphere has to be taken into consideration. Calibration for these wet effects rely heavily on measurements of atmospheric conditions at the seperate interferometer elements.
- This data is normally stored as additional tables of information and accompany observations.
-
- Another high altitude atmospheric effect dependent on frequency are the Ionospheric phase delay effects ($\propto \upsilon^{-1}$). The electron column densities are measured by high frequency radar examination (an \textit{ionosonde}) or by dual 
- frequency satellite transmission. These effects additionally vary with direction, as the electron density in the ionosphere is not constant over the entire field of view. The frequency dependency of the ionospheric term is 
- normally calibrated by observing a bright source with a flat spectrum over the observed frequency band. These frequency dependency luckily vary slowly with time and only one such calibration is normally needed per observation.
-
- Magnetic effects in the Ionosphere typically produces directionally dependent \textit{Faraday Rotation} which introduces a phase rotation between the R and L polarization feeds and additionally
- varies with frequency as well ($\propto \upsilon^{-2}$). Polarization delays are calibrated through strongly polarized sources. Calibration is additionally needed to accomodate for leakage between 
- orthogonal polarizations. Both the troposphere and ionosphere additionally absorbs some of the source signal and contributes to the noise levels in the signal. These can normally be corrected by 
- observing a source of known flux or tipping curve techniques.
+%  Correcting for known time-uniform directional effects can be achieved through either a facet-based polyhedron approach or through AW-projection. Using a image-space facet-based approach these directional
+%  effects are locally-invariant and are corrected for over small portions of the final image, by multiplying with the appropriate inverse Jones matricies. In AW-projection these effects can be corrected for by convolving with
+%  transposed Jones matricies, and this can be integrated to either the convolutional gridding (reverse Fast Fourier Transform) or degridding (forward Fast Fourier Transform) strategies which will be discussed 
+%  in the next chapter \cite{2011A&A...527A.107S}. Both facet-based and AW-projection approaches will be discussed further in the chapter on non-coplanar wide-field imaging.
+%  
+%  Another approach is to subtract the directionally dependent effects directly from the observed visibilities, before correcting for the directional independent effects at the model
+%  subtraction phase. Such an approach corrects these effects individually per model source and is equivalent to evaluating equation~\ref{eqn_RIME} for a set of discrete sources. These
+%  analytical approaches are computationally prohibative, when compared to the convolution gridding approaches, coupled with either W-projection-based or faceting techniques, although 
+%  it has the advantage of being much more accurate \cite{2011A&A...527A.107S}.
  
- Correcting for known time-uniform directional effects can be achieved through either a facet-based polyhedron approach or through AW-projection. Using a image-space facet-based approach these directional
- effects are locally-invariant and are corrected for over small portions of the final image, by multiplying with the appropriate inverse Jones matricies. In AW-projection these effects can be corrected for by convolving with
- transposed Jones matricies, and this can be integrated to either the convolutional gridding (reverse Fast Fourier Transform) or degridding (forward Fast Fourier Transform) strategies which will be discussed 
- in the next chapter \cite{2011A&A...527A.107S}. Both facet-based and AW-projection approaches will be discussed further in the chapter on non-coplanar wide-field imaging.
- 
- Another approach is to subtract the directionally dependent effects directly from the observed visibilities, before correcting for the directional independent effects at the model
- subtraction phase. Such an approach corrects these effects individually per model source and is equivalent to evaluating equation~\ref{eqn_RIME} for a set of discrete sources. These
- analytical approaches are computationally prohibative, when compared to the convolution gridding approaches, coupled with either W-projection-based or faceting techniques, although 
- it has the advantage of being much more accurate \cite{2011A&A...527A.107S}.
- 
-\subsubsection{Self-calibration}
- The lack of strong calibrators near observed areas, and the requirements placed on the properties of these calibrations, makes the process of calibrating the rapidly varying 
- directional effects within the atmosphere a very hard problem. By allowing the individual element gains to be free parameters forms the basis of self-calibration. 
-
- Self-calibration imposes some restrictions: information about the absolute position, structure and intensity of an observed source is traded
- for improved signal-to-noise ratios. It should be noted that these minimization approaches cannot completely replace the methods of source and polarization calibration mentioned earlier. 
- The effect of these issues are normally incorporated as explicit Jones terms in the model, such as the one mentioned earlier. These effects are greatly reduced by adding additional 
- antennae to the array. The self-calibration problem can be viewed as iteratively improving an initial model by correcting the effects of gain on sky brightness through algorithms such as the Maximum Entropy Method
- and the CLEAN algorithm. The specification of the initial model does not necessarily have to be very accurate for CLEAN to converge at some point: it may simply 
- consist of point sources for relatively simple images. Convergence is, however, not guarenteed.
-
- The H\"ogbom CLEAN algorithm locates (and keeps a list of) the brightest sources in an image in an iterative cycle, subtracting the Point Spread Function from each source until some 
- thresholding condition is met. The remaining image is termed the residuals. After convolving the found point sources with elliptical function fitted over the Point Spread Function, 
- the residuals are added to the convolved image, forming the final ''clean" image. Many other variations on the algorithm exist, bringing with them improvements in execution speed and 
- stability.
-
- While CLEAN provides a procedural approach to deconvolution, the Maximum Entropy Method selects an image that fits the data to within a specified noise level, and is not procedural.
- The method essentially limits the range of pixel values and focusses these ranges around bright objects. Though CLEAN is usually much faster on smaller simple images, it is prohibatively slow 
- on large complex images. Under these conditions the Maximum Entropy Method is outright faster.
-
- Traditional self-calibration, however, assumes that the same ``apparent sky'' is sampled by all antennae, and solves only for the direction independent gain terms. They consider directional dependent terms as simple effects that 
- do not vary in time and is identical per antenna. The addition of directional dependencies within the all-sky integral, primarily those caused by the ionosphere and modulation effects by the primary beam, violates this premis. In 
- the NEWSTAR package the traditional self calibration process includes the following steps \cite{2011A&A...527A.107S}:
- \begin{enumerate}
-  \item Gain minimization per antenna, and the minimization of the residual amplitudes and phases associated to each individual baseline (\textit{closure errors}) through a least squares approach.
-  \item Model subtraction to form a residual image.
-  \item Imaging, deconvolution and model updating using H\"ogbom CLEAN
- \end{enumerate}
- 
- In reality this simple least-squares gain-adjustment process cannot remove the effects due to polarized beam patterns, beam rotations and attenuation, as well as the aforementioned effects of the ionosphere and fast-varying tropospheric
- effects. These directionally dependant effects are not simply a multiplication in u,v space, but should be thought of as a convolution. Because these effects vary with both direction and time, deconvolving them is an extremely tricky proposition: 
- at every timestep since only a handful of points from these convolving functions are sampled! More recently several solutions to solve slow-varying Directional Dependent Effects using self-calibration have been proposed. These include pointing self-calibration,
- peeling, the method of differential gains and other compressive sensing techniques (like the analytical solution descibed in \cite{hardy2013direct}). Peeling is a slightly modified version of traditional self-calibration and is widely tested. It involves iteratively removing the effects from the brightest sources, while 
- differential gains simultaniously solves for the gain effects from bright and faint sources using a mix of Direct Fourier Transform and traditional Discrete Fourier Transform-based approaches \cite{2011A&A...527A.107S,2011A&A...527A.108S}.
+% \subsubsection{Self-calibration}
+%  The lack of strong calibrators near observed areas, and the requirements placed on the properties of these calibrations, makes the process of calibrating the rapidly varying 
+%  directional effects within the atmosphere a very hard problem. By allowing the individual element gains to be free parameters forms the basis of self-calibration. 
+% 
+%  Self-calibration imposes some restrictions: information about the absolute position, structure and intensity of an observed source is traded
+%  for improved signal-to-noise ratios. It should be noted that these minimization approaches cannot completely replace the methods of source and polarization calibration mentioned earlier. 
+%  The effect of these issues are normally incorporated as explicit Jones terms in the model, such as the one mentioned earlier. These effects are greatly reduced by adding additional 
+%  antennae to the array. The self-calibration problem can be viewed as iteratively improving an initial model by correcting the effects of gain on sky brightness through algorithms such as the Maximum Entropy Method
+%  and the CLEAN algorithm. The specification of the initial model does not necessarily have to be very accurate for CLEAN to converge at some point: it may simply 
+%  consist of point sources for relatively simple images. Convergence is, however, not guarenteed.
+% 
+%  The H\"ogbom CLEAN algorithm locates (and keeps a list of) the brightest sources in an image in an iterative cycle, subtracting the Point Spread Function from each source until some 
+%  thresholding condition is met. The remaining image is termed the residuals. After convolving the found point sources with elliptical function fitted over the Point Spread Function, 
+%  the residuals are added to the convolved image, forming the final ''clean" image. Many other variations on the algorithm exist, bringing with them improvements in execution speed and 
+%  stability.
+% 
+%  While CLEAN provides a procedural approach to deconvolution, the Maximum Entropy Method selects an image that fits the data to within a specified noise level, and is not procedural.
+%  The method essentially limits the range of pixel values and focusses these ranges around bright objects. Though CLEAN is usually much faster on smaller simple images, it is prohibatively slow 
+%  on large complex images. Under these conditions the Maximum Entropy Method is outright faster.
+% 
+%  Traditional self-calibration, however, assumes that the same ``apparent sky'' is sampled by all antennae, and solves only for the direction independent gain terms. They consider directional dependent terms as simple effects that 
+%  do not vary in time and is identical per antenna. The addition of directional dependencies within the all-sky integral, primarily those caused by the ionosphere and modulation effects by the primary beam, violates this premis. In 
+%  the NEWSTAR package the traditional self calibration process includes the following steps \cite{2011A&A...527A.107S}:
+%  \begin{enumerate}
+%   \item Gain minimization per antenna, and the minimization of the residual amplitudes and phases associated to each individual baseline (\textit{closure errors}) through a least squares approach.
+%   \item Model subtraction to form a residual image.
+%   \item Imaging, deconvolution and model updating using H\"ogbom CLEAN
+%  \end{enumerate}
+%  
+%  In reality this simple least-squares gain-adjustment process cannot remove the effects due to polarized beam patterns, beam rotations and attenuation, as well as the aforementioned effects of the ionosphere and fast-varying tropospheric
+%  effects. These directionally dependant effects are not simply a multiplication in u,v space, but should be thought of as a convolution. Because these effects vary with both direction and time, deconvolving them is an extremely tricky proposition: 
+%  at every timestep since only a handful of points from these convolving functions are sampled! More recently several solutions to solve slow-varying Directional Dependent Effects using self-calibration have been proposed. These include pointing self-calibration,
+%  peeling, the method of differential gains and other compressive sensing techniques (like the analytical solution descibed in \cite{hardy2013direct}). Peeling is a slightly modified version of traditional self-calibration and is widely tested. It involves iteratively removing the effects from the brightest sources, while 
+%  differential gains simultaniously solves for the gain effects from bright and faint sources using a mix of Direct Fourier Transform and traditional Discrete Fourier Transform-based approaches \cite{2011A&A...527A.107S,2011A&A...527A.108S}.
  \section{Review of core digital signals processing techniques [need revision and simplification]}
 Radio astronomy has its roots in Digital Signals Processing. Before diving into the details of how these telescopes work we refer the reader to the \textit{Scientist and Engineer's guide to Digital Signals Processing} by 
 Steven Smith\footnote{Available freely at \url{http://www.dspguide.com/}}\cite{smith1997scientist} for a detailed, yet simple overview of the field. A (very) brief overview of some of the core terminology is given here.
