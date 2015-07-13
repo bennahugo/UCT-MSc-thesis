@@ -30,15 +30,16 @@
 %	HEADING SECTIONS
 %----------------------------------------------------------------------------------------
 
-\textsc{\LARGE SKA NRF Progress report}\\[1.5cm]
-
+\textsc{\LARGE Progress report}\\
+{\small NRF scarce skills 2014 and SKA NRF postgraduate funding 2015}\\
+{\small Duration of funding: February 2014 - July 2015}\\[1.5cm]
 %----------------------------------------------------------------------------------------
 %	TITLE SECTION
 %----------------------------------------------------------------------------------------
 
 \HRule \\[0.4cm]
-{ \huge \bfseries Bullseye: An parallel targeted facet imager}\\[0.4cm]
-{ \large \url{https://www.github.com/ratt-ru/bullseye}}
+{ \huge \bfseries Bullseye: A parallel targeted facet imager}\\[0.4cm]
+{ \large \url{https://www.github.com/ratt-ru/bullseye} (GNU GPL v3)}\\
 \HRule \\[1.5cm]
  
 %----------------------------------------------------------------------------------------
@@ -134,8 +135,8 @@ approximation brakes down when imaging wider fields of view. This is illustrated
     \caption{Delay in signal propagation between antennas in an array-based telescope}
   \end{subfigure}
   \caption[Widefield phase delay]{The combined propagation delay of emission from sources far away from the telescope pointing centre is a combination
-  of the error between the planar approximation and the celestial sphere in (a) and the height difference between pairs of antennae
-  in the telescope array as illustrated in (b). The total phase error is expressed as $w(n-1)$. The multiplicative effect of this w-term becomes a
+  of the error between the planar approximation and the celestial sphere in (a) and the delay difference between pairs of antennae in the telescope
+  pointing direction as illustrated in (b). The total phase error is expressed as $w(n-1)$. The multiplicative effect of this w-term becomes a
   significant problem in large non-East-West antenna arrays, where the array components do not remain coplanar as the Earth rotates.}
   \label{FIG_WIDEFIELD_ERROR}
 \end{figure}
@@ -170,37 +171,113 @@ effects of incomplete sampling, it is worth investigating how this step may be a
 resampling component of the first two approaches, a hybrid approach between faceting and W-projection. We focus on parallelizing
 this hybrid faceting technique both using CPU multithreading techniques, as well as using General Purpose Graphics 
 Processing Units.
-\section{Hybrid approach}
+\section{Facet imaging (2014)}
 When performing facet imaging multiple smaller images of the sky are made. Each smaller image is made with respect to a new reference
 centre, by phase shifting each coherence measurement. This effectively means that the resampling step has to be done for each
 facet, and the computational complexity of the method grows with number of facets. The filter support region, however remains unchanged.
 
 As Rick Perley \cite{perley1999imaging} points out it is also necessary to make the new facets tangent to the celestial sphere in order 
 to keep the phase error over a fixed field of view comparable between facet images. Failure to do so will result in needing many
-more facets towards the edge of a wide field image than in the centre. We've implemented this classic faceting approach and obtained
+more facets towards the edge of a wide field image than in the centre. We've implemented this classic faceting approach in 2014 and obtained
 good results with both simulated and calibrated data from the Extended Very Large Array. Our imager allows the user to either target the 
-regions around a list of specific coordinates (figure~\ref{FIG_BULLSEYE}) or divide a continuous piece of sky into multiple facets.
+regions around a list of coordinates (figure~\ref{FIG_BULLSEYE}) or divide a continuous piece of sky into multiple facets.
 
 \begin{figure}[h!]
  \centering
- \includegraphics[width=0.65\textwidth]{images/targeted_faceting.png}
+ \includegraphics[width=0.75\textwidth]{images/targeted_faceting.png}
  \caption[Targeted faceting]{Here the prototype user interface for targeted faceting is demonstrated. A region towards the edge
  of a simulated grid sky model is faceted. The facet image is displayed in a new window.}
  \label{FIG_BULLSEYE}
 \end{figure}
 
-However, this approach does pose a cumbersome problem. Since the facets are rotated through a rotation of the sampling coordinates, 
+However, this approach poses a cumbersome problem. Since the facets are rotated through a rotation of the sampling coordinates, 
 the Point Spread Function \footnote {Fourier transform of the sampling coordinates. Each source will be convolved with this function.
 An example is the Gausian-like smearing around each point source in the simulated field in figure~\ref{FIG_SMEARING}. In this instance
 the PSF is ideal. With other array configurations the PSF can take on more cumbersome forms} changes per facet. Unlike in normal 
-narrow field imaging this effectively means that the PSF changes over the final image (each facet will have its own associated PSF).
+narrow fieldimaging this effectively means that the PSF changes over the final image (each facet will have its own associated PSF). Thus, 
+Because of this non-coplanar faceting complicates the task of deconvolution. 
 
-This non-coplanar (or uv-faceting as it is sometimes called) faceting makes the task of deconvolution much more complicated. Instead we 
-additionally investigated using a coplanar faceting approach, where all the facets images are parallel to each other and can be jointly 
-deconvolved and mosaicked into a single image of the sky.
+We opted to investigate a coplanar faceting approach instead. With such an approach all the facet images are parallel to 
+each other and can be jointly deconvolved. There are multiple ways to achieve coplanar faceting. Non-coplanar facets can be
+re-projected and mosaiced onto a common plane using the transformations described by Sault et. al \cite{sault1996approach} in the measurement space 
+or using existing mosaicing software, such as Montage \cite{jacob2004montage} in the image space. Doing the latter reprojection and 
+background correction during every major deconvolution cycle can prove costly - both in the extra memory required and 
+computation time.
 
-With coplanar faceting the error term, $w(n-1)$, must be somehow accounted for when creating a facet far from the original reference
-centre. 
+Another approach that is more in line with the idea behind w-projection is to introduce an approximation of $w(n-1)$ while resampling.
+Here Kogan and Greisen \footnote{AIPS Memo 113 (2009). Available from \url{http://www.aips.nrao.edu/aipsmemo.html}} uses a first order
+tailor approximation to the error term, which we incorporated into our imager. A more accurate approach involves including a higher
+order approximation to the error term through convolution as with w-projection. This increases the filter support size and the 
+computational costs, but using such a hybrid approach it is possible to create larger facet images at the cost of slightly more
+expensive gridding.
+\section{Hybrid W-faceting (2015)}
+In W-projection \cite{cornwell2008noncoplanar} the filtering operation in resampling is changed to include the error term. This filter has to be sampled
+at a high enough rate to accomodate the rapidly changing w value at the edge of the image. The filter is precomputed for a
+range of values for w between $w_{min}$ and $w_{max}$. While resampling the best-fit filter is picked depending on the
+coordinate at which the coherence measurement is taken. See figure~\ref{FIG_W}.
+\begin{figure}[h!]
+ \centering
+ \begin{subfigure}[b]{0.75\textwidth}
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/w100.png}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.75\textwidth}
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/w1000.png}
+ \end{subfigure}
+ \caption[W as a function of image size]{The W-term varies as a function of image size. Larger images have faster varying
+ W-values at the edge of the image. This requires larger filters to accomodate this fast varying function. Non-East-West 
+ Arrays with longer baselines have faster varying w values.}
+ \label{FIG_W}
+\end{figure}
+
+With a hybrid approach \footnote{Suggested by the TDP Calibration group \cite{yashar2009tdp}} the facet images are smaller than those synthesized in a pure 
+w-projection approach. The associated filter support regions, as well as number of w-values being computed, are also smaller. This 
+makes the gridding operation more data parallel and less memory intensive than full w-projection - the latter requires careful consideration when creating 
+images at the Nyquest rate required by the SKA layout (which may be up to $10^{10}$ pixels for the final image according to some estimates). 
+Here either a faceting approach such as the one we're investigating may be needed or the gridding operation will have to be done in 
+multiple passes.
+
+Another advantage to combining faceting with w-projection is that, for smaller fields of view the filter becomes seperable, requiring far
+less memory and precomputation time than its non-seperable counterpart. Additionally this filter is much more likely to fit into the cache memory
+of General Purpose Graphics co-processors - this is essential to achieving good throughput on such architectures.
+\section{Validation on observed EVLA data}
+As part of our validation strategy we've selected a sample EVLA dataset. To ensure the usability of our imager
+we support measurements stored in the NRAO Measurement Set format \footnote{NRAO CASA Memo 229. Available from \url{http://casa.nrao.edu/Memos/229.html}}.
+The data we've selected as part of our standard set of test datasets is the calibrated and flagged measurement of the supernova
+reminant G55.7+3.4 as observed using the EVLA D configuration at L-band. A continuium image is shown in Figure~\ref{FIG_SUPERNOVA}.
+\begin{figure}[h!]
+  \centering
+ \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/mosaic.png}
+    \caption{Mosaiced faceted image (2x2 facets, 1.2\% padding). No additional w-projection.}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/wproj.png}
+    \caption{W-projected image. No faceting.}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/uncorrected.png}
+    \caption{Uncorrected image (normal narrow field imaging).}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/corrections.png}
+    \caption{Up close, from the left: the uncorrected source, the faceted source and 
+    finally the w-projected source}
+ \end{subfigure}
+ \caption[Supernova reminant G55.7+3.4]{In this field there is a clear widefield distorition near
+ right assention $19h26m$, declination $21^\circ7'$. Both the faceting and w-projection
+ implementations corrects the distortion as expected.}
+ \label{FIG_SUPERNOVA}
+\end{figure}
+\section{Implementation and work on acceleration progress}
+
+\section{Work considered out of scope in this project}
+
 \pagebreak
 \bibliography{ska_progress_report}{}
 \bibliographystyle{plain}
