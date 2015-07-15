@@ -82,7 +82,6 @@ Cyril \textsc{Tasse}\\
 \tableofcontents
 \pagebreak
 \listoffigures
-\listoftables
 \pagebreak
 \section{Context}
 There is a well-known fourier relationship between the coherence measurements taken with array-based radio telescopes and
@@ -274,7 +273,7 @@ reminant G55.7+3.4 as observed using the EVLA D configuration at L-band. A conti
  implementations corrects the distortion as expected.}
  \label{FIG_SUPERNOVA}
 \end{figure}
-\section{Implementation and work on acceleration progress}
+\section{Implementation progress}
 \subsection{February 2014 - February 2015}
 A significant portion of the code base for the imager was written during this period. This included a lock-based multithreaded 
 CPU facet imager, based on the non-coplanar method discussed above. I additionally created a GPU-based implementation of the
@@ -295,6 +294,75 @@ parallelization achieved when creating multiple facets in parallel. This account
 During the few weeks I've also reworked a portion of my GPU resampling implementation to use seperable W-projection filters. The implementation now
 caches the w-projection filters in a fast on-chip texture cache that limits accesses to global memory and ensures that the resampling time is roughly 20\% faster than
 performing w-projection without this caching operation.
+\subsection{Latest results}
+I've included figures~\ref{FIG_RESULTS} to showcase our latest results. The modifications and improvements to the CPU-based resampling method
+recently has made a dramatic improvement in runtime. This has made it comparable to a GPU based approach using Romeins distribution strategy,
+as discussed earlier.
+
+\begin{figure}[h!]
+  \begin{subfigure}[b]{0.49\textwidth}
+  \centering
+   \resizebox{\linewidth}{!}{
+      \begin{tikzpicture}
+      \begin{axis}[
+	  title={Single precision gridding results},
+	  ylabel={Seconds},
+	  ymajorgrids=true,
+	  grid style=dashed,
+	  symbolic x coords={Serial,8 threads,GT770},
+	      xtick=data]
+	      \addplot[ybar,fill=blue] coordinates {
+		  (Serial,13342.452)
+		  (8 threads,1823.442)
+		  (GT770,1806.816)
+	      };
+      \end{axis}
+      \end{tikzpicture}
+  }
+  \caption{Comparison between approaches using a hybrid 5x5 facets, w-projection with 31px support kernels}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \resizebox{\linewidth}{!}{
+    \begin{tikzpicture}
+      \begin{axis}[
+	  title={Speedup using per core AVX vectorization when doing W-projection},
+	  xlabel={Filter support per dimension},
+	  ylabel={Speedup (No-AVX / AVX)},
+	  legend pos=south east,
+	  ymajorgrids=true,
+	  grid style=dashed,
+      ]
+      
+      \addplot[
+	  color=blue,
+	  mark=square,
+	  ]
+	  coordinates {
+	  (9,1.4308884327)(17,1.7517694033)(25,1.7849861029)
+	  };
+	  
+      \addplot[
+	  color=green,
+	  mark=triangle,
+	  ]
+	  coordinates {
+	  (9,1.4513690673)(17,1.5463198748)(25,1.7423449855)
+	  };
+	  \legend{Single Precision,Double Precision}
+      \end{axis}
+      \end{tikzpicture}
+  }
+  \caption{Speedup achieved per core when vectorizing the inner most loop in the resampling method using the AVX instruction set}  
+  \end{subfigure}
+  \caption[Acceleration Results]{The following results compares firstly the runtimes between sequential, CPU parallel and GPU parallel
+    approaches (a) and secondly the performance impact of vectorizing w-projection resampling routines (b). Our latest optimizations
+    on CPU-based facet resampling made it comparable to a GPU resampling implementation using Romein's work distribution strategy.
+    In both plots the field G55.7+3.4 is being imaged. Our dataset has 778.91 MiB worth of correlation measurements (visibilities) 
+    alone, excluding supporting data columns.}
+  \label{FIG_RESULTS}
+\end{figure}
+
 \section{Work to be completed within the next few weeks}
 Although the majority of the implementation agreed upon has been completed, there are still a few remaining smaller issues to be investigated and fixed. One of which is
 the effect of doing the resampling in double precision instead of single precision. Support for this is already available in our imager, and the investigation simply entails
@@ -314,6 +382,9 @@ existing and new telescopes has warented a refreshed look at older calibration a
 useful in widefield imaging, where sources may lay outside the primary beam of the telescope. Using facet imaging to approximate the beam pattern while resampling is certainly a promising
 way of dealing with the new reality. Bullseye already has some functionality to read time and frequency varient matricies from an extended measurement set format and all that remains is to
 propagate those tables with values derived from a realistic beam pattern model.
+
+It should be noted that Bullseye is intended to be used as a continuium imager. A useful addition will be the incorporation of 
+relativistic effects necessary to do spectral imaging in very narrow bands.
 \pagebreak
 \bibliography{ska_progress_report}{}
 \bibliographystyle{plain}
