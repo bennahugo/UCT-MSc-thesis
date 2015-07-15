@@ -275,9 +275,45 @@ reminant G55.7+3.4 as observed using the EVLA D configuration at L-band. A conti
  \label{FIG_SUPERNOVA}
 \end{figure}
 \section{Implementation and work on acceleration progress}
+\subsection{February 2014 - February 2015}
+A significant portion of the code base for the imager was written during this period. This included a lock-based multithreaded 
+CPU facet imager, based on the non-coplanar method discussed above. I additionally created a GPU-based implementation of the
+convolutional resampling technique, based partly on a work distribution approach suggested by John Romein \cite{romein2012efficient}.
+In this approach the correlation methods of each antenna pair is added to the regular grid in parallel. Because the tracks from these
+antenna pairs are swept out slowly over the duration of an observation it is possible to limit global write operations, by accumulating
+results in the register memory of the GPU. We further extended this approach to compute multiple facets in parallel. By the end of January 2015
+the GPU-based implementation was working.
+\subsection{March 2015 - June 2015}
+Most of our effort during the past few months was focussed on adding coplanar faceting and rewriting most of the CPU convolutional resampling algorithm.
+The approach we took focusses on a course-grained parallel approach to create facets in parallel, removing the need for locks. We further focussed on implementing
+various forms of the w-projection algorithm and ensuring good performance on the CPU for the purpose of comparison. 
 
-\section{Work considered out of scope in this project}
+Because of the increased filter size a W-projection resampling approach is much slower than regular gridding. However, it does provide an opportunity
+to better employ the vector instruction sets of modern CPUs. We've implemented w-projection employing AVX vectorization in addition to the course-grained 
+parallelization achieved when creating multiple facets in parallel. This accounts for roughly 2 months worth of work.
 
+During the few weeks I've also reworked a portion of my GPU resampling implementation to use seperable W-projection filters. The implementation now
+caches the w-projection filters in a fast on-chip texture cache that limits accesses to global memory and ensures that the resampling time is roughly 20\% faster than
+performing w-projection without this caching operation.
+\section{Work to be completed within the next few weeks}
+Although the majority of the implementation agreed upon has been completed, there are still a few remaining smaller issues to be investigated and fixed. One of which is
+the effect of doing the resampling in double precision instead of single precision. Support for this is already available in our imager, and the investigation simply entails
+simulating several realistic fields and noting the effect of using double precision on the dynamic range of the images. There are also several small bug fixes and small 
+optimizations that can still be made. This should not take more than 2 weeks to complete.
+
+I aim to compare performance against other existing software packages and write up the relevant chapters on implementation and analysis during the 3rd and early 4th quarter
+of the year and have my discertation ready for marking by December 2015. 
+\section{Useful avenues of expansion considered out of scope in this project}
+Our work primarily focussed on accelerating the convolutional resampling algorithm and constructing a viable imager to make dirty sky maps. However, there is significant
+contributions to be made to the imager. One of which is adding a major-minor cycle deconvolution strategy. This should not prove to be too difficult since
+the coplanar facet images can be jointly deconvolved.
+
+Additionally facet imaging provides an opportunity to deal with Directional Dependent Effects. One of the most crutial is the removal of the effects introduced by the antenna
+response pattern. In previous years antenna beam pattern models only consisted of overly simplistics analytic functions. However, improved antenna sensitivity in recent upgrades to
+existing and new telescopes has warented a refreshed look at older calibration and correction techniques. Correcting for the antenna beam pattern in the imaging step will prove very
+useful in widefield imaging, where sources may lay outside the primary beam of the telescope. Using facet imaging to approximate the beam pattern while resampling is certainly a promising
+way of dealing with the new reality. Bullseye already has some functionality to read time and frequency varient matricies from an extended measurement set format and all that remains is to
+propagate those tables with values derived from a realistic beam pattern model.
 \pagebreak
 \bibliography{ska_progress_report}{}
 \bibliographystyle{plain}
