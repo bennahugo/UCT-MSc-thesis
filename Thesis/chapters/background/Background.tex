@@ -1,39 +1,3 @@
-\documentclass[a4paper,10pt]{report}
-\usepackage[utf8]{inputenc}
-\usepackage{fullpage}
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{tikz}
-\usepackage{graphicx}
-\usepackage{mdframed}
-\usepackage{color}
-\usepackage{listing}
-\usepackage{wrapfig}
-\usepackage[parfill]{parskip}
-\usepackage{subcaption}
-\usepackage{hyperref}
-\usepackage[font={small}]{caption}
-\usepackage{marvosym}
-%-----------------------------------------------------
-% Drawing packages
-%-----------------------------------------------------
-\usepackage[usenames,dvipsnames]{pstricks}
-\usepackage{epsfig}
-\usepackage{auto-pst-pdf}
-\usepackage{pst-grad} % For gradients
-\usepackage{pst-plot} % For axes
-%-----------------------------------------------------
-%User-defined operators
-%-----------------------------------------------------
-\DeclareMathOperator*{\sinc}{sinc}
-% Title Page
-\title{Facet-based Imaging}
-\author{Benjamin Hugo}
-\date{April 2014}
-
-\begin{document}
-\maketitle
-\tableofcontents
 \chapter{Background}
 The focus of our work can best be summarized as accelerating the removal of artifacts introduced by creating widefield images from the measurements taken by radio telescopes. 
 In this chapter we give the reader a ``grand tour'' \footnote{It is important to stress that radio astronomy is a cross-section of many disciplines including astronomy, physics, 
@@ -54,8 +18,7 @@ reading the first three texts in order before moving to synthesis imaging):
 } of radio telescopes, including a discussion on what is being measured, how these telescopes work and ultimately how these 
 measurements are related to images of the radio sky. We will then look at how to correct the distortions introduced when imaging over wider fields of view and finally on 
 the technologies we will use to accelerate this wide-field imaging process.
-\section{Introduction to radio astronomy}
-\subsection{Electromagnetic radiation}
+\section{The radio universe}
 Just as with visible light, radio waves are a form of electromagnetic radiation (consisting of waves with an electrical and perpendicular magnetic component) which propagate through free space at the speed 
 of light. Recall from elementary physics that the frequency and wavelength of a wave are related:
 \begin{equation*}
@@ -124,8 +87,8 @@ the spectrum. Since those early days significant progress has been made towards 
 
 Next we will explore how a single element telescope works, before moving onto the topic of aperture synthesis with array-based telescopes.
 
-\subsection{Radio antennae}
-\subsubsection{Overview}
+\section{Radio antennae}
+\subsection{Overview}
 Maxwell's set of partial differential equations (1873) is one of the most elegant ways of explaining the relationship between electrical and magnetic fields, and how these can propagate at the speed of light 
 though free space. In summary they state that a when current flows, a magnetic field is created in the surrounding space. When this magnetic field is varied a accompanying [perpendicular] electrical field is formed. This electrical field 
 varies at the same frequency as the magnetic field, which in turn varies at the frequency at which the underlying current changes. Not only does this mean that antennae can generate electromagnetic fields and transmit signals (provided
@@ -247,7 +210,7 @@ channels. These common elements absorb electromagnetic radiation at known freque
 $\lambda \approx 18 cm$ for hydroxyl). These are appropriately called \textit{spectral line} observations and here data from different frequency channels
 will be reduced independently.
 
-\subsubsection{Measurement}
+\subsection{Measurement}
 The energy available at the output terminals of a single aperture antenna will be roughly proportional to the electrical intensity per unit area per unit frequency on the 
 collected planar wavefront. This is the electrical flux density, $S$ measured in units $Wm^{-2}Hz^{-1}$. It is useful to remind the reader that power is proportional to the square voltage and may 
 practically be used interchangeably.
@@ -299,8 +262,8 @@ but the exact details are beyond the scope of this introductory discussion. Typi
 For more details the reader is referred to Synthesis Imaging II \cite[Lectures 3, 5, 8 and 10]{taylor1999synthesis}. In the measurement section of the next chapter
 we will refer to a general model which may be used to describe both atmospheric and antenna terms and can be used for self-calibration processes.
 
-\subsection{Aperture synthesis with array telescopes}
-\subsubsection{Overview}
+\section{Aperture synthesis with array telescopes}
+\subsection{Overview}
 As pointed out in the previous section the angular resolution is constrained to the diameter of the telescope. For longer 
 wavelengths very big directional antennae are needed to achieve good angular resolution. Unfortunately 
 there are material constraints, increased maintenance costs and a lack in steering capacity associated with large telescopes. 
@@ -341,7 +304,7 @@ the discussion on single antenna telescopes). In VLBI timing and data transport 
 physically shipped to a central location. Combination over the Internet (e-VLBI) has only recently become feasible. Avid readers may 
 refer to the survey conducted by Middelberg et al. \cite{middelberg2008high} for a good introductory overview.
 
-\subsubsection{Measurement}
+\subsection{Measurement}
 It is also possible to think of arrays using a more physical approach. These telescopes measure what is commonly referred 
 to as the \textit{spacial coherence} of a source. A simple analogy describing how array antennae work from a physical 
 perspective would be to think of a point disturbance in a bowl of water. If the amplitude is measured by two calibrated 
@@ -991,7 +954,4 @@ over one axis and then transforms the output on the second axis.
  \section{Multicore architectures [TODO:Still have to be written]}
  {\color{red} TODO: WRITE THIS CHAPTER}
  \section{Review of previous literature [TODO:Still have to be written]}
- {\color{red} TODO: WRITE THIS CHAPTER}
-\bibliography{bibfile}
-\bibliographystyle{plain}
-\end{document}          
+ {\color{red} TODO: WRITE THIS CHAPTER}        
