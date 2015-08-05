@@ -618,11 +618,10 @@ may not necessarily commute, so the order of multiplication is important). We wi
 when discussing on how the RIME can be inverted.
 
 Up to this point the formulation only accounts for two-element arrays. However, the linearity of the system allows us
-to simply add multiple of these short term averages together. When discussing signal processing aspects more formally
-it will become clear why this is possible. In practice, we can correlate the signal between all possible pairs of 
-antennae and only reduce afterwards. This means that the data rates produced in correlation grows quadratically with 
-number of antennae (ie., the number of possible baselines). This includes the auto-correlated baselines (correlation 
-of each antenna with itself).
+to simply combine multiple of these short term averages together to form a single observation using an entire array of
+antennae. In practice, we can correlate the signal between all possible pairs of antennae and only reduce afterwards. 
+This means that the data rates produced in correlation grows quadratically with number of antennae (ie., the number of 
+possible baselines). This includes the auto-correlated baselines (correlation of each antenna with itself).
 \begin{equation}
   \text{number of baselines } = \frac{n(n-1)}{2} + n
 \end{equation}
