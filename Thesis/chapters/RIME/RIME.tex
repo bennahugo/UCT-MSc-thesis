@@ -73,12 +73,11 @@ infrared spectrum is only observable at high altitudes and under dry conditions,
 
 In addition to the optical properties of electromagnetic waves and their attenuation one has to consider the direction of propagation of each point on the incoming wavefront. If most of the energy of these points is strongly 
 directional the wave is said to be \textit{polarized}. For polarized emissions the path traced by each point (of either the electrical or magnetic components) will be highly regular; it will 
-remain in a single plane (\textit{linear} polarization), will spiral at a fixed diameter (\text{circular} polarization) or will spiral elliptically. Circular polarized waves can be thought 
-of as the combination of two perpendicular linearly polarized waves of equal strength (if the two wavefronts are not equally strong the resultant polarization will be elliptical). 
+remain in a single plane (\textit{linear} polarization), will spiral at a fixed diameter (\text{circular} polarization) or will spiral elliptically. 
 
 We can draw on an application of this property from an everyday context: in the visible spectrum sunglasses will filter out all light except vertically polarized light, in order to reduce glare. A single-feed radio 
-antenna will similarly measure a single directional component, and will therefore only be useful in measuring strongly polarized sources. Such antennae are not useful for general observations, save for 
-those of pulsars. In most contexts it is more useful to have two perpendicular feeds (a dipole is a simple example) in order to fully describe the incoming wavefront of the field parallel to the dipole (or at least 
+antenna will similarly measure a single directional component, and will therefore only be useful in measuring strongly polarized sources. Such antennae are not useful for general observations, except for highly directional
+sources. In most contexts it is more useful to have two perpendicular feeds (a dipole is a simple example) in order to fully describe the incoming wavefront of the field parallel to the dipole (or at least 
 the electric component thereof). When the energy measured by both feeds are roughly equal the emitting source is said to be \textit{unpolarized}.
 \begin{figure}[ht]
  \begin{mdframed}
@@ -105,11 +104,11 @@ because of the opaqueness of the ionosphere at longer wavelengths.
 To simplify our discussion we will only consider directional antennae (a simple parabolic reflector with an axial feed above the center of the parabola is 
 one such choice). Here the parabolic reflector serves either to focus highly directional incoming energy to a single point, or conversely to 
 focus the energy of the transmitter into a very narrow beam. Because the wavelengths of radio waves are the size of man-made objects the geometrical optics 
-used in optical telescopes, where waves can be considered as rays, are of very limited use. It is much more preferable to describe these antennae in terms of 
+used in optical telescopes, where waves can be considered as rays, are of very limited use. It is preferable to describe these antennae in terms of 
 physical optics.
 
 Consider, for the moment, that the telescope is suspended in free space with no obstructions in its vicinity (including the ground or supports). If
-we also (in blissful ignorance) discard the effects of the feed between this focus and measuring equipment, then the energy measured at the focus 
+we also discard the effects of the feed between this focus and measuring equipment, then the energy measured at the focus 
 of the parabola should be the sum of contributions across the extent of the collected wavefront. However, instead of focusing all 
 energy at one single point, as one would expect when using geometrical optics, an interference pattern is formed. Here
 distinct beams are discernible (a close analogue to this is the interference pattern formed when light passes through a narrow slit).
@@ -143,7 +142,7 @@ be out of phase depending on the height of the antenna and its declination, port
 may experience significant destructive interference.
 
 The gain, $G$, of the antenna is defined as the ratio of radiation intensity collected in a given direction (as when emitted by a highly 
-directional source), to the intensity that would have been obtained when receiving from an isotropic source. This definition includes feed losses
+directional source), to the intensity that would have been obtained when receiving radiation isotropically. This definition includes feed losses
 due to ordinary resistance and is obviously direction dependent. For our discussion on radio telescopes, however it is much more useful to think in terms of 
 the effective area of the antenna. The effective area is defined in terms of the gain of the antenna as:
 \begin{equation*}
@@ -162,7 +161,7 @@ This may be either a narrow or a wide band of frequencies. Size is one of the fa
 Although there are no hard and fast rules about the size of antennae, a general rule of thumb is that antennae smaller than $0.5\lambda$ are considered electrically small and antennae more than 
 about $100\lambda$ are considered electrically large, and are capable of attaining much higher gains in the case of directional antennae.
 
-For astronomical purposes it is \textit{very important} to have an antenna much larger than $\lambda$ in order to increase both sensitivity 
+For astronomical purposes it is very important to have an antenna much larger than $\lambda$ in order to increase both sensitivity 
 and resolution. Although large objects may easily be resolved if they are smaller than the primary beam in the response pattern of the antenna, 
 the resolution of finer details depends squarely on the angular resolution of the observing telescope:
 
@@ -173,7 +172,7 @@ where $D$ is the aperture diameter.
 
 Small telescopes will smear finer detail, and point sources right next to each other may not be discernible. The angular resolution is
 an indication of the minimum distance at which two point sources can be separated and still be discernible. This sheds some light on astronomers'
-neverending pursuit of larger and larger antennae, as evident by the Arecibo observatory in Puerto Rico (Figure \ref{fig_arecibo}).
+neverending pursuit of larger and larger telescopes, as evident by the Arecibo observatory in Puerto Rico (Figure \ref{fig_arecibo}).
 
 \begin{figure}[ht]
  \begin{mdframed}
@@ -212,11 +211,27 @@ observation of spectral line emission (such as the absorption line of abundant n
 important when tracking the evolution of the universe.
 
 Before deriving a more formal mathematical framework to describe the measurements taken of sources on the celestial sphere it is necessary to introduce a 
-rectangular coordinate system centered on the focus of the antenna, tilted such that w points in the direction of the maximum response, and u and v are the 
-orthogonal horizontal and vertical cutting planes respectively. u, v and w are 
-measured in wavelengths, and therefore measured in meters. The direction of a point on the sky (a unit sphere) is given by the 
-direction cosines, measured according to the local frame. These cosines are denoted by l, m and n respectively (note that $l^2 + m^2 + n^2 = 1$). 
-Both $l$ and $m$ may range between $\pm\pi \text{ radians}$.
+rectangular coordinate system centered on the focus of the antenna, tilted such that x and y are the orthogonal horizontal and vertical cutting planes respectively, and z
+is orthogonal to both. The direction of a point on the sky (a fictitious unit sphere) is given by the direction cosines, measured according to this local frame. These cosines are 
+denoted by l, m and n respectively (note that $l^2 + m^2 + n^2 = 1$), and can be measured in terms of the azimuth and elevation/zenithal angles to the source along the local horizon.
+Zenith is the position directly upwards from the telescope. Refer to Figure~\ref{fig_lmn}.
+\begin{figure}[ht]
+\begin{mdframed}
+ \centering
+ \includegraphics[width=0.75\textwidth]{images/lmn.png}
+ \caption[lmn coordinates]{Source coordinates measured according to the local horizon. The sky dome is represented by a fictitious unit sphere called the celestial sphere in order to simplify 
+ the mathematics. The Azimuth angle is measured from the south while the zenith angle (directly above the observer) is measured along the great circle connecting the north-south meridian, the source 
+ and the horizon. Note that the arclengths are given by $Z=1\theta$ and $A=1\phi$. Figure taken from \cite{christiansenradiotelescopes}.}
+ \label{fig_lmn}
+\end{mdframed}
+\end{figure}
+\begin{equation*}
+ \begin{split}
+  l &= \sin{Z}\sin{A}\\
+  m &= \sin{A}\cos{A}\\
+  n &= \cos{Z}\\
+ \end{split}
+\end{equation*}
 
 Now let $\Omega$ be a \textit{small} solid angle subtended by a very small area. This solid angle is measured in square radians (steradians or ``sr''). A visualization 
 of the measured flux density falling on an infinitesimal area of telescope is given in Figure~\ref{fig_measuring_source_brightness}. The flux density measured 
@@ -226,7 +241,7 @@ per steradian over the entire solid angle per unit frequency must then be
     \label{REF_EQN_SINGLE_ANTENNA}
   \end{equation}
 where\\
-  $p$ is traditionally measured in Janskies ($10^{-26}.W.m^{-2}.Hz^{-1}$)\\
+  $p$ is traditionally measured in terms of Janskies ($1\text{Jy} := 10^{-26}\text{W}\text{m}^{-2}\text{Hz}^{-1}$) per steradian\\
   $I$ is the flux density measured per unit steradian: $I(l,m) := \frac{\Delta S(l,m)}{\Delta\Omega}$\\
 \begin{figure}[ht]
 \begin{mdframed}
@@ -276,7 +291,7 @@ large areas may not be covered at all. As we see later this produces smearing in
 discussion by itself.
 
 The resolving power obtained from such a synthesized aperture depends on the distance between the furthest separated 
-telescopes, and can be expressed as:
+antennae, and can be expressed as:
 \begin{equation*}
  \text{angular resolution} \propto \frac{\lambda}{B} \text{ if } D\ll B
 \end{equation*}
@@ -286,7 +301,7 @@ where $D$ is the diameter of the largest aperture in the array and $B$ is the le
 Since Martin Ryle and his collaborators made their pioneering observations using array telescopes there has been
 a significant drive towards building arrays of ever-increasing size. In applications where angular resolution is
 the one of the dominant factors it is even possible to connect up telescopes located on different continents, or even orbiting satellites.
-This is appropriately called \textit{Very Long Baseline Interferometry}. Avid readers may refer to the survey 
+This is appropriately called \textit{Very Long Baseline Interferometry}. For more details refer to the survey 
 conducted by Middelberg et al. \cite{middelberg2008high} for a good introductory overview of VLBI. In the next section we discuss
 what is meant by an interferometer and why array telescopes are referred to as radio interferometers
 
@@ -399,20 +414,22 @@ Fainter sources have to be observed for much longer to be discernible from noise
 of tracking stellar sources.
 
 For this discussion refer to Figure~\ref{fig_celestrial_coords} for a visual reference. Due to the rotation 
-axis of the earth sources on the celestial sphere will appear to move both in azimuth and elevation, moving from East to West.
-However, it may not be immediately apparent that the rising and setting positions of a source (for example the sun) with respect to the local horizon
-do not remain fixed throughout the duration of a year. If one were to point a camera due East to monitor the sunrise
-over the course of one year, the rising position will appear to oscillate around true East over the course of the year. Only at two 
-points during the year will the sun rise due East - these are known as the spring and autumn equinoxes. At these points the 
-plane containing the earth's equator intersects the sun. This is the reason why the sun will appear to move along different star 
-constellations throughout the year. Hence astronomers need a coordinate system that measures the earth's rotation with respect 
-to the stars and not the sun in order to accurately fix the position of sources for long term observation (on the scale of decades).
+axis of the earth sources on the celestial sphere will appear to move both in azimuth and elevation, steadily moving from East to 
+West and completing a full rotation in just under 24 hours. In order to track sources over a prolonged period of time it is very 
+useful to convert their coordinates to a reference frame where the path of a source is determined only by an hour angle. However, for this 
+to work astronomers need a coordinate system that measures the Earth's rotation with respect to the stars and not the sun. 
 
-In order to track sources over a prolonged period of time it is also very useful to convert their coordinates to a reference 
-frame where the path of a source is determined only by an hour angle. In this reference frame the equator of the earth
-is projected out onto the unit celestial sphere mentioned previously. The declination of a source is the distance
-along the great circle connecting the North Celestial Pole (NCP, the projection of the magnetic north pole onto the unit sphere)
-and the projected equator.
+It may not immediately be apparent that the rising and setting positions of the sun with respect to the local horizon do not remain fixed 
+throughout the duration of a year. If one were to point a camera due East to monitor the sunrise over the course of one year, the rising 
+position will appear to oscillate around true East over the course of the year. Only at two points during the year will the sun rise due East - 
+these are known as the spring and autumn equinoxes. At these points the plane containing the earth's equator intersects the sun. This is the 
+reason why the sun will appear to move along different star constellations throughout the year. 
+
+Instead astronomers use the local sidereal time as the hour angle to a source. A sidereal day is slightly shorter than the solar day and the reference 
+point for the angle is the vernal equinox - which remains valid on the scale of decades. In this reference frame the equator of the earth is projected 
+out onto the unit celestial sphere mentioned previously. The declination of a source is the distance along the great circle 
+connecting the North Celestial Pole (NCP, the projection of the magnetic north pole onto the unit sphere) and the 
+projected equator.
 
 \begin{figure}[h]
  \begin{mdframed}
@@ -476,7 +493,7 @@ A similar left-handed convention can just as easily be defined ($\alpha_0$ is th
 Ignoring the effects of polarization, the directional antenna gain (the beam, as before) and any atmospheric effects
 for the moment, the correlator will measure values proportional to:
 \begin{equation*}
-    p(u,v,w) \approx \int_{sources}\int_{sources}{\left<E_p(\vec{s})E_q^*(\vec{s'})\right>e^{2\pi i\vec{p}\cdot\vec{s}}e^{-2\pi i\vec{q}\cdot\vec{s'}}d\Omega_pd\Omega_q}     
+    p(u,v,w) \approx \left<\int_{sources}\int_{sources}{E_p(\vec{s})E_q^*(\vec{s'})e^{2\pi i\vec{p}\cdot\vec{s}}e^{-2\pi i\vec{q}\cdot\vec{s'}}d\Omega_pd\Omega_q}\right>     
 \end{equation*}
 
 Here E is the flux density over a small area (stemming directly from equation~\ref{REF_EQN_SINGLE_ANTENNA}). The assumption that two sources at differing locations are 
@@ -515,8 +532,8 @@ If one were to integrate over such limited bandwidth a problem becomes apparent:
 is modulated by $\Delta\nu\sinc{\pi\Delta\nu\tau}$ (sinc is defined as $\sinc{x} = \frac{\sin{x}}{x}$). As apparent from
 Figure~\ref{fig_interferometer}, $\tau$ depends on the orientation of the baseline with respect to a source, as well as the length of the 
 baseline. The correlator response will be maximum only when the source vector is normal to the baseline. Therefore the 
-correlator must compensate for this delay, as well as continuously shift the fringe modulation function to the phase centre of the 
-observed field.
+correlator must continuously compensate for this delay at the tracking centre, as well as continuously shift the fringe modulation 
+function to the phase centre of the observed field.
 
 Up to this point we have for simplicity only discussed correlator output between single feed antennae.
 Just as in the case of a single antenna telescope, the response from such a correlator will only be sensitive to highly 
@@ -639,9 +656,9 @@ This ellipse is shifted along the v axis by $\frac{L_Z\cos{\delta_0}}{\lambda}$.
 $\frac{2\sqrt{L_X^2 + L_Y^2}}{\lambda}$. It also follows that at low declinations the baselines 
 of a pure east-to-west array will be nearly parallel to the pointing direction of the telsecope.
 Not only will the foremost antenna shadow the antennae behind it, but there will be little coverage of the u, v
-frame and a very weak response if the $\tau$ is not corrected for. One way of improving u,v coverage is to add baselines
-that are sufficiently perpendicular to the rotation of the Earth (as is done in the VLA). However, these baselines are rotated into
-the w-direction and present a serious problem in imaging. We will come back to this when discussing wide-field imaging.
+frame. One way of improving u,v coverage is to add baselines that are sufficiently perpendicular to the 
+rotation of the Earth (as is done in the VLA). However, these baselines are rotated into the w-direction 
+and present a serious problem in imaging. We will come back to this when discussing wide-field imaging.
 
 To make this more concrete consider a fictitious observation with the Extended Very Large Array. The antenna 
 positions for all 27 antennae, available baselines and projected tracks are shown in Figure~\ref{fig_evla_observation}. With
@@ -652,35 +669,35 @@ images are synthesized.
 \begin{figure}[h]
  \begin{mdframed}
  \centering
- \begin{subfigure}[b]{0.3\textwidth}
+ \begin{subfigure}[b]{0.32\textwidth}
   \includegraphics[width=\textwidth]{images/vla.jpg}
   \caption{}
  \end{subfigure}
- \begin{subfigure}[b]{0.3\textwidth}
+ \begin{subfigure}[b]{0.32\textwidth}
   \includegraphics[width=\textwidth]{images/evla_observation/array_config.png}
   \caption{}
  \end{subfigure}
- \begin{subfigure}[b]{0.3\textwidth}
+ \begin{subfigure}[b]{0.32\textwidth}
   \includegraphics[width=\textwidth]{images/evla_observation/5min_snapshot_ncp.png}
   \caption{}
  \end{subfigure}
- \begin{subfigure}[b]{0.3\textwidth}
+ \begin{subfigure}[b]{0.32\textwidth}
   \includegraphics[width=\textwidth]{images/evla_observation/6hr_ncp.png}
   \caption{}
  \end{subfigure}
- \begin{subfigure}[b]{0.3\textwidth}
+ \begin{subfigure}[b]{0.32\textwidth}
   \includegraphics[width=\textwidth]{images/evla_observation/6hr_dec60.png}
   \caption{}
  \end{subfigure}
- \begin{subfigure}[b]{0.3\textwidth}
+ \begin{subfigure}[b]{0.32\textwidth}
   \includegraphics[width=\textwidth]{images/evla_observation/6hr_dec30.png}
   \caption{}
  \end{subfigure}
- \begin{subfigure}[b]{0.3\textwidth}
+ \begin{subfigure}[b]{0.32\textwidth}
   \includegraphics[width=\textwidth]{images/evla_observation/6hr_dec5.png}
   \caption{}
  \end{subfigure}
- \begin{subfigure}[b]{0.3\textwidth}
+ \begin{subfigure}[b]{0.32\textwidth}
   \includegraphics[width=\textwidth]{images/evla_observation/6hr_dec0.png}
   \caption{}
  \end{subfigure}
