@@ -103,8 +103,29 @@ interferometers in general: the $\psf$ acts very similar to a high-pass filter. 
 in the image. This is not always desirable - observing extended emission sources is equally important, which requires only short baselines.
 
 This brings us to consider a strategy to deconvolve the extended lobe structure of the $\psf$ from the images. In order to achive this goal we make an assumption about the distribution of sources in the sky, in that the radio
-sky is mostly void of emission. If we further assume most sources are compact point-like sources it gives us one possible strategy to remove some of the $\psf$ structure:
-
+sky is mostly void of emission. If we further assume most sources are compact point-like sources it gives us one possible strategy to remove some of the $\psf$ structure as stated in
+Algorithm~\ref{alg_clean}
+\begin{algorithm}
+  \begin{algorithmic}
+  \STATE {Given a dirty image, $d$ of size $n \times m$ pixels}
+  \STATE {Given a synthesized $\psf$ of size $p \times q$}
+  \STATE {Let $c$ be an all-zero cleaned image of size $n \times m$}
+  \STATE {Given the loop gain $0.0 \leq \gamma \leq 1.0$}
+  \STATE {Let $R_p = \infty$}
+  \STATE {Let $R_c = \infty$}
+  \REPEAT
+      \STATE {Let $b$ be the position of the maximum value in $d$}
+      \STATE {Set $c[b] = c[b] + \gamma\max{d}$}
+      \STATE {Subtract from $d$ the scaled beam $\gamma\max{d}\psf$, centred on position $b$}    
+      \STATE {Set $R_p = R_c$}
+      \STATE {Set $R_c = \frac{\max{d}}{\rms{d}}$}
+  \UNTIL {$|R_p - R_c| \leq \epsilon$ \OR maximum iterations reached} 
+  \STATE {Convolve $c$ with gausian-like function with half-amplitude width equal to that in the \psf}
+  \STATE {Set $c[...] = c[...] + d[...]$, ie. add the residual noise back into the cleaned image}
+  \end{algorithmic}
+  \caption{The H\"ogbom CLEAN algorithm}
+  \label{alg_clean}
+\end{algorithm}
 \section{Narrow field synthesis using the FFT}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MORE ABOUT THE CORRELATOR ONCE WE DISCUSSED FOURIER THEORY
 
