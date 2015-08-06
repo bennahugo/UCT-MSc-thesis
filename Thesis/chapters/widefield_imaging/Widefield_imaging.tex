@@ -12,7 +12,7 @@ The inversion of this equation is as simple as taking an inverse Fourier Transfo
 \end{equation*}
 Observe that this is practically the same as the RIME. If the delta functions are replaced with the scaled intensities over infinitesimally small areas of the sky as defined previously and the direction dependent and
 independent terms are added in the convolution integral the two integrals are practically identical, apart from the $w(\sqrt{1-l^2-m^2}-1)$ term in the complex exponent and the $n = \sqrt{1-l^2-m^2}$ in the denumerator. 
-For narrow fields of view this term is much less than unity and can be ignored. We will revisit this assumption later on when discussing the wide field problem.
+For narrow fields of view these terms are much less than unity and can be ignored. We will revisit this assumption later on when discussing the wide field problem.
 
 In order to get the \emph{observed} intensity distribution back the Fourier transform can simply be inverted. However, inversion is not all the synthesis imaging problem entails; a distinction has to be drawn
 between the \emph{observed} and \emph{true} radio sky: how much of the \emph{true} radio sky can be recovered, given the imperfect measurements made with a radio interferometer over a limited amount of time? Foremost, the
@@ -63,7 +63,7 @@ dependent and independent effects.
  \end{mdframed}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[ht!]
  \begin{mdframed}
  \centering
  \begin{subfigure}[b]{0.39\textwidth}
@@ -95,6 +95,15 @@ dependent and independent effects.
   \label{fig_model_convolution}
  \end{mdframed}
 \end{figure}
+
+Referring back to the sampling tracks in Figure~\ref{fig_evla_observation} highlights a further (but minor) complication with the PSF: there are clearly more short baselines than long baselines. The resulting effect on this non-uniform
+weighting in the sampling function is a broadening of the $\psf$ and by implication an bias towards resolving extended structure in the image space. In order to resolve finer (compact) emission structure in the image
+it is necessary to divide through by the number of samples in the neighborhood of each point in the measurement space, in order to \emph{uniformly} weight the synthesized image. This highlights an important aspect about
+interferometers in general: the $\psf$ acts very similar to a high-pass filter. Adding longer baselines to an array increases the compactness of the $\psf$, which in turn serves to resolve higher frequency structure (edges, points, etc.)
+in the image. This is not always desirable - observing extended emission sources is equally important, which requires only short baselines.
+
+This brings us to consider a strategy to deconvolve the extended lobe structure of the $\psf$ from the images. In order to achive this goal we make an assumption about the distribution of sources in the sky, in that the radio
+sky is mostly void of emission. If we further assume most sources are compact point-like sources it gives us one possible strategy to remove some of the $\psf$ structure:
 
 \section{Narrow field synthesis using the FFT}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MORE ABOUT THE CORRELATOR ONCE WE DISCUSSED FOURIER THEORY
