@@ -103,12 +103,11 @@ interferometers in general: the $\psf$ acts very similar to a high-pass filter. 
 in the image. This is not always desirable - observing extended emission sources is equally important, which requires only short baselines.
 
 This brings us to consider a strategy to deconvolve the extended lobe structure of the $\psf$ from the images. In order to achive this goal we make an assumption about the distribution of sources in the sky, in that the radio
-sky is mostly void of emission. If we further assume most sources are compact point-like sources it gives us one possible strategy to remove some of the $\psf$ structure as stated in
-Algorithm~\ref{alg_clean}
+sky is mostly void of emission. If we further assume most sources are compact point-like sources it gives us one possible strategy to remove some of the $\psf$ structure as stated in Algorithm~\ref{alg_clean}
 \begin{algorithm}
   \begin{algorithmic}
   \STATE {Given a dirty image, $d$ of size $n \times m$ pixels}
-  \STATE {Given a synthesized $\psf$ of size $p \times q$}
+  \STATE {Given a synthesized $\psf$ of size $2n \times 2m$}
   \STATE {Let $c$ be an all-zero cleaned image of size $n \times m$}
   \STATE {Given the loop gain $0.0 \leq \gamma \leq 1.0$}
   \STATE {Let $R_p = \infty$}
@@ -126,6 +125,19 @@ Algorithm~\ref{alg_clean}
   \caption{The H\"ogbom CLEAN algorithm}
   \label{alg_clean}
 \end{algorithm}
+
+Although CLEAN was initially intended only to work on a sky consisting of point sources, practice shows that it
+deconvolves regions of extended emission as well. The output is then a collection of clean components spaced closely
+together. 
+
+The $\psf$ subtraction in the image / sky domain for every detected source is a relatively expensive operation. One of the
+most notable adaptions to CLEAN is the Cotton-Schwab major-minor cycle adaption to the algorithm. Here only a truncated
+$\psf$ (up to the first few sidelobes) is subtracted in the image domain. The resulting clean model is then converted back
+to the continuous measurement domain (here again the measurement is predicted by the RIME) and then subtracted from the 
+observed visibilities. The convergence criteria of the algorithm is well beyond the introductory discussion here. Refer to 
+Thompson et al. \cite[ch 11]{thompson2008interferometry} for a more detailed discussion and further reading on the topic.
+
+
 \section{Narrow field synthesis using the FFT}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MORE ABOUT THE CORRELATOR ONCE WE DISCUSSED FOURIER THEORY
 
