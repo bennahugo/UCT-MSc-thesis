@@ -3,7 +3,7 @@ In this chapter we discuss how the Radio Interferometric Measurement Equation ca
 delving into the finer details of creating what is known as ``dirty'' images of the sky and correcting the wide field distortions introduced in the images when breaking the assumptions made when the images 
 are synthesized using a Fast Fourier Transform. Finally we discuss previous literature on acceleration of the correcting process, before moving onto the design of our imager in the following chapter. Before
 continuing readers not familiar should refer to Appendix~\ref{chp_DSP} for a refresher on basic signal processing concepts.
-\section{The self-calibration, imaging and deconvolution pipeline}
+\section{The calibration, imaging and deconvolution pipeline}
 The RIME can be thought of as the equation that predicts what measurement the telescope should make, given a model radio sky (\emph{intensity distribution}), telescope behavior and environmental effects as inputs. 
 The inversion of this equation is as simple as taking an inverse Fourier Transform. To see why this is true consider that the continuous sky is simply an infinite sequence of shifted and scaled impulses 
 (or delta functions), where each impulse is infinitesimally narrow, has an area of 1 and is infinitely high at the origin (zero everywhere else). The Fourier transform of this delta function is simply:
@@ -134,23 +134,48 @@ The $\psf$ subtraction in the image / sky domain for every detected source is a 
 most notable adaptions to CLEAN is the Cotton-Schwab major-minor cycle adaption to the algorithm. Here only a truncated
 $\psf$ (up to the first few sidelobes) is subtracted in the image domain. The resulting clean model is then converted back
 to the continuous measurement domain (here again the measurement is predicted by the RIME) and then subtracted from the 
-observed visibilities. In fact this major-minor cycle approach ideal when dealing with multiple adjacent fields. 
+observed visibilities. In fact this major-minor cycle approach works well when deconvolving multiple adjacent fields. 
 
 The convergence criteria of the algorithm is well beyond the introductory discussion here. Refer to Thompson et 
 al. \cite[ch 11]{thompson2008interferometry} for a more detailed discussion and further reading on the topic. More
 recently new sparce synthesis and analysis approaches has been suggested as alternatives to CLEAN. An example is the 
 MORESANE \cite{dabbech2015moresane} algorithm.
 
-In addition to the $\psf$ deconvolution problem is the telescope calibration problem. One of the more pronounced directional 
-dependent effects is the antenna primary beam in wide field imaging. It is possible to decern bright sources in the sidelobes 
-of the antenna beam (and they will contribute to the $\psf$ convolution just the same as sources inside the primary beam). However, 
-as already mentioned, the antenna gain vary accross the field of view. This means that some sources
-will be more resolved than others for the same amount of observation time, depending on their position in the sky. 
-Adding to the complexity, the beam pattern can be anisotropic; one cause can be the struts above a prime-focus antenna. 
-If the antennae are placed on alt-azumuth mounts the sky rotates with respect to this anisotropic beam pattern over 
-the course of an observation. This results in sources that is only partially resolved everywhere other than well 
-within the primary beam. The correction of this effect alone is not a trivial undertaking and involves a convolution
+In addition to the $\psf$ deconvolution problem is the telescope calibration problem. Appart from removing unwanted
+radio interference and erroneous measurements through flagging and solving for varying instrumental gains, it is also
+necessary to calibrate known, and solve for unknown directional-dependent effects. One of the more pronounced directional 
+dependent effects is the antenna primary beam and its associated polarization effects in wide field imaging. We will return
+to ways of solving this problem after discusssing the projection effect introduced by the $w(n-1)$ term in the RIME.
 
+To summarize this discussion the general imaging pipeline is illustrated in Figure~\ref{fig_img_pipeline}. Next we will discuss
+how images can be efficiently synthesized (fourier inverted / ``backward step'') using a narrow-field approximation.
+\begin{figure}[h]
+ \centering
+ \begin{tikzpicture}[node distance=4.5cm]
+  \node (start) [startstop] {};
+  \node (dical) [process, right of=start] {Direction independent calibration \& flagging};
+  \node (backward) [process, right of=dical] {Fourier inversion (synthesis/``backward computation'')};
+  \node (minor) [process, below of=backward] {Minor cycle model estimation};
+  \node (prediction) [process, below of=minor] {Continuous measurement/visibility calculation (``Prediction'') using the RIME};
+  \node (major) [process, left of=prediction] {Major cycle residual calculation};
+  \node (converged) [decision, above of=major] {Converged};
+  \node (finalize) [process, left of=converged] {Clean map creation};
+  \node (stop) [startstop, below of=finalize] {};
+  \draw [rarrow] (start) -- node [yshift=0.3cm] {Observed} (dical);
+  \draw [rarrow] (dical) -- (backward);
+  \draw [rarrow] (backward) -- node [anchor=west] {``Dirty''} (minor);
+  \draw [rarrow] (minor) -- node [anchor=west] {``Model''} (prediction);
+  \draw [rarrow] (prediction) -- node [yshift=0.3cm] {$V(u,v)$} (major);
+  \draw [rarrow] (major) -- (converged);
+  \draw [rarrow] (converged) -- node[yshift=0.3 cm] {yes} (finalize);
+  \draw [rarrow] (converged) -- node[anchor=west] {no} (backward);
+  \draw [rarrow] (finalize) -- (stop);
+ \end{tikzpicture}
+ \caption[Imaging pipeline]{Here the traditional imaging pipeline is shown. The known directional-dependent calibration terms are taken 
+ into account during the ``backwards'' inversion step, while the unknown slowly varying directional-dependent effects can be solved for
+ if enough about the model sky is known.}
+ \label{fig_img_pipeline}
+\end{figure}
 
 \section{Narrow field synthesis using the FFT}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MORE ABOUT THE CORRELATOR ONCE WE DISCUSSED FOURIER THEORY
@@ -200,22 +225,7 @@ within the primary beam. The correction of this effect alone is not a trivial un
 %  While CLEAN provides a procedural approach to deconvolution, the Maximum Entropy Method selects an image that fits the data to within a specified noise level, and is not procedural.
 %  The method essentially limits the range of pixel values and focusses these ranges around bright objects. Though CLEAN is usually much faster on smaller simple images, it is prohibatively slow 
 %  on large complex images. Under these conditions the Maximum Entropy Method is outright faster.
-% 
-%  Traditional self-calibration, however, assumes that the same ``apparent sky'' is sampled by all antennae, and solves only for the direction independent gain terms. They consider directional dependent terms as simple effects that 
-%  do not vary in time and is identical per antenna. The addition of directional dependencies within the all-sky integral, primarily those caused by the ionosphere and modulation effects by the primary beam, violates this premis. In 
-%  the NEWSTAR package the traditional self calibration process includes the following steps \cite{2011A&A...527A.107S}:
-%  \begin{enumerate}
-%   \item Gain minimization per antenna, and the minimization of the residual amplitudes and phases associated to each individual baseline (\textit{closure errors}) through a least squares approach.
-%   \item Model subtraction to form a residual image.
-%   \item Imaging, deconvolution and model updating using H\"ogbom CLEAN
-%  \end{enumerate}
-%  
-%  In reality this simple least-squares gain-adjustment process cannot remove the effects due to polarized beam patterns, beam rotations and attenuation, as well as the aforementioned effects of the ionosphere and fast-varying tropospheric
-%  effects. These directionally dependant effects are not simply a multiplication in u,v space, but should be thought of as a convolution. Because these effects vary with both direction and time, deconvolving them is an extremely tricky proposition: 
-%  at every timestep since only a handful of points from these convolving functions are sampled! More recently several solutions to solve slow-varying Directional Dependent Effects using self-calibration have been proposed. These include pointing self-calibration,
-%  peeling, the method of differential gains and other compressive sensing techniques (like the analytical solution descibed in \cite{hardy2013direct}). Peeling is a slightly modified version of traditional self-calibration and is widely tested. It involves iteratively removing the effects from the brightest sources, while 
-%  differential gains simultaniously solves for the gain effects from bright and faint sources using a mix of Direct Fourier Transform and traditional Discrete Fourier Transform-based approaches \cite{2011A&A...527A.107S,2011A&A...527A.108S}.
- 
+
  There are generally two techniques used to approximate the fourier transforms between the observed visibilities and the (dirty) image. Either a brute force Direct Fourier Transform is taken where each grid point is approximated through a brute-force
  evaluation over all the observed visibilities (M of them in total). This approach requires on the order of $O(N^2M) \approx O(N^4)$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large number of visibilities. A basic co-planar analytical 
  algorithm boils down to a summation of complex multiplications over the entire grid in the image space \cite[Lecture 7]{taylor1999synthesis}: 
@@ -333,4 +343,46 @@ be scalled over multiple multicore accelerators. A detailed comparison between t
 \subsection{Anti-aliasing filters}
 \subsection{Introducing the W-term}
 \subsection{Filter seperability}
+\section{Revisiting the direction dependent effects}
+Traditional calibration pipelines assumes that the same ``apparent sky'' is sampled by all antennae, and attempts to solve only the unknown direction-independent gain terms.
+This process is known as \textit{self-calibration}. Furthermore some packages like the CASA framework consider directional dependent terms as simple effects 
+that do not vary in time and is identical per antenna. The addition of directional dependencies within the all-sky integral, primarily those caused by the 
+ionosphere and modulation effects by the primary beam, violates this premis. 
+
+The self-calibration process relies on a knowing some aspects of the sky and can include one or more well-described sources. It includes the 
+following steps \cite{2011A&A...527A.107S}:
+ \begin{enumerate}
+  \item Gain minimization per antenna, and the minimization of the residual amplitudes and phases associated to each individual baseline.
+  \item Imaging, deconvolution and model updating using H\"ogbom CLEAN
+ \end{enumerate}
+ 
+In reality this simple gain-adjustment process cannot remove the polarization effects due to the primary beam, nor can it solve for unknown slow-varying 
+directional dependent gain terms. If we for the moment only consider the known polarization effects of the antenna beam (which can be modeleled or 
+measured using Holography) it becomes clear that some sources will be more resolved than others for the same amount of observation time, 
+depending on their position in the sky. In practice, the beam pattern is also anisotropic; one possible cause can be 
+the struts above a prime-focus antenna. If the antennae are placed on alt-azumuth mounts the sky rotates with respect 
+to this anisotropic beam pattern over the course of an observation. This results in sources that is only partially 
+resolved everywhere other than well-within the primary beam. The correction of this effect alone is not a trivial undertaking - 
+as the reader may suspect one possible solution is to attempt to ``invert'' the directional dependent effects on the visibility 
+inside the convolution integral of the RIME. 
+
+Since these effects vary with both direction and time, removing them is a tricky proposition; at every timestep since only a 
+handful of points from these convolving functions are sampled! More recently several solutions to solve for slow-varying 
+directional-dependent effects using self-calibration and removing known effects through calibration have been proposed. 
+These include solving direction dependent effects through the method of differential gains, peeling and A-projection. Peeling 
+involves iteratively removing the effects from the brightest sources through direct fourier approaches, while differential 
+gains simultaniously solves for the gain effects from bright and faint sources \cite{2011A&A...527A.107S,2011A&A...527A.108S}. 
+When dealing with known (or modeled) directional-dependent effects the A-projection algorithm \cite{bhatnagar2008correcting} has 
+proven very successful in removing the polarization effects contributed (predominantly) by the primary beam for the 
+LOFAR array (refer to the Awimager implementation by Tasse et al. \cite{tasse2013applying}).
+
+The ``union-form'' of the RIME stated before can be rewritten in terms of 16-element muler matricies where: 
+\begin{equation}
+ D_{pq}(l,m,\nu,t) := D_{p}(l,m,\nu,t) \otimes D_{q}(l,m,\nu,t) 
+\end{equation}
+
+To accomplish this invertion it is necessary to assume that the 16 terms of the Muler matrix $D_p(l,m)\otimes D_q(l,m)$ are relative
+
+Solutions to direction independent gains (the G terms of the RIME) can be computed without image synthesis, but 
+
 \section{Review of previous literature}
