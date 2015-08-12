@@ -3,7 +3,7 @@ In this chapter we discuss how the Radio Interferometric Measurement Equation ca
 delving into the finer details of creating what is known as ``dirty'' images of the sky and correcting the wide field distortions introduced in the images when breaking the assumptions made when the images 
 are synthesized using a Fast Fourier Transform. Finally we discuss previous literature on acceleration of the correcting process, before moving onto the design of our imager in the following chapter. Before
 continuing readers not familiar should refer to Appendix~\ref{chp_DSP} for a refresher on basic signal processing concepts.
-\section{The imaging and deconvolution pipeline}
+\section{The self-calibration, imaging and deconvolution pipeline}
 The RIME can be thought of as the equation that predicts what measurement the telescope should make, given a model radio sky (\emph{intensity distribution}), telescope behavior and environmental effects as inputs. 
 The inversion of this equation is as simple as taking an inverse Fourier Transform. To see why this is true consider that the continuous sky is simply an infinite sequence of shifted and scaled impulses 
 (or delta functions), where each impulse is infinitesimally narrow, has an area of 1 and is infinitely high at the origin (zero everywhere else). The Fourier transform of this delta function is simply:
@@ -25,7 +25,7 @@ a measurement is made and 0 everywhere else. The observed measurements (hencefor
 
 When equation~\ref{eqn_observed_vis} is inverted the extent of the problem becomes apparent:
 \begin{equation}
- I_{observed}(l,m) = G_p(t,\nu)D_p(l,m,t,\nu)*I_{true}(l,m)*D_q(l,m,t,\nu)G_q(t,\nu)*\psf{(l,m,\nu)} + \eta
+ I_{observed}(l,m) = G_p(t,\nu)D_p(l,m,t,\nu)I_{true}(l,m)D_q^H(l,m,t,\nu)G_q^H(t,\nu)*\psf{(l,m,\nu)} + \eta
 \end{equation}
 where the G terms are the directional independent gains, the D terms are the directional dependent gains and the Point Spread Function, $\psf$, is the Fourier Transform of the sampling function, $S$. Since
 the u,v coordinates depend on the wavelength the $\psf$ in turn also scales depending on wavelength. $\eta$ represents the background noise level that depends on system temperature, integration time and integration
@@ -34,9 +34,9 @@ bandwidth as mentioned previously.
 Not all the information we need to accurately reconstruct the true intensity distribution, $I_{true}$, is available. In fact the $\psf$ alone provides a challenging
 problem by itself. The more complete the sampling function, the more accurate we can reconstruct the image. If measurements are taken over too short an observation there is
 no hope of deconvolving most of the $\psf$ from the image. Even more concerning is the fact that the directional dependent effects cause a time-dependent convolution with the
-true visibilities. Figure~\ref{fig_psf} shows how the $\psf$ gradually improves with longer observation time, while Figure~\ref{fig_model_convolution} provides a good 
-illustration of the challenge astronomers face when just considering the effects of limited sampling on the true sky, let alone telescope sensitivity and the direction 
-dependent and independent effects.
+true measurements and serve to modulate different parts of the synthesized image at different levels during the course of an observation. Figure~\ref{fig_psf} shows how the 
+$\psf$ gradually improves with longer observation time, while Figure~\ref{fig_model_convolution} provides a good illustration of the challenge astronomers face 
+when just considering the effects of limited sampling on the true sky, let alone telescope sensitivity and the direction dependent and independent effects.
 \begin{figure}[h]
  \begin{mdframed}
  \centering
@@ -103,7 +103,7 @@ interferometers in general: the $\psf$ acts very similar to a high-pass filter. 
 in the image. This is not always desirable - observing extended emission sources is equally important, which requires only short baselines.
 
 This brings us to consider a strategy to deconvolve the extended lobe structure of the $\psf$ from the images. In order to achive this goal we make an assumption about the distribution of sources in the sky, in that the radio
-sky is mostly void of emission. If we further assume most sources are compact point-like sources it gives us one possible strategy to remove some of the $\psf$ structure as stated in Algorithm~\ref{alg_clean}
+sky is mostly void of emission. If we further assume most sources are compact point-like sources it gives us one possible strategy to remove some of the $\psf$ structure as stated in CLEAN, Algorithm~\ref{alg_clean}.
 \begin{algorithm}
   \begin{algorithmic}
   \STATE {Given a dirty image, $d$ of size $n \times m$ pixels}
@@ -134,8 +134,22 @@ The $\psf$ subtraction in the image / sky domain for every detected source is a 
 most notable adaptions to CLEAN is the Cotton-Schwab major-minor cycle adaption to the algorithm. Here only a truncated
 $\psf$ (up to the first few sidelobes) is subtracted in the image domain. The resulting clean model is then converted back
 to the continuous measurement domain (here again the measurement is predicted by the RIME) and then subtracted from the 
-observed visibilities. The convergence criteria of the algorithm is well beyond the introductory discussion here. Refer to 
-Thompson et al. \cite[ch 11]{thompson2008interferometry} for a more detailed discussion and further reading on the topic.
+observed visibilities. In fact this major-minor cycle approach ideal when dealing with multiple adjacent fields. 
+
+The convergence criteria of the algorithm is well beyond the introductory discussion here. Refer to Thompson et 
+al. \cite[ch 11]{thompson2008interferometry} for a more detailed discussion and further reading on the topic. More
+recently new sparce synthesis and analysis approaches has been suggested as alternatives to CLEAN. An example is the 
+MORESANE \cite{dabbech2015moresane} algorithm.
+
+In addition to the $\psf$ deconvolution problem is the telescope calibration problem. One of the more pronounced directional 
+dependent effects is the antenna primary beam in wide field imaging. It is possible to decern bright sources in the sidelobes 
+of the antenna beam (and they will contribute to the $\psf$ convolution just the same as sources inside the primary beam). However, 
+as already mentioned, the antenna gain vary accross the field of view. This means that some sources
+will be more resolved than others for the same amount of observation time, depending on their position in the sky. 
+Adding to the complexity, the beam pattern can be anisotropic; one cause can be the struts above a prime-focus antenna. 
+If the antennae are placed on alt-azumuth mounts the sky rotates with respect to this anisotropic beam pattern over 
+the course of an observation. This results in sources that is only partially resolved everywhere other than well 
+within the primary beam. The correction of this effect alone is not a trivial undertaking and involves a convolution
 
 
 \section{Narrow field synthesis using the FFT}
@@ -147,48 +161,13 @@ Thompson et al. \cite[ch 11]{thompson2008interferometry} for a more detailed dis
 % 
 % In the previous section the response, $r$, of a complex correlator was described. The \textit{visibility} is an unnormalized measure of the coherence of an electric field, and is very closely related to the correlator response to the planar wave fronts emitted
 % by a source. The magnitude of this coherence has dimensions of flux density as described earlier. The Radio Interferometric Measurement Equation relates between these visibilities and the projection of the source onto the celestial sphere. This projection and measurement
-% process is illustracted in figure~\ref{fig_uvw_lmn}. Without loss of generality when extended to the different polarization terms, the relation between the measured visibilities and the image can be defined as:
-% \begin{equation}
-%  \label{eqn_visibility}
-%  \begin{split}
-%   V(u,v,w) &:= \int_{\vec{s}}{A(\vec{s})I(\vec{s})\cos{\frac{2\pi\vec{b}\cdot(\vec{s}-\vec{s_0})}{\lambda}}d\Omega}\\
-% 	   &= \int_{-\infty}^\infty{\int_{-\infty}^\infty{A(l,m)I(l,m)e^{-2\pi i[ul+vm+w(n-1)]} \frac{dldm}{\sqrt{1-l^2-m^2}}}}\\
-% 	   &= \int_{-\infty}^\infty{\int_{-\infty}^\infty{A(l,m)I(l,m)e^{-2\pi i[ul+vm+w(\sqrt{1-l^2-m^2}-1)]} \frac{dldm}{\sqrt{1-l^2-m^2}}}}
-%  \end{split}
-% \end{equation}
-% 
-% \begin{figure}[h]
-%  \begin{mdframed}
-%  \centering
-%  \includegraphics[width=0.5\textwidth]{images/lmn_uvw.png}
-%  \caption[The relation between image space and visibilities]{The relation between the measured spatial coherence function and the source on the unit ``celestial'' sphere, emitting planar waves of radiation \cite{taylor1999synthesis}.}
-%   \label{fig_uvw_lmn}
-%  \end{mdframed}
-% \end{figure}
-% 
-% When the field of view being observed is sufficiently small, $n$ is close to unity and the term $w(n-1) = 0$. Similarly, if the all the antenna are at equal height (\textit{co-planar}) $w=0$ and the term disappears as well. Under 
-% these circumstances equation~\ref{eqn_visibility} is the two dimensional fourier transform of the image. In reality the image is not only affected by the effective area of the comprising elements in the interferometer, but is 
-% subject to incomplete sampling, direction-independent antenna gains, as well as directional effects, such as ionospheric and tropospheric conditions. 
-% 
-% Each observation will typically extend over a prolonged period of time (over many hours for instance) and collect a large number of visibilities, typically over a large number of channels. As the earth rotates each baseline sweeps out
-% eliptical paths in u,v space, sampling the coherence function at regular intervals. As the number of antennae in the array is increased the number of measured visibilities grow quadratically, since the number of possible baselines between 
-% antennae is given as $\frac{n(n-1)}{2}+n$. Adding a small number of antennae to the array can therefore effectively improve the uv coverage. By adding more visibilities in fourier space the quality of the synthesized 
-% image is improved, because the effects of the limited sampling can be more effectively removed from the produced image as is explained in the section on convolutional gridding.
+% process is illustracted in figure~\ref{fig_uvw_lmn}. Without loss of generality when extended to the different polarization terms, the relation between the measured visibilities and the image can be defined as
 % 
 % The uniform and wide coverage of the entire u,v space (the size of which is determined by the required angular resolution), can normally be attained using only east-west baselines, except at very low declanations (less than about $30^o$) at the horizon. At low declanations baselines 
 % with a component sufficiently parallel to the Earths axis (non East-West) are needed. Such a two dimensional array have baseline components which don't remain co-planar over long observations and require the l and m components being small enough to 
 % ensure $(\sqrt{1 - l^2 - m^2} - 1)w \approx 0$. See figure~\ref{fig_VLBA_uv} for an illustration of the uv-coverage attained by the VLBA array. The spacing in such an East-West array is of high importance
 % in ensuring the uniform sampling of the u,v space. Spacing the antennas uniformly for instance will result in many redundant coverages by the shorter baselines. Other designs include movable
 % antennae provide greater flexibility and can cover more baselines. For two dimensional arrays reducing redundancy becomes even more challenging as eluded to in Synthesis Imaging II \cite[Lecture 2]{taylor1999synthesis}.
-% 
-% \begin{figure}[h]
-%  \begin{mdframed}
-%  \centering
-%  \includegraphics[width=0.5\textwidth]{images/eliptical_sampling.png}
-%  \caption[VLBA uv-coverage]{The sampling patterns of the ten antennae of the VLBA at 4 different declanations. The best coverage is attained at greater declanations}
-%   \label{fig_VLBA_uv}
-%  \end{mdframed}
-% \end{figure}
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CORRECTING THE RIME TERMS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
  
