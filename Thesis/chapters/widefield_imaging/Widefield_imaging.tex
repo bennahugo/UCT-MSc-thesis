@@ -5,14 +5,15 @@ are synthesized using a Fast Fourier Transform. Finally we discuss previous lite
 continuing readers not familiar should refer to Appendix~\ref{chp_DSP} for a refresher on basic signal processing concepts.
 \section{The calibration, imaging and deconvolution pipeline}
 The RIME can be thought of as the equation that predicts what measurement the telescope should make, given a model radio sky (\emph{intensity distribution}), telescope behavior and environmental effects as inputs. 
-The inversion of this equation is as simple as taking an inverse Fourier Transform. To see why this is true consider that the continuous sky is simply an infinite sequence of shifted and scaled impulses 
-(or delta functions), where each impulse is infinitesimally narrow, has an area of 1 and is infinitely high at the origin (zero everywhere else). The Fourier transform of this delta function is simply:
+If all the information is known the inversion of this equation is as simple as taking an inverse Fourier Transform. To see why this is true consider that the continuous sky is simply an infinite sequence of 
+shifted and scaled impulses (or delta functions), where each impulse is infinitesimally narrow, has an area of 1 and is infinitely high at the shifted position (zero everywhere else). The Fourier transform 
+of each of the delta functions is simply:
 \begin{equation*}
- h(u,v) := \int_\infty^\infty\int_\infty^\infty \delta(l-l_\Delta,m-m_\Delta)e^{-2\pi i(ul+vm)}dldm
+ h(u,v) := \int_-\infty^\infty\int_-\infty^\infty \delta(l-l_\Delta,m-m_\Delta)e^{-2\pi i(ul+vm)}dldm
 \end{equation*}
 Observe that this is practically the same as the RIME. If the delta functions are replaced with the scaled intensities over infinitesimally small areas of the sky as defined previously and the direction dependent and
 independent terms are added in the convolution integral the two integrals are practically identical, apart from the $w(\sqrt{1-l^2-m^2}-1)$ term in the complex exponent and the $n = \sqrt{1-l^2-m^2}$ in the denumerator. 
-For narrow fields of view these terms are much less than unity and can be ignored. We will revisit this assumption later on when discussing the wide field problem.
+For narrow fields of view these terms are negligible. We will revisit this assumption later on when discussing the wide field problem.
 
 In order to get the \emph{observed} intensity distribution back the Fourier transform can simply be inverted. However, inversion is not all the synthesis imaging problem entails; a distinction has to be drawn
 between the \emph{observed} and \emph{true} radio sky: how much of the \emph{true} radio sky can be recovered, given the imperfect measurements made with a radio interferometer over a limited amount of time? Foremost, the
@@ -178,62 +179,16 @@ how images can be efficiently synthesized (fourier inverted / ``backward step'')
 \end{figure}
 
 \section{Narrow field synthesis using the FFT}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MORE ABOUT THE CORRELATOR ONCE WE DISCUSSED FOURIER THEORY
-
-% It is worthwhile to note that the correlation, delay and phase compensations can also be done in the fourier domain, and in the case of delay compensation this approach makes fractional delay compensation feasible (see Taylor et al. \cite{taylor1999synthesis}). These correlators are effectively 
-% known as \textit{FX} correlators. If these power spectra are of high time resolution it is possible to perform surveys focussed on transient detection. Modern arrays such as LOFAR, KAT-7 and MeerKAT (currently under construction) have the capability to perform these searches through
-% special \textit{beamforming} modes which may be run concurrently with imaging modes. See Stappers et al. \cite{stappers2011observing} for details on pulsar observation with LOFAR. In this thesis, however, we will focus solely on the imaging pipeline which is discussed in the next section.
-% 
-% In the previous section the response, $r$, of a complex correlator was described. The \textit{visibility} is an unnormalized measure of the coherence of an electric field, and is very closely related to the correlator response to the planar wave fronts emitted
-% by a source. The magnitude of this coherence has dimensions of flux density as described earlier. The Radio Interferometric Measurement Equation relates between these visibilities and the projection of the source onto the celestial sphere. This projection and measurement
-% process is illustracted in figure~\ref{fig_uvw_lmn}. Without loss of generality when extended to the different polarization terms, the relation between the measured visibilities and the image can be defined as
-% 
-% The uniform and wide coverage of the entire u,v space (the size of which is determined by the required angular resolution), can normally be attained using only east-west baselines, except at very low declanations (less than about $30^o$) at the horizon. At low declanations baselines 
-% with a component sufficiently parallel to the Earths axis (non East-West) are needed. Such a two dimensional array have baseline components which don't remain co-planar over long observations and require the l and m components being small enough to 
-% ensure $(\sqrt{1 - l^2 - m^2} - 1)w \approx 0$. See figure~\ref{fig_VLBA_uv} for an illustration of the uv-coverage attained by the VLBA array. The spacing in such an East-West array is of high importance
-% in ensuring the uniform sampling of the u,v space. Spacing the antennas uniformly for instance will result in many redundant coverages by the shorter baselines. Other designs include movable
-% antennae provide greater flexibility and can cover more baselines. For two dimensional arrays reducing redundancy becomes even more challenging as eluded to in Synthesis Imaging II \cite[Lecture 2]{taylor1999synthesis}.
- 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CORRECTING THE RIME TERMS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
- 
-%  Correcting for known time-uniform directional effects can be achieved through either a facet-based polyhedron approach or through AW-projection. Using a image-space facet-based approach these directional
-%  effects are locally-invariant and are corrected for over small portions of the final image, by multiplying with the appropriate inverse Jones matricies. In AW-projection these effects can be corrected for by convolving with
-%  transposed Jones matricies, and this can be integrated to either the convolutional gridding (reverse Fast Fourier Transform) or degridding (forward Fast Fourier Transform) strategies which will be discussed 
-%  in the next chapter \cite{2011A&A...527A.107S}. Both facet-based and AW-projection approaches will be discussed further in the chapter on non-coplanar wide-field imaging.
-%  
-%  Another approach is to subtract the directionally dependent effects directly from the observed visibilities, before correcting for the directional independent effects at the model
-%  subtraction phase. Such an approach corrects these effects individually per model source and is equivalent to evaluating equation~\ref{eqn_RIME} for a set of discrete sources. These
-%  analytical approaches are computationally prohibative, when compared to the convolution gridding approaches, coupled with either W-projection-based or faceting techniques, although 
-%  it has the advantage of being much more accurate \cite{2011A&A...527A.107S}.
- 
-% \subsubsection{Self-calibration}
-%  The lack of strong calibrators near observed areas, and the requirements placed on the properties of these calibrations, makes the process of calibrating the rapidly varying 
-%  directional effects within the atmosphere a very hard problem. By allowing the individual element gains to be free parameters forms the basis of self-calibration. 
-% 
-%  Self-calibration imposes some restrictions: information about the absolute position, structure and intensity of an observed source is traded
-%  for improved signal-to-noise ratios. It should be noted that these minimization approaches cannot completely replace the methods of source and polarization calibration mentioned earlier. 
-%  The effect of these issues are normally incorporated as explicit Jones terms in the model, such as the one mentioned earlier. These effects are greatly reduced by adding additional 
-%  antennae to the array. The self-calibration problem can be viewed as iteratively improving an initial model by correcting the effects of gain on sky brightness through algorithms such as the Maximum Entropy Method
-%  and the CLEAN algorithm. The specification of the initial model does not necessarily have to be very accurate for CLEAN to converge at some point: it may simply 
-%  consist of point sources for relatively simple images. Convergence is, however, not guarenteed.
-% 
-%  The H\"ogbom CLEAN algorithm locates (and keeps a list of) the brightest sources in an image in an iterative cycle, subtracting the Point Spread Function from each source until some 
-%  thresholding condition is met. The remaining image is termed the residuals. After convolving the found point sources with elliptical function fitted over the Point Spread Function, 
-%  the residuals are added to the convolved image, forming the final ''clean" image. Many other variations on the algorithm exist, bringing with them improvements in execution speed and 
-%  stability.
-% 
-%  While CLEAN provides a procedural approach to deconvolution, the Maximum Entropy Method selects an image that fits the data to within a specified noise level, and is not procedural.
-%  The method essentially limits the range of pixel values and focusses these ranges around bright objects. Though CLEAN is usually much faster on smaller simple images, it is prohibatively slow 
-%  on large complex images. Under these conditions the Maximum Entropy Method is outright faster.
-
  There are generally two techniques used to approximate the fourier transforms between the observed visibilities and the (dirty) image. Either a brute force Direct Fourier Transform is taken where each grid point is approximated through a brute-force
- evaluation over all the observed visibilities (M of them in total). This approach requires on the order of $O(N^2M) \approx O(N^4)$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large number of visibilities. A basic co-planar analytical 
- algorithm boils down to a summation of complex multiplications over the entire grid in the image space \cite[Lecture 7]{taylor1999synthesis}: 
+ evaluation over all the observed visibilities (M of them in total). This approach requires on the order of $O(N^2M) \approx O(N^4)$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large number of visibilities. 
+ A basic planar analytical algorithm boils down to a summation of complex multiplications over the entire grid in the image space \cite[Lecture 7]{taylor1999synthesis}. This equation can be amended to be as accurate as needed, taking per pixel effects into 
+ account if necessary:
  \begin{equation}
-  (\forall \text{polarizations})(\forall l,m) I_{p}(l,m) = \frac{1}{M}\sum_{k=1}^{M}{V_p'(u_k,v_k)e^{2\pi i (u_kl,v_km)}}
- \end{equation}
+  (\forall \text{correlations})(\forall\text{ pixels }l,m) I_{\text{observed},c}(l,m) = \frac{1}{M}\sum_{k=1}^{M}{\frac{V_{c}}{n}'(u,v)e^{2\pi i (ul + vm + w(n-1))}}
+ \end{equation} 
  
- The second approach is to interpolate the data onto a regularly sampled grid with a two-dimensional convolution function, as is required when using the Fast Fourier Transform to approximate the transformations. A Fast Fourier Transform has a computational complexity of $O(N^2\log_2{N})$, while
+ The first approach is prohibitively expensive when the number of baselines grows or the observation time increases, considering that the operation will be called upon multiple times in a major-minor deconvolution cycle. Instead astronomers rely
+ on a simple \emph{planar} approximation. This second approach employs the Fast Fourier Transform. is to interpolate the data onto a regularly sampled grid with a two-dimensional convolution function, as is required when using the Fast Fourier Transform to approximate the transformations. A Fast Fourier Transform has a computational complexity of $O(N^2\log_2{N})$, while
  convolutional gridding typically requires $O(MC^2) \approx O(N^2C^2)$ operations (where C is the size of each dimension of a square filter) for large numbers of visibilities. If both the image size is small and the number of visibilities 
  are small the Direct Fourier Transform may be faster than the convolutional gridding approach. However, this will not generally be true for very large arrays such as the SKA or its predicessors that are currently under construction, 
  considering the sheer number of baselines involved, as well as the typical grid sizes involved.
@@ -343,30 +298,26 @@ be scalled over multiple multicore accelerators. A detailed comparison between t
 \subsection{Anti-aliasing filters}
 \subsection{Introducing the W-term}
 \subsection{Filter seperability}
-\section{Revisiting the direction dependent effects}
+\section{Revisiting the direction-dependent effects}
 Traditional calibration pipelines assumes that the same ``apparent sky'' is sampled by all antennae, and attempts to solve only the unknown direction-independent gain terms.
 This process is known as \textit{self-calibration}. Furthermore some packages like the CASA framework consider directional dependent terms as simple effects 
 that do not vary in time and is identical per antenna. The addition of directional dependencies within the all-sky integral, primarily those caused by the 
 ionosphere and modulation effects by the primary beam, violates this premis. 
 
-The self-calibration process relies on a knowing some aspects of the sky and can include one or more well-described sources. It includes the 
-following steps \cite{2011A&A...527A.107S}:
- \begin{enumerate}
-  \item Gain minimization per antenna, and the minimization of the residual amplitudes and phases associated to each individual baseline.
-  \item Imaging, deconvolution and model updating using H\"ogbom CLEAN
- \end{enumerate}
- 
-In reality this simple gain-adjustment process cannot remove the polarization effects due to the primary beam, nor can it solve for unknown slow-varying 
-directional dependent gain terms. If we for the moment only consider the known polarization effects of the antenna beam (which can be modeleled or 
-measured using Holography) it becomes clear that some sources will be more resolved than others for the same amount of observation time, 
+The self-calibration process relies on a knowing some aspects of the sky and can include one or more well-described sources. The directional
+independent and directional dependent terms can be solved for by a fitting the predicted model visibilities to the observed 
+data \cite{noordam2010meqtrees}. Only adjusting the gains based on directional-independent effects cannot remove the complex 
+polarization effects due to the primary beam, nor can it solve for unknown slow-varying directional dependent gain terms. If we, for 
+the moment, only consider the known polarization effects of the antenna beam (which can be modeleled or measured using holography) it 
+becomes clear that some sources will be more resolved than others for the same amount of observation time, 
 depending on their position in the sky. In practice, the beam pattern is also anisotropic; one possible cause can be 
 the struts above a prime-focus antenna. If the antennae are placed on alt-azumuth mounts the sky rotates with respect 
 to this anisotropic beam pattern over the course of an observation. This results in sources that is only partially 
 resolved everywhere other than well-within the primary beam. The correction of this effect alone is not a trivial undertaking - 
 as the reader may suspect one possible solution is to attempt to ``invert'' the directional dependent effects on the visibility 
-inside the convolution integral of the RIME. 
+inside the convolution integral of the RIME.
 
-Since these effects vary with both direction and time, removing them is a tricky proposition; at every timestep since only a 
+Since these effects vary with both direction and time, removing them is a tricky proposition; at every timestep only a 
 handful of points from these convolving functions are sampled! More recently several solutions to solve for slow-varying 
 directional-dependent effects using self-calibration and removing known effects through calibration have been proposed. 
 These include solving direction dependent effects through the method of differential gains, peeling and A-projection. Peeling 
@@ -374,15 +325,51 @@ involves iteratively removing the effects from the brightest sources through dir
 gains simultaniously solves for the gain effects from bright and faint sources \cite{2011A&A...527A.107S,2011A&A...527A.108S}. 
 When dealing with known (or modeled) directional-dependent effects the A-projection algorithm \cite{bhatnagar2008correcting} has 
 proven very successful in removing the polarization effects contributed (predominantly) by the primary beam for the 
-LOFAR array (refer to the Awimager implementation by Tasse et al. \cite{tasse2013applying}).
+LOFAR array (see figure~\ref{fig_aprojection_lofar}). Refer to the Awimager implementation by Tasse et 
+al. \cite{tasse2013applying} for a full mathematical treatment of the algorithm.
 
-The ``union-form'' of the RIME stated before can be rewritten in terms of 16-element muler matricies where: 
-\begin{equation}
- D_{pq}(l,m,\nu,t) := D_{p}(l,m,\nu,t) \otimes D_{q}(l,m,\nu,t) 
-\end{equation}
+\begin{figure}[h]
+ \centering
+ \begin{subfigure}[b]{0.35\textwidth}
+  \includegraphics[width=\textwidth]{images/lofar_no_dd.png}
+  \caption{Cleaned w-projected image}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.35\textwidth}
+  \includegraphics[width=\textwidth]{images/lofar_dd.png}
+  \caption{Cleaned aw-projected image}
+ \end{subfigure}
+ \caption[A-projection results on LOFAR]{Figures (a) and (b) shows the result of correcting for the complex polarization leakage patterns
+ introduced by the LOFAR individual element beams and phased-array stations}
+ \label{fig_aprojection_lofar}
+\end{figure}
 
-To accomplish this invertion it is necessary to assume that the 16 terms of the Muler matrix $D_p(l,m)\otimes D_q(l,m)$ are relative
+In A-projection the ``union-form'' of the RIME stated before can be rewritten in terms of 16-element Muler matricies, for which first-order 
+inverses can be computed. Provided that the 16 element terms vary slowly over the sky the inverses can be sampled at a limited number
+of support points (far fewer than the w term stated previously) and can be convolved as part of the inversion step. A-projection does 
+however require a massive amount of memory and time to precompute the 16 baseline-dependent (due to individual antenna pointing error) 
+convolutions per processed visibility. As the number of baselines grow as the square of the number of antennae in this approach fast 
+becomes prohiatively expensive \cite{tasse2013applying}.
 
-Solutions to direction independent gains (the G terms of the RIME) can be computed without image synthesis, but 
+An alternative strategy that can prove useful is to consider an amended faceting approach\footnote{Suggested by Cyril Tasse}. Here the 
+direction-dependent effects are assumed to stay constant over a small area of the sky (centred at some $l_i,m_i$) and the Jones 
+matrices may simply be inverted and applied as part of the part of the resampling process:
+\begin{equation*}
+ \begin{split}
+ I_{\text{corrected,dirty}} &= \mathcal{F}^{-1}(D_p^{-1}(l_i,m_i,t,\nu)V_{\text{obs}}(u,v,t,\nu)D_q^{H^{-1}}(l_i,m_i,t,\nu))\\
+			    &= \mathcal{F}^{-1}(D_p^{-1}(l_i,m_i,t,\nu)V_{\text{obs}}(u,v,t,\nu)D_q^{{-1}^H}(l_i,m_i,t,\nu))\\
+ \end{split}
+\end{equation*}
+
+This approach has the additional advantage of being arbitrarily accurate: as the facet image size is decreased the inversion step
+becomes a per-pixel corrected direct Fourier inversion. This makes this approach a viable alternative to A-projection. However, 
+it must be stressed that the computation cost of both inversion and prediction steps rises sharply when creating polarization-corrected 
+images with either approach: all four correlations must be gridded in stead of taking either only the parallel or cross-hand terms into 
+account when doing traditional imaging. This effectively means that the number of floating point operations required by resampling 
+effectively quadruples (the work in the inner most loop is four times more) without considering the additional conjugates taken and 
+matrix multiplications for each observed visibility. Using this approach the additional storage required to store the 2x2 Jones 
+matrices grows approximately as:
+\begin{equation*}
+ N_{\text{Jones}} \approx N_{\text{sources}}N_{\text{integration steps}}N_{\text{channels}}\sqrt{N_{\text{Baselines}}}
+\end{equation*}
 
 \section{Review of previous literature}
