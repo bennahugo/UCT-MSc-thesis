@@ -180,15 +180,53 @@ how images can be efficiently synthesized (fourier inverted / ``backward step'')
 
 \section{Narrow field synthesis using the FFT}
  There are generally two techniques used to approximate the fourier transforms between the observed visibilities and the (dirty) image. Either a brute force Direct Fourier Transform is taken where each grid point is approximated through a brute-force
- evaluation over all the observed visibilities (M of them in total). This approach requires on the order of $O(N^2M) \approx O(N^4)$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large number of visibilities. 
+ evaluation over all the observed visibilities (M of them in total). This approach requires on the order of $N^2M \approx N^4$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large number of visibilities. 
  A basic planar analytical algorithm boils down to a summation of complex multiplications over the entire grid in the image space \cite[Lecture 7]{taylor1999synthesis}. This equation can be amended to be as accurate as needed, taking per pixel effects into 
  account if necessary:
  \begin{equation}
-  (\forall \text{correlations})(\forall\text{ pixels }l,m) I_{\text{observed},c}(l,m) = \frac{1}{M}\sum_{k=1}^{M}{\frac{V_{c}}{n}'(u,v)e^{2\pi i (ul + vm + w(n-1))}}
+  (\forall c\in\text{correlations})(\forall\text{ pixels }l,m) I_{\text{observed},c}(l,m) = \frac{1}{M}\sum_{k=1}^{M}{\frac{V_{c,\text{observed}}}{n}(u,v)e^{2\pi i (ul + vm + w(n-1))}}
  \end{equation} 
  
  The first approach is prohibitively expensive when the number of baselines grows or the observation time increases, considering that the operation will be called upon multiple times in a major-minor deconvolution cycle. Instead astronomers rely
- on a simple \emph{planar} approximation. This second approach employs the Fast Fourier Transform. is to interpolate the data onto a regularly sampled grid with a two-dimensional convolution function, as is required when using the Fast Fourier Transform to approximate the transformations. A Fast Fourier Transform has a computational complexity of $O(N^2\log_2{N})$, while
+ on a simple \emph{planar} approximation. This second approach employs the Fast Fourier Transform (see Cochran et al. \cite{cochran1967fast} for algorithmic details). Instead of having complexity order $N^4$ the two dimensional Fast Fourier 
+ Transform can be computed with roughly $2N^2\log{N}$ steps. There are three very serious problems to consider though:
+ \begin{enumerate}
+  \item The Fast Fourier Transform yields a \emph{tangent planar approximation} to the sky dome: the synthesized image is only accurate near the phase centre (by convention the center) of the image.
+        This implies that the FFT may only be used when $\sqrt{1-l^2-m^2} - 1 \ll 1$. When doing wide field synthesis this assumption is broken and have to be corrected for.
+  \item The Fast Fourier Transform only operates on \emph{regularly sampled} data. This statement simply means that the data has to be sampled on a uniformly spaced grid in order to 
+	apply the two dimensional FFT. This resampling step (essentially a variant of image upsampling) is very computationally expensive: as we will see it quickly comes to 
+	dominate the entire synthesis process. On the other end of the pipeline the prediction step suffers from the same affliction: a FFT can again be employed when going 
+	from the model sky to continuous measurements, but then the regularly spaced samples have to be resampled to continuous coordinates.
+  \item The regularly sampled FFT assumes the signal (in this context the signal is the sky) repeats: sources outside the field of view of the produced image is flipped back into the image
+	on the opposite side. This introduces the necessity to filter the image with a filter that only passes signal that is in the field of view being considered and stops
+	any energy outside the field of view.
+ \end{enumerate}
+ The second and third problems are related and for now our discussion will be focused on providing a solution to address them. The first problem will be discussed in
+ the next section.
+ 
+ We will use the terms ``interpolation'' and ``resampling'' interchangeably throughout this thesis. By these terms we refer to a process that 
+ either takes a set of continuous samples as input and yields a discretized set of samples as output (``gridding'') or working in the opposite 
+ direction (appropriately referred to as ``degridding''). There is no single best way to interpolate data onto a regularly spaced grid 
+ and it necessary to consider multiple strategies to complete this task. The resampling problem is shared between the many fields including, 
+ but not necessarily limited to, the astronomical and medical imaging subfields, and as such literature from both fields can be considered in 
+ the discussion. An excellent comparative discussion on image interpolation is given by Th\'evenaz et al. \cite{thevenaz2000image}, while
+ Thompson and Bracewell \cite{thompson1974interpolation} gives a detailed overview and comparison of different interpolation techniques when it comes to 
+ resampling the visibility measurements produced by an interferometer. Briggs et al. \cite[Lecture 7]{taylor1999synthesis} and 
+ Thompson et al. \cite[p. 387-399]{thompson2008interferometry} give concise discussions of the technical considerations that must be taken into 
+ account in the synthesis step.
+ 
+ Our approach focuses on a variant of the relatively fast class of linear interpolation operations:
+ \begin{equation}
+   (\forall f(a)\in\mathbb{C},\phi(b)\in\mathbb{C})f(x) = \sum_{k\in Q\subseteq\mathbb{R}^2}{f(k)\phi(x-k)}
+ \end{equation}
+ The constant-selection function $\phi$ can be one of the myriad of functions proposed in the literature. These include linear, Lagrange, sinc, 
+ guasian, B-spline, etc. and may additionally be windowed by one of the large number of window functions as in the case of the sinc function, 
+ for example Hamming, Hanning, Blackman, Kaiser-Bessel, along with many others.
+ 
+ One of the primary constraints are that the interpolation operator must be very fast. 
+ 
+ 
+ is to interpolate the data onto a regularly sampled grid with a two-dimensional convolution function, as is required when using the Fast Fourier Transform to approximate the transformations. A Fast Fourier Transform has a computational complexity of $O(N^2\log_2{N})$, while
  convolutional gridding typically requires $O(MC^2) \approx O(N^2C^2)$ operations (where C is the size of each dimension of a square filter) for large numbers of visibilities. If both the image size is small and the number of visibilities 
  are small the Direct Fourier Transform may be faster than the convolutional gridding approach. However, this will not generally be true for very large arrays such as the SKA or its predicessors that are currently under construction, 
  considering the sheer number of baselines involved, as well as the typical grid sizes involved.
