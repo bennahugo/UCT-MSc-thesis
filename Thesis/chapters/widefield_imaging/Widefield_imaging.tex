@@ -9,7 +9,7 @@ If all the information is known the inversion of this equation is as simple as t
 shifted and scaled impulses (or delta functions), where each impulse is infinitesimally narrow, has an area of 1 and is infinitely high at the shifted position (zero everywhere else). The Fourier transform 
 of each of the delta functions is simply:
 \begin{equation*}
- h(u,v) := \int_-\infty^\infty\int_-\infty^\infty \delta(l-l_\Delta,m-m_\Delta)e^{-2\pi i(ul+vm)}dldm
+ h(u,v) := \int_{-\infty}^\infty\int_{-\infty}^\infty \delta(l-l_\Delta,m-m_\Delta)e^{-2\pi i(ul+vm)}dldm
 \end{equation*}
 Observe that this is practically the same as the RIME. If the delta functions are replaced with the scaled intensities over infinitesimally small areas of the sky as defined previously and the direction dependent and
 independent terms are added in the convolution integral the two integrals are practically identical, apart from the $w(\sqrt{1-l^2-m^2}-1)$ term in the complex exponent and the $n = \sqrt{1-l^2-m^2}$ in the denumerator. 
@@ -17,22 +17,22 @@ For narrow fields of view these terms are negligible. We will revisit this assum
 
 In order to get the \emph{observed} intensity distribution back the Fourier transform can simply be inverted. However, inversion is not all the synthesis imaging problem entails; a distinction has to be drawn
 between the \emph{observed} and \emph{true} radio sky: how much of the \emph{true} radio sky can be recovered, given the imperfect measurements made with a radio interferometer over a limited amount of time? Foremost, the
-effects of limited sampling in the measurement/fourier space (uv plane) must be considered. Formally the tracks depicted in Figure~\ref{fig_evla_observation} is called the sampling function and is defined as being 1 wherever 
-a measurement is made and 0 everywhere else. The observed measurements (henceforth referred to as \emph{visibilities}) is therefore a multiplication with this sampling function, $S(u,v)$:
+effects of limited sampling in the measurement/Fourier space (uv plane) must be considered. Formally the tracks depicted in Figure~\ref{fig_evla_observation} is called the sampling function and is defined as being 1 wherever 
+a measurement is made and 0 everywhere else. The observed measurements (\emph{visibilities}) are therefore a multiplication with this sampling function, $S(u,v)$:
 \begin{equation}
- V_{observed}(u,v) := V_{RIME}(u,v)S(u,v)
+ V_{\text{obs}}(u,v) := V_{\text{RIME}}(u,v)S(u,v)
  \label{eqn_observed_vis}
 \end{equation}
 
 When equation~\ref{eqn_observed_vis} is inverted the extent of the problem becomes apparent:
 \begin{equation}
- I_{observed}(l,m) = G_p(t,\nu)D_p(l,m,t,\nu)I_{true}(l,m)D_q^H(l,m,t,\nu)G_q^H(t,\nu)*\psf{(l,m,\nu)} + \eta
+ I_{\text{obs}}(l,m) = (G_p(t,\nu)D_p(l,m,t,\nu)I_{\text{true}}(l,m)D_q^H(l,m,t,\nu)G_q^H(t,\nu))*\psf{(l,m,\nu)} + \eta
 \end{equation}
 where the G terms are the directional independent gains, the D terms are the directional dependent gains and the Point Spread Function, $\psf$, is the Fourier Transform of the sampling function, $S$. Since
 the u,v coordinates depend on the wavelength the $\psf$ in turn also scales depending on wavelength. $\eta$ represents the background noise level that depends on system temperature, integration time and integration
 bandwidth as mentioned previously.
 
-Not all the information we need to accurately reconstruct the true intensity distribution, $I_{true}$, is available. In fact the $\psf$ alone provides a challenging
+Not all the information we need to accurately reconstruct the true intensity distribution, $I_{\text{true}}$, is available. In fact the $\psf$ alone provides a challenging
 problem by itself. The more complete the sampling function, the more accurate we can reconstruct the image. If measurements are taken over too short an observation there is
 no hope of deconvolving most of the $\psf$ from the image. Even more concerning is the fact that the directional dependent effects cause a time-dependent convolution with the
 true measurements and serve to modulate different parts of the synthesized image at different levels during the course of an observation. Figure~\ref{fig_psf} shows how the 
@@ -142,18 +142,18 @@ al. \cite[ch 11]{thompson2008interferometry} for a more detailed discussion and 
 recently new sparce synthesis and analysis approaches has been suggested as alternatives to CLEAN. An example is the 
 MORESANE \cite{dabbech2015moresane} algorithm.
 
-In addition to the $\psf$ deconvolution problem is the telescope calibration problem. Appart from removing unwanted
+In addition to the $\psf$ deconvolution problem is the telescope calibration problem. Apart from removing unwanted
 radio interference and erroneous measurements through flagging and solving for varying instrumental gains, it is also
-necessary to calibrate known, and solve for unknown directional-dependent effects. One of the more pronounced directional 
-dependent effects is the antenna primary beam and its associated polarization effects in wide field imaging. We will return
-to ways of solving this problem after discusssing the projection effect introduced by the $w(n-1)$ term in the RIME.
+necessary to calibrate known, and solve for unknown directional-dependent effects. One of the more pronounced directional-dependent 
+effects is the antenna primary beam and its associated polarization effects in wide-field imaging. We will return
+to ways of solving this problem after discussing the projection effect introduced by the $w(n-1)$ term in the RIME.
 
 To summarize this discussion the general imaging pipeline is illustrated in Figure~\ref{fig_img_pipeline}. Next we will discuss
-how images can be efficiently synthesized (fourier inverted / ``backward step'') using a narrow-field approximation.
+how images can be efficiently synthesized (Fourier-inverted / ``backwards-processed'') using a narrow-field approximation.
 \begin{figure}[h]
  \centering
  \begin{tikzpicture}[node distance=4.5cm]
-  \node (start) [startstop] {};
+  \node (start) [start] {};
   \node (dical) [process, right of=start] {Direction independent calibration \& flagging};
   \node (backward) [process, right of=dical] {Fourier inversion (synthesis/``backward computation'')};
   \node (minor) [process, below of=backward] {Minor cycle model estimation};
@@ -161,7 +161,7 @@ how images can be efficiently synthesized (fourier inverted / ``backward step'')
   \node (major) [process, left of=prediction] {Major cycle residual calculation};
   \node (converged) [decision, above of=major] {Converged};
   \node (finalize) [process, left of=converged] {Clean map creation};
-  \node (stop) [startstop, below of=finalize] {};
+  \node (stop) [stop, below of=finalize] {};
   \draw [rarrow] (start) -- node [yshift=0.3cm] {Observed} (dical);
   \draw [rarrow] (dical) -- (backward);
   \draw [rarrow] (backward) -- node [anchor=west] {``Dirty''} (minor);
@@ -181,7 +181,7 @@ how images can be efficiently synthesized (fourier inverted / ``backward step'')
 \section{Narrow field synthesis using the FFT}
  There are generally two techniques used to approximate the fourier transforms between the observed visibilities and the (dirty) image. Either a brute force Direct Fourier Transform is taken where each grid point is approximated through a brute-force
  evaluation over all the observed visibilities (M of them in total). This approach requires on the order of $N^2M \approx N^4$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large number of visibilities. 
- A basic planar analytical algorithm boils down to a summation of complex multiplications over the entire grid in the image space \cite[Lecture 7]{taylor1999synthesis}. This equation can be amended to be as accurate as needed, taking per pixel effects into 
+ The direct inversion algorithm boils down to a summation of complex multiplications over the entire grid in the image space \cite[Lecture 7]{taylor1999synthesis}. This equation can be amended to be as accurate as needed, taking per pixel effects into 
  account if necessary:
  \begin{equation}
   (\forall c\in\text{correlations})(\forall\text{ pixels }l,m) I_{\text{observed},c}(l,m) = \frac{1}{M}\sum_{k=1}^{M}{\frac{V_{c,\text{observed}}}{n}(u,v)e^{2\pi i (ul + vm + w(n-1))}}
