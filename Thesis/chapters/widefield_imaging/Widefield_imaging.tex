@@ -8,9 +8,10 @@ The RIME can be thought of as the equation that predicts what measurement the te
 If all the information is known the inversion of this equation is as simple as taking an inverse Fourier Transform. To see why this is true consider that the continuous sky is simply an infinite sequence of 
 shifted and scaled impulses (or delta functions), where each impulse is infinitesimally narrow, has an area of 1 and is infinitely high at the shifted position (zero everywhere else). The Fourier transform 
 of each of the delta functions is simply:
-\begin{equation*}
+\begin{equation}
+ \label{eqn_delta_response}
  h(u,v) := \int_{-\infty}^\infty\int_{-\infty}^\infty \delta(l-l_\Delta,m-m_\Delta)e^{-2\pi i(ul+vm)}dldm
-\end{equation*}
+\end{equation}
 Observe that this is practically the same as the RIME. If the delta functions are replaced with the scaled intensities over infinitesimally small areas of the sky as defined previously and the direction dependent and
 independent terms are added in the convolution integral the two integrals are practically identical, apart from the $w(\sqrt{1-l^2-m^2}-1)$ term in the complex exponent and the $n = \sqrt{1-l^2-m^2}$ in the denumerator. 
 For narrow fields of view these terms are negligible. We will revisit this assumption later on when discussing the wide field problem.
@@ -203,8 +204,7 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
 	apply the two dimensional FFT. This resampling step (essentially a variant of image upsampling) is very computationally expensive: as we will see it quickly comes to 
 	dominate the entire synthesis process. On the other end of the pipeline the prediction step suffers from the same affliction: a FFT can again be employed when going 
 	from the model sky to continuous measurements, but then the regularly spaced samples have to be resampled to continuous coordinates.
-  \item The regularly sampled FFT assumes the signal (in this context the signal is the sky) is periodic (in other words it repeats\footnote{The literature classifies this periodic
-	replication as an ``aliasing'' effect}): sources outside the field of view of the produced image is flipped back into the image on the opposite side. This 
+  \item The regularly sampled FFT assumes the signal (in this context the signal is the sky) is periodic (in other words it repeats: sources outside the field of view of the produced image is flipped back into the image on the opposite side. This 
 	introduces the necessity to filter the image with a filter that only passes signal that is in the field of view being considered and stops any energy 
 	outside the field of view.
  \end{enumerate}
@@ -222,7 +222,10 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  Thompson et al. \cite[p. 387-399]{thompson2008interferometry} give concise discussions of the technical considerations that must be taken into 
  account in the synthesis step. Our discussion highlights some key considerations and findings from these works.
  
- In radio astronomy the resampling step focuses on a variant of the relatively fast class of linear interpolation operations:
+ Thompson and Bracewell \cite{thompson1974interpolation} suggests a radial interpolation strategy, but it assumes
+ that the baseline tracks (as depicted earlier) are concentric circles of an East-West array (at high declinations for instance). Instead a 
+ more non-exact interpolation-by-convolution strategy is widely followed here. In radio astronomy the resampling step focuses on a 
+ variant of the relatively fast class of linear interpolation operations:
  \begin{equation}
    \label{eqn_interp_op}
    (\forall f(a)\in\mathbb{C},\phi(b)\in\mathbb{C})f(x) = \sum_{k\in Q\subseteq\mathbb{R}^2}{f(k)\phi(x-k)}
@@ -233,14 +236,18 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  
  Notice that if the resampling was to be done on data that was already discretely sampled (traditional upsampling) and the constant 
  selection function $\phi$ was evaluated at the resulting integer positions, Equation~\ref{eqn_interp_op} would be a discrete convolution as it is
- normally defined. Instead the operator as it stands here is not the regular convolution sum and should be thought of as an approximation to the 
- \emph{non-discrete integral convolution} following the terminology of Briggs et al. \cite[Lecture 7]{taylor1999synthesis}. 
+ normally defined. Instead the operator as it stands here is not the regular convolution sum and should be thought of as an approximate convolution. 
+ Strictly speaking convolutional gridding and degridding are not exact interpolation operations as Thompson et al. \cite{thompson2008interferometry} and 
+ Sze Tan \cite{tan1986aperture} points out, but rather interpolation-like (or as Briggs et al. \cite[Lecture 7]{taylor1999synthesis} puts 
+ it: a \emph{non-discrete integral convolution approximation}).
  
  It is useful to think of this \emph{non-discrete integral convolution} operator in terms of the ordinary upsampling operation. As with upsampling (where
  the data is already discretized) the space in-between samples are filled with zero value\footnote{``Zero-stuffed'' in DSP nomenclature}, only here the zeros
  are added in-between continuous samples at integral spacings. Just as with ordinary upsampling it is then necessary to ``smoothen'' the new data points 
  between the measured points using some form of interpolation / convolution, in order not to introduce new high frequency terms (sudden jumps) in the 
- higher resolution image. To help visualize this ``convolutional gridding'' process refer to Figure~\ref{fig_gridding}.
+ higher resolution image. It is quite important to realize however that in the gridding (and degridding) steps the data is simply smeared out into the continuous
+ measurement space and by implication also over the newly inserted zeros. To help visualize this ``convolutional gridding'' process refer 
+ to Figure~\ref{fig_gridding}.
  \begin{figure}[h]
   \begin{mdframed}
    \begin{tikzpicture}[font=\tiny]
@@ -269,11 +276,12 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
   \end{mdframed}
  \end{figure}
  
- It is important to stress that the interpolated measurements taken at the grid points are not known exactly, and normally in interpolation it is 
- hoped that the variance of this error is small as soon as the step size in the resampling process becomes infinitesimally narrow. In the context of
- radio astronomy the ``significantly oversampled'' criterion is not normally met because of the significant amounts of memory this will require, especially considering
- the sizes of the arrays currently under construction. Instead, only a \emph{critically sampled} image is usually produced during synthesis. Importantly
- note that ``critically sampled'' refers to the Shannon-Nyquest sampling criterion:
+ The interpolated measurements taken at the grid points are not known exactly, and normally in interpolation techniques it is 
+ hoped that the variance of this error is small as soon as the step size in the resampling process becomes infinitesimally narrow. 
+ In the context of radio astronomy the ``significantly oversampled'' criterion is not normally met because of the significant amounts 
+ of memory this will require, especially considering the sizes of the arrays currently under construction. Instead, only a 
+ \emph{critically sampled} image is usually produced during synthesis. Importantly note that ``critically sampled'' refers to 
+ the Shannon-Nyquest sampling criterion:
  \begin{equation}
   \label{eqn_img_sampling}
   \begin{split}
@@ -285,20 +293,38 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  subsampled (change the equality to $>$) the longest baselines will fall off the uv grid and angular resolution will be lost. 
  
  This sampling criterion alone justifies our statement that the Fourier response of the resampling function should be considered of higher priority
- than the approximation criterion, unlike in other contexts where interpolation quality may be the most important.
- 
- To understand why these ``aliased sources'' occur we have to define the gridding operation somewhat more rigorously. Each (discrete) measurement taken
- by an interferometer in the continuous uv space  is ``convolved'' with a two-dimensional interpolation function in order to create a continuous
- function. This function is then discretized again onto a set of regular coordinates by a ``bed-of-nails'' function. Mathematically we can say:
+ than the approximation criterion, unlike in other contexts where interpolation quality may be the most important. The energy reduction properties of
+ $\phi$ can be stated in terms of maximizing the following integral ratio for all square-integrable $\phi$ functions\footnote{It is possible to
+ define another criterion here. Sze Tan \cite{tan1986aperture} for instance defined this as minimizing the difference between the Direct Transform and the 
+ FFT approach}:
  \begin{equation}
-  V_{\text{gridded}}[u,v] = V_{\text{sampled,observed}}(u,v)*C(u,v)\III(u,v)
+  \label{eqn_aliasing_energy}
+  \frac{\int_{\text{FOV}}{|[\mathcal{F}\phi](l,m)|^2dS}}{\int_{-\infty}^{\infty}{|[\mathcal{F}\phi](l,m)|^2dS}}
+ \end{equation}
+ 
+ To better understand why these repeating or ``aliased sources'' occur in the first place we have to define the gridding operation somewhat more 
+ rigorously. Each (discrete) measurement taken by an interferometer in the continuous uv space  is ``convolved'' with a two-dimensional interpolation 
+ function in order to create a continuous function. This function is then discretized again onto a set of regular coordinates by a 
+ ``bed-of-nails'' function. Mathematically we can say:
+ \begin{equation}
+  V_{\text{gridded}}[u,v] = [V_{\text{sampled,observed}}(u,v)*\phi(u,v)]\frac{\III(u,v)}{\Delta{u}\Delta{v}}
  \end{equation}
  where $\III$ is the shah function defined as:
  \begin{equation}
-  (\forall u_d,v_d\in\mathbb{Z})\III(u_d,v_d)=\sum_{j=-\infty}^{\infty}{\sum_{i=-\infty}^{\infty}{\delta{(j-u_d,k-v_d)}}}
+  \III(u/\Delta{u},v/\Delta{v})=\Delta{u}\Delta{v}\sum_{j=-\infty,j\in\mathbb{Z}}^{\infty}{\sum_{i=-\infty,i\in\mathbb{Z}}^{\infty}{\delta{(u-j\Delta{u},v-i\Delta{v})}}}
  \end{equation}
  
- Another consideration is speed. Due to the large measurement datasets produced with larger arrays the convolutional resampling process
+ Convolution with the Fourier transform of the shah function (composed itself by many band-limited impulses) creates a sum of periodic functions
+ in the image domain \footnote{It is useful to note that the Fourier transform of a band-limited (non-zero over a finite range) function 
+ such as a box function is a function that stretches over an infinite support region}. The result is a periodic field of view that repeats at
+ $M\Delta{l}$ and $N\Delta{m}$ for an $M\times N$ image (ie. at multiples of the field of view). In practice not all the energy from 
+ these replicated fields can be stopped at the edge of the field of view, and this is responsible for the aliasing seen in the images. Further
+ truncation of the shah and convolving functions also contribute to the aliasing.
+ 
+ The $\phi$ functions considered here all have the property of \emph{separability}. By this it is implied that $\phi(u,v) = \phi(u)\phi(v)$. We will return
+ to a discussion of this later on when discussing w-projection. For now the discussion will focus on functions of one variable.
+ 
+ After aliasing speed becomes a major consideration. Due to the large measurement datasets produced with larger arrays the convolutional resampling process
  has to be fast; the complexity of the resampling step grows as $MC^2$, where C is the support size of the convolution filter. Therefore
  the convolution function $\phi$ is normally pretabulated for a given support size in grid steps. Additionally it is very important to oversample
  the precomputed $\phi_{\text{filter}}$ to reduce conserve the spatial relation in the measured coherence function and to 
@@ -313,16 +339,32 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  The image phase consideration effectively precludes using nearest-neighbor\footnote{or \textit{cell-summing} techniques as 
  Thompson and Bracewell \cite{thompson1974interpolation} puts it} interpolation. The nearest neighbour technique simply snaps (box function) 
  points close to the grid point into the sum at that point, without any consideration on the visibility's distance from the grid point. Additionally 
- the Fourier transform of the box function is an \emph{infinite} $\sinc$ function. It is useful to note that the Fourier transform of a 
- band-limited (non-zero over a finite range) function such as the box function is a function that stretches over an infinite 
- support region. Due to the fact that the $\sinc$ function slowly ripples out toward $\infty$ it is not a good response 
- when it comes to reducing the unwanted energy from sources that fall outside the field of view.
+ the Fourier transform of the box function is an \emph{infinite} $\sinc$ function.  Due to the fact that the $\sinc$ function slowly ripples out 
+ toward $\infty$ it is not a good response when it comes to reducing the unwanted energy from sources that fall outside the field of view.
  
  If the last observation about box functions are inverted then we arrive at a partial solution to the problem of selecting a filtering function
- that better-limits aliasing energy; convolving with the \emph{infinite} $\sinc$ yields a box response in the image domain. Unfortunately it is 
+ that better limits aliasing energy; convolving with the \emph{infinite} $\sinc$ yields a box response in the image domain. Unfortunately it is 
  impossible to convolve with a infinite function to exactly reconstruct the sought-after box response in the image domain. It is also computationally
  prohibitive to increase the support range of the convolution filter, but without large support sizes the filter's Fourier response does not taper (or 
- ``roll off'') immediately.
+ ``roll off'') immediately. See Figure~\ref{fig_aliasing_nn_vs_sinc} for a comparative example of the significant difference between nearest neighbor 
+ interpolation compared to even just the ordinary $\sinc$ function.
+ \begin{figure}[h]
+  \begin{mdframed}
+    \centering
+    \begin{subfigure}[b]{0.35\textwidth}
+      \includegraphics[width=\textwidth]{images/ratt_aa_kernel_demo_nn.png}
+      \caption{Nearest neighbor interpolation}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.35\textwidth}
+      \includegraphics[width=\textwidth]{images/ratt_aa_kernel_demo_larger_support.png}
+      \caption{$\sinc$ 8x8 full support}
+    \end{subfigure}
+    \caption[Alias reduction]{Here a ``grid'' sky model was simulated using MeqTrees and imaged with our imager, first using Nearest Neighbour
+    and then using an ordinary unwindowed $\sinc$ function. Sources that fall slightly outside the field of view are aliased back in when the energy
+    outside the field of view is not limited as expected.}
+    \label{fig_aliasing_nn_vs_sinc}
+  \end{mdframed}
+ \end{figure}
  
  To address this problem the literature is filled with alternative windowing functions to the truncation window, of which 
  the Kaiser-Bessel window proposed by Jackson et al. \cite{jackson1991selection} yields very good results. 
@@ -336,11 +378,18 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  for $\beta$.
 
  An alternative to using a windowed $\sinc$ function is to use a prolate spheriodal function. These are also widely employed in 
- astronomical imagers. The prolate spheriodal function is defined as:
-%  \begin{equation}
-%   
-%  \end{equation}
-
+ astronomical imagers and a more detailed analysis is given by \cite{schwab1984optimal}. The computation of these family of 
+ spheriodal functions (as defined by Rhodes \cite{rhodes1970spheroidal}) maximizes the energy concentration ratio in 
+ Equation~\ref{eqn_aliasing_energy} much better than many other functions considered by Schwab in \cite{schwab1984optimal}:
+ \begin{equation}
+  |1-(2x/W)^2|^\alpha\psi_{\alpha0}(0.5\pi W,2x/W
+ \end{equation}
+ 
+ Here $W$ is again the full support of the the convolution filter and $x$ increases in steps of $\Delta{u}$. If $\alpha=0$ the function
+ as it stands is called the \emph{prolate spheriodal function}. When $\alpha>0$ a weighted energy concentration ratio is maximized instead.
+ 
+ To conclude our comparison we give some extracts from the literature in Figure~\ref{}
+ 
  
  is to interpolate the data onto a regularly sampled grid with a two-dimensional convolution function, as is required when using the Fast Fourier Transform to approximate the transformations. A Fast Fourier Transform has a computational complexity of $O(N^2\log_2{N})$, while
  convolutional gridding typically requires $O(MC^2) \approx O(N^2C^2)$ operations (where C is the size of each dimension of a square filter) for large numbers of visibilities. If both the image size is small and the number of visibilities 
