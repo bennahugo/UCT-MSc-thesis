@@ -158,6 +158,7 @@ to ways of solving this problem after discussing the projection effect introduce
 To summarize this discussion the general imaging pipeline is illustrated in Figure~\ref{fig_img_pipeline}. Next we will discuss
 how images can be efficiently synthesized (Fourier-inverted / ``backwards-processed'') using a narrow-field approximation.
 \begin{figure}[h]
+ \begin{mdframed}
  \centering
  \begin{tikzpicture}[node distance=4.5cm]
   \node (start) [start] {};
@@ -183,6 +184,7 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  into account during the ``backwards'' inversion step, while the unknown slowly varying directional-dependent effects can be solved for
  if enough about the model sky is known.}
  \label{fig_img_pipeline}
+ \end{mdframed}
 \end{figure}
 
 \section{Narrow field synthesis using the FFT}
@@ -245,9 +247,9 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  the data is already discretized) the space in-between samples are filled with zero value\footnote{``Zero-stuffed'' in DSP nomenclature}, only here the zeros
  are added in-between continuous samples at integral spacings. Just as with ordinary upsampling it is then necessary to ``smoothen'' the new data points 
  between the measured points using some form of interpolation / convolution, in order not to introduce new high frequency terms (sudden jumps) in the 
- higher resolution image. It is quite important to realize however that in the gridding (and degridding) steps the data is simply smeared out into the continuous
- measurement space and by implication also over the newly inserted zeros. To help visualize this ``convolutional gridding'' process refer 
- to Figure~\ref{fig_gridding}.
+ higher resolution image. It is quite important to realize however that in the gridding the data is simply smeared out into the continuous
+ measurement space and by implication also over the newly inserted zeros. The rationale behind degridding can be explained using a very similar downsampling 
+ argument. To help visualize this ``convolutional gridding'' process refer to Figure~\ref{fig_gridding}.
  \begin{figure}[h]
   \begin{mdframed}
    \begin{tikzpicture}[font=\tiny]
@@ -295,8 +297,8 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  This sampling criterion alone justifies our statement that the Fourier response of the resampling function should be considered of higher priority
  than the approximation criterion, unlike in other contexts where interpolation quality may be the most important. The energy reduction properties of
  $\phi$ can be stated in terms of maximizing the following integral ratio for all square-integrable $\phi$ functions\footnote{It is possible to
- define another criterion here. Sze Tan \cite{tan1986aperture} for instance defined this as minimizing the difference between the Direct Transform and the 
- FFT approach}:
+ define another criterion here, for example to promote accurate interpolation over energy concentration. Sze Tan \cite{tan1986aperture} for 
+ instance defined this as minimizing the difference between the Direct Transform and the FFT approach}:
  \begin{equation}
   \label{eqn_aliasing_energy}
   \frac{\int_{\text{FOV}}{|[\mathcal{F}\phi](l,m)|^2dS}}{\int_{-\infty}^{\infty}{|[\mathcal{F}\phi](l,m)|^2dS}}
@@ -319,7 +321,10 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  such as a box function is a function that stretches over an infinite support region}. The result is a periodic field of view that repeats at
  $M\Delta{l}$ and $N\Delta{m}$ for an $M\times N$ image (ie. at multiples of the field of view). In practice not all the energy from 
  these replicated fields can be stopped at the edge of the field of view, and this is responsible for the aliasing seen in the images. Further
- truncation of the shah and convolving functions also contribute to the aliasing.
+ truncation of the shah function to represent only a single field of view, as well as the truncation of the convolving function also 
+ contribute to the aliasing. It should be understood that the $\psf$ sidelobes from sources outside the field of view that fall legitimately inside
+ the field of view are not removed and this will raise the noise levels inside a deconvolved image if the sources responsible for those sidelobes are not
+ included in the deconvolved model.
  
  The $\phi$ functions considered here all have the property of \emph{separability}. By this it is implied that $\phi(u,v) = \phi(u)\phi(v)$. We will return
  to a discussion of this later on when discussing w-projection. For now the discussion will focus on functions of one variable.
@@ -342,6 +347,72 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  the Fourier transform of the box function is an \emph{infinite} $\sinc$ function.  Due to the fact that the $\sinc$ function slowly ripples out 
  toward $\infty$ it is not a good response when it comes to reducing the unwanted energy from sources that fall outside the field of view.
  
+ What makes convolutional gridding a more attractive approach to cell-summing is the fact that the distance between the grid point and the
+ measured uv point is taken into consideration when picking a set of convolution weights from the oversampled filter shown in 
+ Figure~\ref{fig_filter}. The fractional offset is simply calculated between the nearest regular grid coordinate and measured uv coordinate and is used to pick
+ the nearest filter value in the oversampled filter.
+ 
+ \begin{figure}[h]
+  \begin{mdframed}
+   \centering
+   \begin{tikzpicture}[font=\tiny]
+    \draw node at ({0*3},0.5) {$\lvert$};
+    \draw node at ({0.2*3},0.5) {*};
+    \draw node at ({0.4*3},0.5) {*};
+    \draw node at ({0.6*3},0.5) {*};
+    \draw node at ({0.8*3},0.5) {*};
+    \draw node at ({1*3},0.5) {$\lvert$};
+    \draw node at ({1.2*3},0.5) {*};
+    \draw node at ({1.4*3},0.5) {*};
+    \draw node at ({1.6*3},0.5) {*};
+    \draw node at ({1.8*3},0.5) {*};
+    \draw node at ({2*3},0.5) {$\lvert$};
+    \draw node at ({2.2*3},0.5) {*};
+    \draw node at ({2.4*3},0.5) {*};
+    \draw node at ({2.6*3},0.5) {*};
+    \draw node at ({2.8*3},0.5) {*};
+    \draw node at ({3*3},0.5) {$\lvert$};
+    \draw node at ({3.2*3},0.5) {*};
+    \draw node at ({3.4*3},0.5) {*};
+    \draw node at ({3.6*3},0.5) {*};
+    \draw node at ({3.8*3},0.5) {*};
+    \draw node at ({4*3},0.5) {$\lvert$};
+    
+    \draw node at ({0*3},0) {1};
+    \draw node at ({0.2*3},0) {2};
+    \draw node at ({0.4*3},0) {3};
+    \draw node at ({0.6*3},0) {4};
+    \draw node at ({0.8*3},0) {5};
+    \draw node at ({1*3},0) {6};
+    \draw node at ({1.2*3},0) {7};
+    \draw node at ({1.4*3},0) {8};
+    \draw node at ({1.6*3},0) {9};
+    \draw node at ({1.8*3},0) {10};
+    \draw node at ({2*3},0) {11};
+    \draw node at ({2.2*3},0) {12};
+    \draw node at ({2.4*3},0) {13};
+    \draw node at ({2.6*3},0) {14};
+    \draw node at ({2.8*3},0) {15};
+    \draw node at ({3*3},0) {16};
+    \draw node at ({3.2*3},0) {17};
+    \draw node at ({3.4*3},0) {18};
+    \draw node at ({3.6*3},0) {19};
+    \draw node at ({3.8*3},0) {20};
+    \draw node at ({4*3},0) {21};
+   \end{tikzpicture}
+   \caption[Oversampled filter]{Accross the literature the definition for ``filter support or window width'' varies considerably. To illustrate the use of the
+   terminology in our work a ficticious filter is shown here. Here the padded and oversampled $\phi_{\text{filter}}[x]$ is illustrated for a 3-cell full-support 
+   region (half support of 1 to both sides of the centre value), padded with one value on both sides. The filter is 5x oversampled, as indicated by the asterisks
+   between the bars, which represent the cell-spacing ($\Delta{u}$) used for the grid. If the measured uv coordinate falls exactly on the nearest grid 
+   cell then values 6,11 and 16 are selected as interpolation coefficients. If $\round{(\fracof{(u,v)}m_{\text{oversample factor}})} = 2$ for instance 
+   then 8, 13 and 18 are selected for the 3 grid points being ``convolved'' or ``smeared'' onto. In other words we place a denser bed of nails over the bed of 
+   nails of the grid and select the closest set of coefficients for the convolution. Briggs et al. \cite[Lecture 7]{taylor1999synthesis} notes that this discretization
+   of $\phi$ will cause a minor replication effect with a very long period of $\frac{m_{\text{oversample factor}}}{\Delta{u}}$ and 
+   $\frac{m_{\text{oversample factor}}}{\Delta{v}}$ in the respective u,v directions.}
+   \label{fig_filter}
+  \end{mdframed}
+ \end{figure}
+ 
  If the last observation about box functions are inverted then we arrive at a partial solution to the problem of selecting a filtering function
  that better limits aliasing energy; convolving with the \emph{infinite} $\sinc$ yields a box response in the image domain. Unfortunately it is 
  impossible to convolve with a infinite function to exactly reconstruct the sought-after box response in the image domain. It is also computationally
@@ -359,9 +430,9 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
       \includegraphics[width=\textwidth]{images/ratt_aa_kernel_demo_larger_support.png}
       \caption{$\sinc$ 8x8 full support}
     \end{subfigure}
-    \caption[Alias reduction]{Here a ``grid'' sky model was simulated using MeqTrees and imaged with our imager, first using Nearest Neighbour
-    and then using an ordinary unwindowed $\sinc$ function. Sources that fall slightly outside the field of view are aliased back in when the energy
-    outside the field of view is not limited as expected.}
+    \caption[Alias reduction]{Here a ``grid'' sky model was simulated using MeqTrees\cite{noordam2010meqtrees} and imaged with our imager, first 
+    using Nearest Neighbour and then using an ordinary unwindowed $\sinc$ function. Sources that fall slightly outside the field of view are 
+    aliased back in when the energy outside the field of view is not limited as expected.}
     \label{fig_aliasing_nn_vs_sinc}
   \end{mdframed}
  \end{figure}
@@ -378,48 +449,55 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  for $\beta$.
 
  An alternative to using a windowed $\sinc$ function is to use a prolate spheriodal function. These are also widely employed in 
- astronomical imagers and a more detailed analysis is given by \cite{schwab1984optimal}. The computation of these family of 
- spheriodal functions (as defined by Rhodes \cite{rhodes1970spheroidal}) maximizes the energy concentration ratio in 
- Equation~\ref{eqn_aliasing_energy} much better than many other functions considered by Schwab in \cite{schwab1984optimal}:
+ astronomical imagers. The Spheriodal functions have the property we're looking for, in that most of their energy is concentrated 
+ over the central part of the function, as a weighted variant of Equation~\ref{eqn_aliasing_energy} as proven generally by 
+ Donald Rhodes \cite{rhodes1970spheroidal}. A later analysis by Frederic Schwab \cite{schwab1984optimal} confirms the good 
+ performance of the spheriodal functions in practice as anti-aliasing filters. Here the prolate spheriodal is defined as 
+ for the special case that $\alpha=0$:
  \begin{equation}
-  |1-(2x/W)^2|^\alpha\psi_{\alpha0}(0.5\pi W,2x/W
+  |1-(2x/W)^2|^\alpha\psi_{\alpha0}(0.5\pi W,2x/W)
  \end{equation}
  
- Here $W$ is again the full support of the the convolution filter and $x$ increases in steps of $\Delta{u}$. If $\alpha=0$ the function
- as it stands is called the \emph{prolate spheriodal function}. When $\alpha>0$ a weighted energy concentration ratio is maximized instead.
+ Here $W$ is again the full support of the the convolution filter and $x$ increases in steps of $\Delta{u}$. When $\alpha>0$ a 
+ weighted energy concentration ratio is maximized instead. The $\psi_{xy}$ function is the one defined by Donald Rhodes \cite{rhodes1970spheroidal}.
+ Its definition alone is well beyond the scope of this discussion, and in fact it is quite difficult to compute for arbitrary support and
+ oversampling parameters.
  
- To conclude our comparison we give some extracts from the literature in Figure~\ref{}
+ After taking the Fourier transform the tapering effects of $\phi$ may optionally be corrected for by point-wise dividing through by the Fourier transform of
+ $\phi$. This does not completely eliminate $\phi$ from the resulting expression, but has the effect of flattening the response of the pass band (removes the
+ tapering towards the edges of the image, but at the same time increasing the amplitudes of the aliasing-sidelobe responses.
  
+ Measuring energy outside the grid-corrected image, Jackson et al.\cite{jackson1991selection} shows that the Keiser-Bessel-windowed $\sinc$ achieves 
+ very similar performance to the Gaussian and Prolate Spheriodal Function for small (preferable) support regions and similar performance to the 
+ prolate spheriodal for larger windows, whilst being considerably easier to compute than the latter. One possible downside to windowed sinc functions
+ are their inability to reproduce a constant function as Th\'evenaz et al. \cite{thevenaz2000image} points out. A synthesized image with a non-zero 
+ mean will appear either too light or too dark when compared to a model image. It is unclear if the prolate spheriodal function suffers from the same
+ problem. Th\'evenaz et al. also points out that the sinc introduces blockiness in the image.
  
- is to interpolate the data onto a regularly sampled grid with a two-dimensional convolution function, as is required when using the Fast Fourier Transform to approximate the transformations. A Fast Fourier Transform has a computational complexity of $O(N^2\log_2{N})$, while
- convolutional gridding typically requires $O(MC^2) \approx O(N^2C^2)$ operations (where C is the size of each dimension of a square filter) for large numbers of visibilities. If both the image size is small and the number of visibilities 
- are small the Direct Fourier Transform may be faster than the convolutional gridding approach. However, this will not generally be true for very large arrays such as the SKA or its predicessors that are currently under construction, 
- considering the sheer number of baselines involved, as well as the typical grid sizes involved. 
+ Lastly it is necessary add (though this is unrelated to the discussions above) that both the Direct Fourier Transform and Fast Fourier Transform approaches
+ have to scale the field of view of the image according to the cell size and number of pixels in the image. In the Fast Fourier Transform approach this is 
+ achieved by scaling the measurement domain's u,v coordinates (measured in $\text{cycles}\text{m}^{-1}\text{rad}^{-1}$) such that when inverted the image
+ has the desired field of view. To achieve this we use the \emph{similarity} property of the FFT:
+ \begin{equation}
+  \alpha^{-n}F(x/\alpha) \rightleftharpoons f(\alpha x)
+ \end{equation}
+ Here $n$ depends on the dimensionality of the Fourier transform. If the desired field of view (measured in radians) is multiplied to each sampled
+ u,v coordinate such that the desired $-0.5\Delta{l}N_l\leq x\leq0.5\Delta{l}N_l$ field of view is satisfied in the synthesized image. It is further 
+ important to note that, by convention, the gridded visibilities are shifted before Fourier transform such that the 0 frequency component 
+ (``DC'' component) is at the centre of the grid and the corresponding centre of the observed field on the image is in the centre pixel of the image.
  
+ To summarize the convolutional gridding process is shown in Figure~\ref{fig_synth_pipeline}.
+ \begin{figure}[h]
+  \begin{mdframed}
+    \centering
+    \includegraphics[width=0.35\textwidth]{images/convolutional_gridding_flow.png}
+    \caption[Synthesis using convolutional gridding]{Here the classic synthesis by convolutional gridding and Inverse Fast Fourier transform is shown.
+    The signal (u,v domain) is multiplied by a sampling function (and optionally weighted by the computed and tapered density function). Then it is convolved
+    and resampled onto the regular grid, Fourier transformed and optionally grid-corrected by point wise division. Courtesy of Jackson et al.\cite{jackson1991selection}}
+    \label{fig_synth_pipeline}
+  \end{mdframed}
+ \end{figure}
  
-%  An abstract view of imaging, deconvolution and gain correction is shown in figure~\ref{fig_image_cycle}. Experiments performed by Varbanscu et al. \cite{varbanescu2008performance} show that convolutional 
-%  gridding accounts for nearly 35.4\% of the computation time, while the inverse process of degridding accounts for 48.74\% of a simple gridding and degridding cycle. In this chapter we will primarily focus on the convolutional gridding algorithm, optimal
-%  convolution functions and a brief overview of the inverse process is given. The next chapter discusses the problem of non-coplanar widefield imaging and the tradeoffs between the various solutions to the 
-%  problem. Therefore, the w term is, for the moment, not considered in this discussion.
-%  
-%  Exploiting the computational efficiency of the Cooley-Tukey Fast Fourier Transform and its inverse to compute the forward and inverse Discrete Fourier Transforms requires, amongst other considerations, that
-%  the input is regularly sampled. This sampling is achieved through the process of convolutional gridding. In essense the algorithm can be broken down to four steps as illustrated in figure~\ref{fig_gridding}:
-%  \begin{enumerate}
-%   \item The individual complex visibilities are convolved with a highly oversampled function C(u,v). This process spreads them out accross a much wider area in u,v space.
-%   \item Afterwards the u,v space is regularly sampled.
-%   \item The image is computed through an Inverse Fast Fourier Transform
-%   \item A correcting function is applied to the sampled image.
-%  \end{enumerate}
- 
- This sampled observed visibility plane is then convolved with a densely sampled convolution function. The primary goal of this convolution is to interpolate each visibility, but may also limit the aliasing energy outside the support 
- region of the convolving function, as well as limit the interpolation error introduced by using convolutional gridding, instead of the Direct Fourier Transform. Depending on the metrics used to define ``optimal gridding function'' these may vary from a simple truncated sinc or exponential function 
- \cite[Lecture 7]{taylor1999synthesis} to prolate spheriodal functions and approximations to these functions, such as the Keiser Bessel function \cite{jackson1991selection}. Sze Tan \cite{tan1986aperture} derives functions that out-perform prolate spheriodal functions
- on the basis of minimizing aliasing energy, as well as providing an opportunity to trade off the order of interpolation over the area for which the convolution error is small.
- 
- It is possible to combine these operations into 
- \begin{equation*}
-  I^s_{dirty} = ([I(l,m)*\mathcal{F}^{-1}\{PSF(u,v)\}]\cdot\mathcal{F}^{-1}\{C(u,v)\}) * \mathcal{F}^{-1}\{III(u,v)\}
- \end{equation*}
 \section{Widefield distortions and the problem of non-coplanar baselines}
 Evaluating a direct 3D analytical solution over an image cube with n layers soon becomes intractable for large images, specifically in terms of sheer memory requirements for storing these layers. Over a three dimensional cube, M (the number of visibilities),
 will be reasonably sparcely sampled, and the number of complex multiplications needed per visibility is estimated to be $\frac{4\lambda B_{max}^3}{D^4}$ \cite{yashar2009tdp}. However, the approach remains embarisingly parallel and can

@@ -33,13 +33,13 @@ Much of the filtering and imaging techniques described in this thesis rely on th
 can be found in Smith \cite[ch 8-12,31]{smith1997scientist}, but the general relations between converting between the time and frequency domains (and between the visibility and the intensity spaces as will be described later on) are as follows:
 \begin{equation*}
   \begin{split}
-    G(f) &= \int_{-\infty}^{\infty}g(x)e^{2\pi ifx}\\
-    g(x) &= \int_{-\infty}^{\infty}G(f)e^{-2\pi ifx}
+    G(f) &= \int_{-\infty}^{\infty}g(x)e^{-2\pi ifx}\\
+    g(x) &= \int_{-\infty}^{\infty}G(f)e^{2\pi ifx}
   \end{split}
 \end{equation*}
-Here capital letters indicate the Fourier space. We will be using this convention throughout this thesis. It is important to realize that the fourier transform conserves the total energy between the signal and Fourier spaces. It is 
-also possible to take the fourier transform with discrete signals (indicated with square brackets as per convention). In that case the Fast Fourier Transform algorithm and its inverse is employed to move between these domains. There are 
-highly optimized libraries available for example FFTW or cuFFT.
+Here capital letters indicate the Fourier space. We will be using this convention throughout this thesis. It is important to realize that the fourier transform conserves the total energy between the signal and Fourier spaces (Parseval's
+Theorem). It is also possible to take the fourier transform with discrete signals (indicated with square brackets as per convention). In that case the Fast Fourier Transform algorithm and its inverse is employed to move between these 
+domains. There are highly optimized libraries available for example FFTW or cuFFT.
 
 For linear systems the following theorems are true (stated without proof):
 \begin{equation*}
