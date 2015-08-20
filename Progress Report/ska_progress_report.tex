@@ -136,7 +136,7 @@ approximation brakes down when imaging wider fields of view. This is illustrated
   \caption[Widefield phase delay]{The combined propagation delay of emission from sources far away from the telescope pointing centre is a combination
   of the error between the planar approximation and the celestial sphere in (a) and the delay difference between pairs of antennae in the telescope
   pointing direction as illustrated in (b). The total phase error is expressed as $w(n-1)$. The multiplicative effect of this w-term becomes a
-  significant problem in large non-East-West antenna arrays, where the array components do not remain coplanar as the Earth rotates.}
+  significant problem in large non-East-West antenna arrays, where the antenna pairs do not remain coplanar as the Earth rotates.}
   \label{FIG_WIDEFIELD_ERROR}
 \end{figure}
 
@@ -159,7 +159,7 @@ than ten pixels per filter dimension.
 When dealing with wide field images the cost of the resampling component quickly escalates to dominate the computational
 complexity of the inversion process. There are 3 commonly used techniques to reduce the widefield smearing shown above:
 \begin{enumerate}
- \item Faceting, where a wide field field of view is broken up into smaller narrow field images.
+ \item Faceting, where a wide field of view is broken up into smaller narrow field images.
  \item W-projection, where the $w(n-1)$ term is convolved into the FFT relationship between the planar image and the emission sources
  on the celestial sphere.
  \item Snapshot imaging, where short duration images are made, reprojected and integrated into one final image.
@@ -167,9 +167,9 @@ complexity of the inversion process. There are 3 commonly used techniques to red
 
 Since this costly resampling step will necessarily be called upon multiple times per observation for the purpose of deconvolving the 
 effects of incomplete sampling, it is worth investigating how this step may be accelerated. Our work focuses on the convolutional 
-resampling component of the first two approaches, a hybrid approach between faceting and W-projection. We focus on parallelizing
-this hybrid faceting technique both using CPU multithreading techniques, as well as using General Purpose Graphics 
-Processing Units.
+resampling component of the first two approaches: a hybrid approach between faceting and W-projection. We focus on parallelizing
+this hybrid faceting technique using both CPU multithreading techniques, as well as using General Purpose Graphics 
+Processing Units in order to draw a useful conclusion.
 \section{Facet imaging (2014)}
 When performing facet imaging multiple smaller images of the sky are made. Each smaller image is made with respect to a new reference
 centre, by phase shifting each coherence measurement. This effectively means that the resampling step has to be done for each
@@ -179,13 +179,13 @@ As Rick Perley \cite{perley1999imaging} points out it is also necessary to make 
 to keep the phase error over a fixed field of view comparable between facet images. Failure to do so will result in needing many
 more facets towards the edge of a wide field image than in the centre. We've implemented this classic faceting approach in 2014 and obtained
 good results with both simulated and calibrated data from the Extended Very Large Array. Our imager allows the user to either target the 
-regions around a list of coordinates (figure~\ref{FIG_BULLSEYE}) or divide a continuous piece of sky into multiple facets.
+regions around a list of coordinates (figure~\ref{FIG_BULLSEYE}) or divide a continuous region of the sky into multiple facets.
 
 \begin{figure}[h!]
  \centering
  \includegraphics[width=0.75\textwidth]{images/targeted_faceting.png}
  \caption[Targeted faceting]{Here the prototype user interface for targeted faceting is demonstrated. A region towards the edge
- of a simulated grid sky model is faceted. The facet image is displayed in a new window.}
+ of a simulated model, with point sources in a grid layout, is faceted. The facet image is displayed in a new window.}
  \label{FIG_BULLSEYE}
 \end{figure}
 
@@ -193,11 +193,11 @@ However, this approach poses a cumbersome problem. Since the facets are rotated 
 the Point Spread Function \footnote {Fourier transform of the sampling coordinates. Each source will be convolved with this function.
 An example is the Gausian-like smearing around each point source in the simulated field in figure~\ref{FIG_SMEARING}. In this instance
 the PSF is ideal. With other array configurations the PSF can take on more cumbersome forms} changes per facet. Unlike in normal 
-narrow fieldimaging this effectively means that the PSF changes over the final image (each facet will have its own associated PSF). Thus, 
-Because of this non-coplanar faceting complicates the task of deconvolution. 
+narrow field imaging this effectively means that the PSF changes over the final image (each facet will have its own associated PSF). Thus, 
+non-coplanar faceting complicates the task of deconvolution. We opted to investigate a coplanar faceting approach instead. With such an approach all the facet images are parallel to 
+each other and can be jointly deconvolved. 
 
-We opted to investigate a coplanar faceting approach instead. With such an approach all the facet images are parallel to 
-each other and can be jointly deconvolved. There are multiple ways to achieve coplanar faceting. Non-coplanar facets can be
+There are multiple ways to achieve coplanar faceting. Non-coplanar facets can be
 re-projected and mosaiced onto a common plane using the transformations described by Sault et. al \cite{sault1996approach} in the measurement space 
 or using existing mosaicing software, such as Montage \cite{jacob2004montage} in the image space. Doing the latter reprojection and 
 background correction during every major deconvolution cycle can prove costly - both in the extra memory required and 
@@ -206,7 +206,7 @@ computation time.
 Another approach that is more in line with the idea behind w-projection is to introduce an approximation of $w(n-1)$ while resampling.
 Here Kogan and Greisen \footnote{AIPS Memo 113 (2009). Available from \url{http://www.aips.nrao.edu/aipsmemo.html}} uses a first order
 tailor approximation to the error term, which we incorporated into our imager. A more accurate approach involves including a higher
-order approximation to the error term through convolution as with w-projection. This increases the filter support size and the 
+order approximation to the error term through convolution, as with box-standard w-projection. This increases the filter support size and the 
 computational costs, but using such a hybrid approach it is possible to create larger facet images at the cost of slightly more
 expensive gridding.
 \section{Hybrid W-faceting (2015)}
@@ -234,7 +234,7 @@ With a hybrid approach \footnote{Suggested by the TDP Calibration group \cite{ya
 w-projection approach. The associated filter support regions, as well as number of w-values being computed, are also smaller. This 
 makes the gridding operation more data parallel and less memory intensive than full w-projection - the latter requires careful consideration when creating 
 images at the Nyquest rate required by the SKA layout (which may be up to $10^{10}$ pixels for the final image according to some estimates). 
-Here either a faceting approach such as the one we're investigating may be needed or the gridding operation will have to be done in 
+Here either a faceting approach, such as the one we're investigating, may be needed or the gridding operation will have to be done in 
 multiple passes.
 
 Another advantage to combining faceting with w-projection is that, for smaller fields of view the filter becomes seperable, requiring far
@@ -244,7 +244,8 @@ of General Purpose Graphics co-processors - this is essential to achieving good 
 As part of our validation strategy we've selected a sample EVLA dataset. To ensure the usability of our imager
 we support measurements stored in the NRAO Measurement Set format \footnote{NRAO CASA Memo 229. Available from \url{http://casa.nrao.edu/Memos/229.html}}.
 The data we've selected as part of our standard set of test datasets is the calibrated and flagged measurement of the supernova
-reminant G55.7+3.4 as observed using the EVLA D configuration at L-band. A continuium image is shown in Figure~\ref{FIG_SUPERNOVA}.
+reminant G55.7+3.4 as observed using the EVLA D configuration at L-band. A set of continuium images created with Bullseye 
+is shown in Figure~\ref{FIG_SUPERNOVA}.
 \begin{figure}[h!]
   \centering
  \begin{subfigure}[b]{0.49\textwidth}
@@ -278,7 +279,7 @@ reminant G55.7+3.4 as observed using the EVLA D configuration at L-band. A conti
 A significant portion of the code base for the imager was written during this period. This included a lock-based multithreaded 
 CPU facet imager, based on the non-coplanar method discussed above. I additionally created a GPU-based implementation of the
 convolutional resampling technique, based partly on a work distribution approach suggested by John Romein \cite{romein2012efficient}.
-In this approach the correlation methods of each antenna pair is added to the regular grid in parallel. Because the tracks from these
+In this approach the correlation measurements of each antenna pair is added to the regular grid in parallel. Because the tracks from these
 antenna pairs are swept out slowly over the duration of an observation it is possible to limit global write operations, by accumulating
 results in the register memory of the GPU. We further extended this approach to compute multiple facets in parallel. By the end of January 2015
 the GPU-based implementation was working.
@@ -291,7 +292,7 @@ Because of the increased filter size a W-projection resampling approach is much 
 to better employ the vector instruction sets of modern CPUs. We've implemented w-projection employing AVX vectorization in addition to the course-grained 
 parallelization achieved when creating multiple facets in parallel. This accounts for roughly 2 months worth of work.
 
-During the few weeks I've also reworked a portion of my GPU resampling implementation to use seperable W-projection filters. The implementation now
+During the last few weeks I've also reworked a portion of my GPU resampling implementation to use seperable W-projection filters. The implementation now
 caches the w-projection filters in a fast on-chip texture cache that limits accesses to global memory and ensures that the resampling time is roughly 20\% faster than
 performing w-projection without this caching operation.
 \subsection{Latest results}
@@ -367,7 +368,7 @@ as discussed earlier.
 Although the majority of the implementation agreed upon has been completed, there are still a few remaining smaller issues to be investigated and fixed. One of which is
 the effect of doing the resampling in double precision instead of single precision. Support for this is already available in our imager, and the investigation simply entails
 simulating several realistic fields and noting the effect of using double precision on the dynamic range of the images. There are also several small bug fixes and small 
-optimizations that can still be made. This should not take more than 2 weeks to complete.
+optimizations that can still be made. This should not take more than one month to complete.
 
 I aim to compare performance against other existing software packages and write up the relevant chapters on implementation and analysis during the 3rd and early 4th quarter
 of the year and have my discertation ready for marking by December 2015. 
@@ -377,14 +378,22 @@ contributions to be made to the imager. One of which is adding a major-minor cyc
 the coplanar facet images can be jointly deconvolved.
 
 Additionally facet imaging provides an opportunity to deal with Directional Dependent Effects. One of the most crutial is the removal of the effects introduced by the antenna
-response pattern. In previous years antenna beam pattern models only consisted of overly simplistics analytic functions. However, improved antenna sensitivity in recent upgrades to
+response pattern. In previous years antenna beam pattern models only consisted of overly simplistic analytic functions. However, improved antenna sensitivity in recent upgrades to
 existing and new telescopes has warented a refreshed look at older calibration and correction techniques. Correcting for the antenna beam pattern in the imaging step will prove very
 useful in widefield imaging, where sources may lay outside the primary beam of the telescope. Using facet imaging to approximate the beam pattern while resampling is certainly a promising
 way of dealing with the new reality. Bullseye already has some functionality to read time and frequency varient matricies from an extended measurement set format and all that remains is to
 propagate those tables with values derived from a realistic beam pattern model.
 
 It should be noted that Bullseye is intended to be used as a continuium imager. A useful addition will be the incorporation of 
-relativistic effects necessary to do spectral imaging in very narrow bands.
+the necessary relativistic effects that are necessary to do spectral imaging in very narrow bands.
+\section{Conferences and workshops}
+In early January 2015 Professor Oleg presented a poster at the Biomedical and Astronomical Signal Processing (BASP) conference 
+in my stead. I was unable to secure the necessary funding to attend that conference in person.
+
+Later in March 2015 I attended the Royal Society on radio imaging workshop where I presented my imager
+to others in the imaging, calibration and deconvolution subfields.
+
+Currently there are no plans to publish any papers.
 \pagebreak
 \bibliography{ska_progress_report}{}
 \bibliographystyle{plain}
