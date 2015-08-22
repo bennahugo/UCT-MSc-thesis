@@ -2,7 +2,7 @@
 In this chapter we discuss how the Radio Interferometric Measurement Equation can be inverted to obtain a synthesized image of the radio sky. First an overview of the imaging pipeline is given, before
 delving into the finer details of creating what is known as ``dirty'' images of the sky and correcting the wide field distortions introduced in the images when breaking the assumptions made when the images 
 are synthesized using a Fast Fourier Transform. Finally we discuss previous literature on acceleration of the correcting process, before moving onto the design of our imager in the following chapter. Before
-continuing readers not familiar should refer to Appendix~\ref{chp_DSP} for a refresher on basic signal processing concepts.
+continuing readers not familiar with Fourier theory should refer to Appendix~\ref{chp_DSP} for a refresher on basic signal processing concepts.
 \section{The calibration, imaging and deconvolution pipeline}
 The RIME can be thought of as the equation that predicts what measurement the telescope should make, given a model radio sky (\emph{intensity distribution}), telescope behavior and environmental effects as inputs. 
 If all the information is known the inversion of this equation is as simple as taking an inverse Fourier Transform. To see why this is true consider that the continuous sky is simply an infinite sequence of 
@@ -10,7 +10,7 @@ shifted and scaled impulses (or delta functions), where each impulse is infinite
 of each of the delta functions is simply:
 \begin{equation}
  \label{eqn_delta_response}
- h(u,v) := \int_{-\infty}^\infty\int_{-\infty}^\infty \delta(l-l_\Delta,m-m_\Delta)e^{-2\pi i(ul+vm)}dldm
+ h(u,v) := \int_{-\infty}^\infty\int_{-\infty}^\infty \delta(l-l_0,m-m_0)e^{-2\pi i(u(l-l_0)+v(m-m_0))}dldm
 \end{equation}
 Observe that this is practically the same as the RIME. If the delta functions are replaced with the scaled intensities over infinitesimally small areas of the sky as defined previously and the direction dependent and
 independent terms are added in the convolution integral the two integrals are practically identical, apart from the $w(\sqrt{1-l^2-m^2}-1)$ term in the complex exponent and the $n = \sqrt{1-l^2-m^2}$ in the denumerator. 
@@ -34,7 +34,7 @@ the u,v coordinates depend on the wavelength the $\psf$ in turn also scales depe
 bandwidth as mentioned previously.
 
 Not all the information we need to accurately reconstruct the true intensity distribution, $I_{\text{true}}$, is available. In fact the $\psf$ alone provides a challenging
-problem by itself. The more complete the sampling function, the more accurate we can reconstruct the image. If measurements are taken over too short an observation there is
+problem by itself. The more complete the sampling function, the more accurately the image can be reconstructed. If measurements are taken over too short an observation there is
 no hope of deconvolving most of the $\psf$ from the image. Even more concerning is the fact that the directional dependent effects cause a time-dependent convolution with the
 true measurements and serve to modulate different parts of the synthesized image at different levels during the course of an observation. Figure~\ref{fig_psf} shows how the 
 $\psf$ gradually improves with longer observation time, while Figure~\ref{fig_model_convolution} provides a good illustration of the challenge astronomers face 
@@ -52,11 +52,11 @@ when just considering the effects of limited sampling on the true sky, let alone
  \end{subfigure}
  \begin{subfigure}[b]{0.24\textwidth}
   \includegraphics[width=\textwidth]{images/evla_observation_psf/6hr.png}
-  \caption{6 hr}
+  \caption{6 hrs}
  \end{subfigure}
  \begin{subfigure}[b]{0.24\textwidth}
   \includegraphics[width=\textwidth]{images/evla_observation_psf/12hr.png}
-  \caption{12 hr}
+  \caption{12 hrs}
  \end{subfigure}
  \caption[EVLA Point Spread Function evolution]{Here the Point Spread Function is shown for various observation lengths on the EVLA D-configuration at $\delta=30^\circ$. The PSF gradually 
  becomes more defined with longer observation time. Removing the repeating lobe-like structure around the source (clearly visible in the longer observations) is the primary goal of 
@@ -98,36 +98,36 @@ when just considering the effects of limited sampling on the true sky, let alone
  \end{mdframed}
 \end{figure}
 
-Referring back to the sampling tracks in Figure~\ref{fig_evla_observation} highlights a further (but minor) complication with the PSF: there are clearly more short baselines than long baselines. The resulting effect on this non-uniform
-weighting in the sampling function is a broadening of the $\psf$ and by implication an bias towards resolving extended structure in the image space. In order to resolve finer (compact) emission structure in the image
-it is necessary to divide through by the number of samples in the neighborhood of each point in the measurement space, in order to \emph{uniformly} weight the synthesized image. This highlights an important aspect about
+Referring back to the sampling tracks in Figure~\ref{fig_evla_observation} highlights a further (but minor) complication with the $\psf$: there are clearly more short baselines than long baselines. The resulting effect on this non-uniform
+weighting in the sampling function is a broadening of the $\psf$, and by implication a bias towards resolving extended structure in the image space. In order to resolve finer (compact) emission structure in the image
+it is necessary to divide through by the number of samples in the neighborhood of each point in the measurement space, \emph{uniformly} weighting the synthesized image. The tracks also highlights an important aspect about
 interferometers in general: the $\psf$ acts very similar to a high-pass filter. Adding longer baselines to an array increases the compactness of the $\psf$, which in turn serves to resolve higher frequency structure (edges, points, etc.)
-in the image. This is not always desirable - observing extended emission sources is equally important, which requires only short baselines and more robust weighting methods are possible.
+in the image. This is not always desirable - observing extended emission sources is equally important, which requires only short baselines and more robust weighting methods are possible for the latter.
 
-Along with the weighting by a density function the measured visibilties are also tapered by a Gaussian-like function in order to control the shape of the $\psf$ and
+In addition to weighting by a density function the measured visibilities are also tapered by a Gaussian-like function in order to control the shape of the $\psf$ and
 drive down the first few sidelobes of the $\psf$ at the slight expense of broadening its main lobe. The final weight also contains the inverse of the expected 
 (constant if calibration is successful) variance of the measurement in order to improve the signal to noise level in the synthesized image. The technicalities are
-not very important in our discussion, but the reader may refer to Briggs et al. \cite[Lecture 7]{taylor1999synthesis} and \cite[p. 387-399]{thompson2008interferometry} for 
+not very important for our discussion, but the reader may refer to Briggs et al. \cite[Lecture 7]{taylor1999synthesis} and Thompson et al. \cite[p. 387-399]{thompson2008interferometry} for 
 more details.
 
-This brings us to consider a strategy to deconvolve the extended lobe structure of the $\psf$ from the images. In order to achieve this goal we make an assumption about the distribution of sources in the sky, in that the radio
-sky is mostly void of emission. If we further assume most sources are compact point-like sources it gives us one possible strategy to remove some of the $\psf$ structure as stated in CLEAN, Algorithm~\ref{alg_clean}.
+This brings us to consider a strategy to deconvolve the extended lobe structure of the $\psf$ from the images. In order to achieve this goal an assumption is made about the distribution of sources in the sky, in that the radio
+sky is mostly void of emission. If it is further assumed that most sources are compact point-like sources one possible strategy to remove some of the $\psf$ structure becomes apparent, as stated in CLEAN, Algorithm~\ref{alg_clean}.
 \begin{algorithm}
   \begin{algorithmic}
   \STATE {Given a dirty image, $d$ of size $n \times m$ pixels}
-  \STATE {Given a synthesized $\psf$ of size $2n \times 2m$}
-  \STATE {Let $c$ be an all-zero cleaned image of size $n \times m$}
-  \STATE {Given the loop gain $0.0 \leq \gamma \leq 1.0$}
+  \STATE {Given a synthesized $\psf$ of size $2n \times 2m$ pixels}
+  \STATE {Let $c$ be an all-zero cleaned image of size $n \times m$ pixels}
+  \STATE {Given the loop gain $0.0 < \gamma \leq 1.0$}
   \STATE {Let $R_p = \infty$}
   \STATE {Let $R_c = \infty$}
   \REPEAT
       \STATE {Let $b$ be the position of the maximum value in $d$}
       \STATE {Set $c[b] = c[b] + \gamma\max{d}$}
-      \STATE {Subtract from $d$ the scaled beam $\gamma\max{d}\psf$, centred on position $b$}    
+      \STATE {Subtract from $d$ the scaled beam $\gamma\max{d}\max\psf$, centred on position $b$}    
       \STATE {Set $R_p = R_c$}
       \STATE {Set $R_c = \frac{\max{d}}{\rms{d}}$}
   \UNTIL {$|R_p - R_c| \leq \epsilon$ \OR maximum iterations reached} 
-  \STATE {Convolve $c$ with gausian-like function with half-amplitude width equal to that in the \psf}
+  \STATE {Convolve $c$ with Gaussian-like function with half-amplitude width equal to that in the \psf}
   \STATE {Set $c[...] = c[...] + d[...]$, ie. add the residual noise back into the cleaned image}
   \end{algorithmic}
   \caption{The H\"ogbom CLEAN algorithm}
@@ -139,14 +139,14 @@ deconvolves regions of extended emission as well. The output is then a collectio
 together. 
 
 The $\psf$ subtraction in the image / sky domain for every detected source is a relatively expensive operation. One of the
-most notable adaptions to CLEAN is the Cotton-Schwab major-minor cycle adaption to the algorithm. Here only a truncated
+most notable adaptions to CLEAN is the Cotton-Schwab major-minor cycle adaption. Here only a truncated
 $\psf$ (up to the first few sidelobes) is subtracted in the image domain. The resulting clean model is then converted back
 to the continuous measurement domain (here again the measurement is predicted by the RIME) and then subtracted from the 
 observed visibilities. In fact this major-minor cycle approach works well when deconvolving multiple adjacent fields. 
 
 The convergence criteria of the algorithm is well beyond the introductory discussion here. Refer to Thompson et 
 al. \cite[ch 11]{thompson2008interferometry} for a more detailed discussion and further reading on the topic. More
-recently new sparse synthesis and analysis approaches has been suggested as alternatives to CLEAN. An example is the 
+recently new sparse synthesis and analysis approaches have been suggested as alternatives to CLEAN. An example is the 
 MORESANE \cite{dabbech2015moresane} algorithm.
 
 In addition to the $\psf$ deconvolution problem is the telescope calibration problem. Apart from removing unwanted
@@ -181,33 +181,33 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
   \draw [rarrow] (finalize) -- (stop);
  \end{tikzpicture}
  \caption[Imaging pipeline]{Here the traditional imaging pipeline is shown. The known directional-dependent calibration terms are taken 
- into account during the ``backwards'' inversion step, while the unknown slowly varying directional-dependent effects can be solved for
+ into account during the ``backwards'' inversion step, while the unknown slowly-varying directional-dependent effects can be solved for
  if enough about the model sky is known.}
  \label{fig_img_pipeline}
  \end{mdframed}
 \end{figure}
 
 \section{Narrow field synthesis using the FFT}
- There are generally two techniques used to approximate the fourier transforms between the observed visibilities and the (dirty) image. Either a brute force Direct Fourier Transform is taken where each grid point is approximated through a brute-force
- evaluation over all the observed visibilities (M of them in total). This approach requires on the order of $N^2M \approx N^4$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large number of visibilities. 
- The direct inversion algorithm boils down to a M summations of complex multiplications over the entire image \cite[Lecture 7]{taylor1999synthesis}. This equation can be amended to be as accurate as needed, taking per-pixel effects into 
+ There are generally two techniques used to approximate the Fourier transforms between the observed visibilities and the (dirty) image. Either a brute force Direct Fourier Transform is taken where each pixel is approximated through an
+ evaluation over all the observed visibilities (M of them in total). This approach requires on the order of $N^2M \approx N^4$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large 
+ number of visibilities \cite[Lecture 7]{taylor1999synthesis}. This equation can be amended to be as accurate as needed, taking per-pixel effects into 
  account if necessary:
  \begin{equation}
-  (\forall c\in\text{correlations})(\forall\text{ pixels }l,m) I_{\text{observed},c}[l,m] = \frac{1}{M}\sum_{k=1}^{M}{\frac{V_{c,\text{observed}}}{n}[u,v]e^{2\pi i (ul + vm + w(n-1))}}
+  (\forall c\in\text{correlations})(\forall\text{ pixels }l,m) I_{\text{observed},c}[l,m] = \frac{1}{M}\sum_{k=1}^{M}{\frac{V_{c,\text{observed}}[u,v]}{n}e^{2\pi i (ul + vm)}}
  \end{equation} 
  
  The first approach is prohibitively expensive when the number of baselines grows or the observation time increases, considering that the operation will be called upon multiple times in a major-minor deconvolution cycle. Instead astronomers rely
  on a simple \emph{planar} approximation. This second approach employs the Fast Fourier Transform (see Cochran et al. \cite{cochran1967fast} for algorithmic details). Instead of having complexity order $N^4$ the two dimensional Fast Fourier 
  Transform can be computed with roughly $2N^2\log{N}$ steps. There are three very serious problems to consider though:
  \begin{enumerate}
-  \item The Fast Fourier Transform yields a \emph{tangent planar approximation} to the sky dome: the synthesized image is only accurate near the phase centre (by convention the center pixel) of the image.
-        This implies that the FFT may only be used when $\sqrt{1-l^2-m^2} - 1 \ll 1$. When doing wide field synthesis this assumption is broken and have to be corrected for.
+  \item The Fast Fourier Transform yields a \emph{tangent planar approximation} to the sky dome: the synthesized image is only accurate near the phase centre (by convention the centre pixel) of the image.
+        This implies that the FFT may only be used when $\sqrt{1-l^2-m^2} - 1 \ll 1$. When doing wide field synthesis this assumption is broken and has to be corrected for.
   \item The Fast Fourier Transform only operates on \emph{regularly sampled} data. This statement simply means that the data has to be sampled on a uniformly spaced grid in order to 
 	apply the two dimensional FFT. This resampling step (essentially a variant of image upsampling) is very computationally expensive: as we will see it quickly comes to 
 	dominate the entire synthesis process. On the other end of the pipeline the prediction step suffers from the same affliction: a FFT can again be employed when going 
-	from the model sky to continuous measurements, but then the regularly spaced samples have to be resampled to continuous coordinates.
+	from the model sky to continuous measurements, but then the regularly spaced visibility measurements have to be resampled to continuous coordinates.
   \item The regularly sampled FFT assumes the signal (in this context the signal is the sky) is periodic (in other words it repeats: sources outside the field of view of the produced image is flipped back into the image on the opposite side. This 
-	introduces the necessity to filter the image with a filter that only passes signal that is in the field of view being considered and stops any energy 
+	introduces the necessity to filter the image with a filter that only passes signal that is inside the field of view being considered, and stops any energy 
 	outside the field of view.
  \end{enumerate}
  The second and third problems are related and for now our discussion will be focused on providing a solution to address them. The first problem will be discussed in
@@ -224,7 +224,7 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  Thompson et al. \cite[p. 387-399]{thompson2008interferometry} give concise discussions of the technical considerations that must be taken into 
  account in the synthesis step. Our discussion highlights some key considerations and findings from these works.
  
- Thompson and Bracewell \cite{thompson1974interpolation} suggests a radial interpolation strategy, but it assumes
+ Thompson and Bracewell \cite{thompson1974interpolation} suggests an exact radial interpolation strategy, but it assumes
  that the baseline tracks (as depicted earlier) are concentric circles of an East-West array (at high declinations for instance). Instead a 
  more non-exact interpolation-by-convolution strategy is widely followed here. In radio astronomy the resampling step focuses on a 
  variant of the relatively fast class of linear interpolation operations:
@@ -244,11 +244,11 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  it: a \emph{non-discrete integral convolution approximation}).
  
  It is useful to think of this \emph{non-discrete integral convolution} operator in terms of the ordinary upsampling operation. As with upsampling (where
- the data is already discretized) the space in-between samples are filled with zero value\footnote{``Zero-stuffed'' in DSP nomenclature}, only here the zeros
- are added in-between continuous samples at integral spacings. Just as with ordinary upsampling it is then necessary to ``smoothen'' the new data points 
- between the measured points using some form of interpolation / convolution, in order not to introduce new high frequency terms (sudden jumps) in the 
- higher resolution image. It is quite important to realize however that in the gridding the data is simply smeared out into the continuous
- measurement space and by implication also over the newly inserted zeros. The rationale behind degridding can be explained using a very similar downsampling 
+ the data is already discretized) the space in-between samples are filled with zero values\footnote{``Zero-stuffed'' in DSP nomenclature}, but with gridding 
+ the regularly-spaced zeros are added in-between samples at non-regular spacings. Just as with ordinary upsampling it is then necessary to ``smoothen'' the new data points 
+ between the measured points using some form of interpolation / convolution, in order not to introduce new, alias-causing, high frequency terms (sudden jumps) in the 
+ higher resolution image. It is quite important to realize, however that in the gridding the data is simply smeared out into the continuous
+ measurement space, and by implication also over the newly inserted zeros. The rationale behind degridding can be explained using a very similar downsampling 
  argument. To help visualize this ``convolutional gridding'' process refer to Figure~\ref{fig_gridding}.
  \begin{figure}[h]
   \begin{mdframed}
@@ -270,7 +270,7 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
     \draw[->,gray] (3,1.5) -- (3,6.5) node[left,pos=0.5]{v};
    \end{tikzpicture}
    \caption[Illustration of convolutional gridding]{Each observed visibility (per channel and baseline) is centered at some precomputed coordinate in continuous u,v space and 
-    is ``convolved'' with some function C, which extends only to finite ``full support'' region as illustrated. The result is binned in a regularly spaced grid. 
+    is ``convolved'' with some function $\phi$, which extends only to finite ``full support'' region as illustrated. The result is binned in a regularly spaced grid. 
     This process essentially spreads each visibility out over a larger area in u,v space. It should be clear that this is not the standard convolution 
     operator as defined in Appendix~\ref{chp_DSP}. After all the observed visibilities have been gridded an Inverse Fast Fourier Transform is performed 
     and a correcting function is applied. Each correlation term (or Stokes sum) is typically resampled and transformed to its own image.}
@@ -291,8 +291,9 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
     \Delta{m} &= \frac{1}{2N_m\Delta{v}}\text{, }\Delta{m}:=\frac{1}{m_{\text{max}}},\Delta{v}:=\frac{1}{v_{\text{max}}}\\
   \end{split}
  \end{equation}
- Here $\Delta{l}$ and $\Delta{m}$ are the pixel sizes given in degrees (or equivalently arcminutes, arcseconds or radians). If the images are sampled are 
- subsampled (change the equality to $>$) the longest baselines will fall off the uv grid and angular resolution will be lost. 
+ Here $\Delta{l}$ and $\Delta{m}$ are the pixel sizes given in degrees (or equivalently arcminutes, arcseconds or radians). $N_l\Delta{u}$ and
+ $N_m\Delta{v}$ correspond to the maximum frequencies in the Fourier / measurement space. If the images are 
+ sub-sampled (change the equality to $>$) the longest baselines will fall off the uv grid and angular resolution will be lost. 
  
  This sampling criterion alone justifies our statement that the Fourier response of the resampling function should be considered of higher priority
  than the approximation criterion, unlike in other contexts where interpolation quality may be the most important. The energy reduction properties of
@@ -317,12 +318,12 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  \end{equation}
  
  Convolution with the Fourier transform of the shah function (composed itself by many band-limited impulses) creates a sum of periodic functions
- in the image domain \footnote{It is useful to note that the Fourier transform of a band-limited (non-zero over a finite range) function 
- such as a box function is a function that stretches over an infinite support region}. The result is a periodic field of view that repeats at
+ in the image domain \footnote{It is useful to note that the Fourier transform of a band-limited (non-zero over a finite range) function, 
+ such as a box function, is a function that stretches over an infinite support region}. The result is a periodic field of view that repeats at
  $M\Delta{l}$ and $N\Delta{m}$ for an $M\times N$ image (ie. at multiples of the field of view). In practice not all the energy from 
  these replicated fields can be stopped at the edge of the field of view, and this is responsible for the aliasing seen in the images. Further
  truncation of the shah function to represent only a single field of view, as well as the truncation of the convolving function also 
- contribute to the aliasing. It should be understood that the $\psf$ sidelobes from sources outside the field of view that fall legitimately inside
+ contribute to the aliasing. It should be understood that the $\psf$ sidelobes from sources outside the field of view that legitimately fall inside
  the field of view are not removed and this will raise the noise levels inside a deconvolved image if the sources responsible for those sidelobes are not
  included in the deconvolved model.
  
@@ -331,24 +332,24 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  
  After aliasing speed becomes a major consideration. Due to the large measurement datasets produced with larger arrays the convolutional resampling process
  has to be fast; the complexity of the resampling step grows as $MC^2$, where C is the support size of the convolution filter. Therefore
- the convolution function $\phi$ is normally pretabulated for a given support size in grid steps. Additionally it is very important to oversample
- the precomputed $\phi_{\text{filter}}$ to reduce conserve the spatial relation in the measured coherence function and to 
- attain \emph{high dynamic range images} (peak value to noise level in the image).
+ the convolution function $\phi$ is normally pretabulated for a given support size (in grid steps). Additionally it is very important to oversample
+ the precomputed $\phi_{\text{filter}}$ to conserve the spatial relation in the measured coherence function and to attain 
+ \emph{high dynamic range images}\footnote{Images having a high peak value to noise level}.
  
  To further understand why the filter has to be significantly oversampled (usually dozens of times) consider that interferometers take measurements 
  in the Fourier space, where any rounding operation (or snapping) of the u,v coordinates in either the grid
- or the filter will cause fringe-like decorrelation in the observed sources. Th\'evenaz et al. \cite{thevenaz2000image} also
- points out that $\phi$ must be symmetrical (ie. $\phi{(x)} = \phi{(-x)}$ and $\phi_{\text{filter}}[x] = \phi_{\text{filter}}[-x]$) to preserve 
+ or the filter will cause fringe-like decorrelation in the observed sources (think back to the Fourier shift theorem). Th\'evenaz et al. \cite{thevenaz2000image} 
+ also points out that $\phi$ must be symmetrical (ie. $\phi{(x)} = \phi{(-x)}$ and $\phi_{\text{filter}}[x] = \phi_{\text{filter}}[-x]$) to preserve 
  the image phase correctly.
 
  The image phase consideration effectively precludes using nearest-neighbor\footnote{or \textit{cell-summing} techniques as 
  Thompson and Bracewell \cite{thompson1974interpolation} puts it} interpolation. The nearest neighbour technique simply snaps (box function) 
  points close to the grid point into the sum at that point, without any consideration on the visibility's distance from the grid point. Additionally 
  the Fourier transform of the box function is an \emph{infinite} $\sinc$ function.  Due to the fact that the $\sinc$ function slowly ripples out 
- toward $\infty$ it is not a good response when it comes to reducing the unwanted energy from sources that fall outside the field of view.
+ towards infinity it is not a good response when it comes to reducing the unwanted energy from sources that fall outside the field of view.
  
  What makes convolutional gridding a more attractive approach to cell-summing is the fact that the distance between the grid point and the
- measured uv point is taken into consideration when picking a set of convolution weights from the oversampled filter shown in 
+ measured uv point is taken into consideration when picking a set of convolution weights from the oversampled filter as illustrated in 
  Figure~\ref{fig_filter}. The fractional offset is simply calculated between the nearest regular grid coordinate and measured uv coordinate and is used to pick
  the nearest filter value in the oversampled filter.
  
@@ -400,13 +401,13 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
     \draw node at ({3.8*3},0) {20};
     \draw node at ({4*3},0) {21};
    \end{tikzpicture}
-   \caption[Oversampled filter]{Accross the literature the definition for ``filter support or window width'' varies considerably. To illustrate the use of the
+   \caption[Oversampled filter illustration]{Across the literature the definition for ``filter support or window width'' varies considerably. To illustrate the use of the
    terminology in our work a ficticious filter is shown here. Here the padded and oversampled $\phi_{\text{filter}}[x]$ is illustrated for a 3-cell full-support 
    region (half support of 1 to both sides of the centre value), padded with one value on both sides. The filter is 5x oversampled, as indicated by the asterisks
-   between the bars, which represent the cell-spacing ($\Delta{u}$) used for the grid. If the measured uv coordinate falls exactly on the nearest grid 
+   between the bars, the latter representing the cell-spacing ($\Delta{u}$ for instance) used for the grid. If the measured uv coordinate falls exactly on the nearest grid 
    cell then values 6,11 and 16 are selected as interpolation coefficients. If $\round{(\fracof{(u,v)}m_{\text{oversample factor}})} = 2$ for instance 
-   then 8, 13 and 18 are selected for the 3 grid points being ``convolved'' or ``smeared'' onto. In other words we place a denser bed of nails over the bed of 
-   nails of the grid and select the closest set of coefficients for the convolution. Briggs et al. \cite[Lecture 7]{taylor1999synthesis} notes that this discretization
+   then 8, 13 and 18 are selected for the 3 grid points being ``convolved'' or ``smeared'' onto. In other words: a denser bed of nails is placed over the bed of 
+   nails of the grid and the closest set of coefficients for the convolution are selected. Briggs et al. \cite[Lecture 7]{taylor1999synthesis} notes that this discretization
    of $\phi$ will cause a minor replication effect with a very long period of $\frac{m_{\text{oversample factor}}}{\Delta{u}}$ and 
    $\frac{m_{\text{oversample factor}}}{\Delta{v}}$ in the respective u,v directions.}
    \label{fig_filter}
@@ -445,14 +446,14 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  \begin{equation}
   \frac{1}{W}I_0(\beta\sqrt{1-(2x/W)^2})
  \end{equation}
- Where W is the full support of the convolution filter. See Jackson et al.\cite{jackson1991selection} for tabulated constants used 
+ Where W is the full support of the convolution filter. See Jackson et al.\cite{jackson1991selection} for the tabulated constants used 
  for $\beta$.
 
- An alternative to using a windowed $\sinc$ function is to use a prolate spheriodal function. These are also widely employed in 
+ An alternative to using a windowed $\sinc$ function is to use a prolate spheriodal function. It is also widely employed in 
  astronomical imagers. The Spheriodal functions have the property we're looking for, in that most of their energy is concentrated 
- over the central part of the function, as a weighted variant of Equation~\ref{eqn_aliasing_energy} as proven generally by 
- Donald Rhodes \cite{rhodes1970spheroidal}. A later analysis by Frederic Schwab \cite{schwab1984optimal} confirms the good 
- performance of the spheriodal functions in practice as anti-aliasing filters. Here the prolate spheriodal is defined as 
+ over the central part of the function, as measured by a weighted variant of Equation~\ref{eqn_aliasing_energy}. This is proven generally by 
+ Donald Rhodes \cite{rhodes1970spheroidal}. A later analysis by Frederic Schwab \cite{schwab1984optimal} confirms the relatively good 
+ performance of the spheriodal functions compared with many others as an anti-aliasing filter. The prolate spheriodal is defined as 
  for the special case that $\alpha=0$:
  \begin{equation}
   |1-(2x/W)^2|^\alpha\psi_{\alpha0}(0.5\pi W,2x/W)
@@ -463,11 +464,11 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  Its definition alone is well beyond the scope of this discussion, and in fact it is quite difficult to compute for arbitrary support and
  oversampling parameters.
  
- After taking the Fourier transform the tapering effects of $\phi$ may optionally be corrected for by point-wise dividing through by the Fourier transform of
+ After taking the Fourier transform the tapering effects of $\phi$ may optionally be corrected for by point-wise division with the Fourier transform of
  $\phi$. This does not completely eliminate $\phi$ from the resulting expression, but has the effect of flattening the response of the pass band (removes the
- tapering towards the edges of the image, but at the same time increasing the amplitudes of the aliasing-sidelobe responses.
+ tapering towards the edges of the image), but at the same time increasing the amplitudes of the aliasing-sidelobe responses.
  
- Measuring energy outside the grid-corrected image, Jackson et al.\cite{jackson1991selection} shows that the Keiser-Bessel-windowed $\sinc$ achieves 
+ Measuring the remaining energy outside the grid-corrected image, Jackson et al.\cite{jackson1991selection} shows that the Keiser-Bessel-windowed $\sinc$ achieves 
  very similar performance to the Gaussian and Prolate Spheriodal Function for small (preferable) support regions and similar performance to the 
  prolate spheriodal for larger windows, whilst being considerably easier to compute than the latter. One possible downside to windowed sinc functions
  are their inability to reproduce a constant function as Th\'evenaz et al. \cite{thevenaz2000image} points out. A synthesized image with a non-zero 
@@ -476,21 +477,22 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  
  Lastly it is necessary add (though this is unrelated to the discussions above) that both the Direct Fourier Transform and Fast Fourier Transform approaches
  have to scale the field of view of the image according to the cell size and number of pixels in the image. In the Fast Fourier Transform approach this is 
- achieved by scaling the measurement domain's u,v coordinates (measured in $\text{cycles}\text{m}^{-1}\text{rad}^{-1}$) such that when inverted the image
+ achieved by scaling the measurement domain's u,v coordinates (measured in $\text{cycles}.\text{m}^{-1}.\text{rad}^{-1}$) such that, when inverted, the image
  has the desired field of view. To achieve this we use the \emph{similarity} property of the FFT:
  \begin{equation}
   \alpha^{-n}F(x/\alpha) \rightleftharpoons f(\alpha x)
  \end{equation}
  Here $n$ depends on the dimensionality of the Fourier transform. If the desired field of view (measured in radians) is multiplied to each sampled
- u,v coordinate such that the desired $-0.5\Delta{l}N_l\leq x\leq0.5\Delta{l}N_l$ field of view is satisfied in the synthesized image. It is further 
+ u,v coordinate then  the synthesized image will have a field of view ranging between $-0.5\Delta{l}N_l\leq l\leq0.5\Delta{l}N_l$ and 
+ $-0.5\Delta{m}N_m\leq m\leq0.5\Delta{m}N_m$. It is further 
  important to note that, by convention, the gridded visibilities are shifted before Fourier transform such that the 0 frequency component 
- (``DC'' component) is at the centre of the grid and the corresponding centre of the observed field on the image is in the centre pixel of the image.
+ (``DC'' component) is at the centre of the grid and the corresponding centre of the observed field on the image is at the centre pixel of the image.
  
  To summarize the convolutional gridding process is shown in Figure~\ref{fig_synth_pipeline}.
  \begin{figure}[h]
   \begin{mdframed}
     \centering
-    \includegraphics[width=0.35\textwidth]{images/convolutional_gridding_flow.png}
+    \includegraphics[width=0.4\textwidth]{images/convolutional_gridding_flow.png}
     \caption[Synthesis using convolutional gridding]{Here the classic synthesis by convolutional gridding and Inverse Fast Fourier transform is shown.
     The signal (u,v domain) is multiplied by a sampling function (and optionally weighted by the computed and tapered density function). Then it is convolved
     and resampled onto the regular grid, Fourier transformed and optionally grid-corrected by point wise division. Courtesy of Jackson et al.\cite{jackson1991selection}}
@@ -498,10 +500,187 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
   \end{mdframed}
  \end{figure}
  
-\section{Widefield distortions and the problem of non-coplanar baselines}
-Evaluating a direct 3D analytical solution over an image cube with n layers soon becomes intractable for large images, specifically in terms of sheer memory requirements for storing these layers. Over a three dimensional cube, M (the number of visibilities),
-will be reasonably sparcely sampled, and the number of complex multiplications needed per visibility is estimated to be $\frac{4\lambda B_{max}^3}{D^4}$ \cite{yashar2009tdp}. However, the approach remains embarisingly parallel and can
-be scalled over multiple multicore accelerators. A detailed comparison between the throughput achievable by using an analytical approach, compared to convolutional gridding approaches have not been for multicore accelerators \cite{hardy2013direct}.
+\section{Wide field distortions and the problem of non-coplanar baselines}
+Up to this point the discussion on employing the Fast Fourier Transform to invert interferometer measurements and discretize the sky has relied on the assumption
+that the the field of view under consideration can be well-approximated by a tangent projection plane. Lower-frequency instruments with a beam that is more 
+sensitive over a wider field of view (for instance LOFAR) can be used to synthesize an image that breaks this fundamental assumption. Much of the remainder of this 
+chapter will focus on the effects the additional phase delay term $w(n-1)$ in the RIME has on the synthesized image. The effect has been extensively studied over 
+the past two decades and is quite well understood. Our discussion will include the proposed solutions in the literature and will draw extensively on the works of 
+Rick Perley \cite[Lecture 19]{taylor1999synthesis}\footnote{A word of thanks to Rick for his insightful discussions on the problem and clarification on his 
+tangent facet imaging approach in late 2014}, Tim Cornwell and 
+Rick Perley \cite{cornwell1992radio}, Cornwell, Golap and Bhatnagar \cite{cornwell2008noncoplanar}, Kogan and Greisen \cite{aipsfaceting}, and 
+Cyril Tasse \cite{tassefaceting}\footnote{This document is an internal memorandum explaining some of the ideas exploited in this work. A great debt of gratitude 
+is owed to Cyril for compiling this discussion on facet and hybrid facet imaging.}.
+
+The widefield effect arise due to the combination of two errors:
+\begin{enumerate}
+ \item Firstly the array geometry in significantly non-coplanar arrays will lead to w-values that cannot be ignored. Similarly the non-East-West baselines
+ in arrays will not remain coplanar over the duration of an observation. These will be rotated up into the w direction as the Earth rotates, even if the physical 
+ array layout is on a very flat plane (as with the EVLA for example).
+ \item Secondly the image projection geometry adds to the signal phase difference between antennae. The distance between the planar projection of the sky and the 
+ celestial sphere (or unit radius ``sky dome'') cannot be ignored far away from the tangent point of the image. This error in distance is expressed 
+ as $n-n_0$ where $n = \sqrt{1-l^2-m^2}$ at the correct position of the source on the celestial sphere, and $n_0=\sqrt{1-l_0^2-m_0^2}$ is the 
+ tangent point / projection pole of the image produced using the Fast Fourier Transform, assuming this projection is the ordinary orthogonal 
+ projection of the sphere onto to the image.
+\end{enumerate}
+As Rick points out this phase difference is not a physical delay in the strictest sense of the word, but arise merely because of the geometry of the array and coordinate
+systems. In essence it arises because the sky is either too wide, or it is sampled with a tilted interferometer or both problems arise simultaneously. The effects 
+are combined as $w(\sqrt{1-l^2-m^2} - \sqrt{1-l_0^2-m_0^2})$ where $\sqrt{1-l_0^2-m_0^2} = 1$ if the projection pole is at the same coordinate as the centre
+of the field being observed (which we take to be true for the remainder of the discussion). Because the phase propagation term $\tau = \frac{\vec{b}\cdot\vec{s}}{c}$ as 
+shown in Figure~\ref{fig_interferometer} depends on the distance a source is away from the delay tracking centre at $\vec{s}_0$ it will continuously change during the course 
+of an observation. As the baselines are rotated with respect to a fixed position in the sky, the apparent position of sources in the image will move as the earth rotates. To see why 
+the latter statement is true from a pure mathematical standpoint consider again the Fourier Shift Theorem:
+\begin{equation}
+ g(x-\Delta) \rightleftharpoons G(f)e^{-2\pi if\Delta}
+\end{equation}
+This theorem says that adding a delay term through multiplication by a complex exponential in the Fourier (measurement) domain will serve to shift values in the 
+signal (sky/image) domain. In this context the effect is somewhat more complicated because sources closer to the tracking centre of the field are not as affected 
+by this shift as those further away from the field centre. Refer to Figure~\ref{fig_wide_field_error} for an illustration of the two terms: $w$ and $(n-1)$.
+
+\begin{figure}[h]
+  \begin{mdframed}
+    \centering
+    \begin{subfigure}[b]{0.70\textwidth}
+     \centering
+     \includegraphics[width=\textwidth]{images/source_projection_onto_image_plane.png}
+     \caption{}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+      \centering
+      \begin{tikzpicture}
+	\draw [black, domain=0:180] plot ({2*cos(\x)}, {2*sin(\x)});
+	\draw [black, ->] (0,0) -- (0,2);
+	\draw [black, ->] (0,0) -- ({-0.75*2},{sqrt(4-(-0.75*2)*(-0.75*2))});
+	\node [above] at (0,1*2) {$n=1$};
+	\node [right] at (0,0.5*2) {$1$};
+	\node [right] at (-0.5*2,0.5*2) {$1$};
+	\node [left] at ({-0.75*2},{sqrt(4-(-0.75*2)*(-0.75*2))}) {$n=\sqrt{1-l^2-m^2}$};
+	\draw [blue,thick] (-2,2) -- (2,2);
+	\draw [red, ->] ({-0.75*2},{sqrt(4-(-0.75*2)*(-0.75*2))}) -- ({-0.75*2},2);
+	\node [left] at ({-0.75*2},{sqrt(4-(-0.75*2)*(-0.75*2))+0.15*2}) {$\epsilon$};
+	\node [right] at ({1*2},{1*2}) {$l$};
+	\node [right] at ({1*2},{0*2}) {$l=1$};
+	\node [left] at ({-1*2},{0*2}) {$l=-1$};
+      \end{tikzpicture}
+      \caption{Error between the orthogonal planar FFT approximation to the sky and their actual positions on the celestial sphere}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+      \centering
+      \begin{tikzpicture}
+	\draw [black,thick] (0,2) -- (3,2);
+	\draw [black,thick] (0,0) -- (3,0);
+	\draw [black, domain={180+15}:{360-15}] plot ({(cos(\x)+1)*0.25}, {(sin(\x))*0.25+2});
+	\draw [black] ({0.25*0.5},{2 - sqrt(0.25*0.25*(1-0.5*0.5))}) -- ({0.25},{2});
+	\draw [black] ({0.25*1.5},{2 - sqrt(0.25*0.25*(1-0.5*0.5))}) -- ({0.25},{2});
+	\draw [black, domain={180+15}:{360-15}] plot ({(cos(\x)-1)*0.25+3}, {(sin(\x))*0.25});
+	\draw [black] ({3-0.25*0.5},{0 - sqrt(0.25*0.25*(1-0.5*0.5))}) -- ({3-0.25},{0});
+	\draw [black] ({3-0.25*1.5},{0 - sqrt(0.25*0.25*(1-0.5*0.5))}) -- ({3-0.25},{0});
+	\draw [red,thick,<->] ({3-0.25},{0}) -- ({3-0.25},{2});
+	\node [right] at ({3-0.25},{1}) {$w$};
+	\node [right] at ({3},{2}) {$w_{p}$};
+	\node [right] at ({3},{0}) {$w_{q}$};
+      \end{tikzpicture}
+      \caption{Delay in signal propagation between antennas in an array-based telescope at some instant in time}
+    \end{subfigure}
+    \caption[Widefield phase delay]{In (a) the projected of the source on the sky dome onto the plane tangent to the projection pole is shown. The baseline tracks
+    are concentric circles exactly parallel to the Earth's equator in the case of East-West arrays. Image adapted from A. Richard Thompson \cite[Lecture 2]{taylor1999synthesis}. 
+    The combined propagation delay of emission from sources far away from the telescope pointing centre is a combination
+    of the error between the planar approximation and the celestial sphere (b) and the phase difference between pairs of antennae in the telescope
+    pointing direction as illustrated as shown in (c). The total phase error is expressed as $w(n-1)$. The multiplicative effect of this w-term becomes a
+    significant problem in large non-East-West antenna arrays, where the baselines between the furthest-separated antenna pairs become significantly non-coplanar 
+    as the Earth rotates.}
+    \label{fig_wide_field_error}
+  \end{mdframed}
+\end{figure}
+
+To add to this problem the difference in the w-term between the antennae increases for observations at lower elevation angles (ie. those observations near the horizon). To see why that
+is true consider that the baseline tracks of observations near NCP consists almost entirely of level concentric circles. As the declination (and elevation) angle are decreased 
+more and more of the circles have non-zero w-components, to the point that their projection onto the uv plane becomes a straight line at $\delta=0$. This last observation
+gives us an estimation for the absolute of the maximum w-value the observation may contain, as well as the sample spacing needed to satisfy the Shannon-Nyquest sampling constraint, 
+as A. Richard Thompson \cite[Lecture 2]{taylor1999synthesis} notes (refer to Figure~\ref{fig_max_baseline} for an illustration of the argument):
+\begin{equation}
+ \label{eqn_wmax}
+ \begin{split}
+  w_{\text{max}} &\approx |\frac{\vec{b}_{\text{max}}}{\lambda}|\\
+  \Delta{l} &= \Delta{m} = \Delta{n} \approx 0.5\frac{\lambda}{|\vec{b}_{\text{max}}|}\\
+ \end{split}
+\end{equation}
+
+\begin{figure}[h!]
+  \begin{mdframed}
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/max_w.png}
+    \caption[Maximum w-estimation at low azimuth angle observation]{When sources are observed at low elevation (or similarly at low declinations) angles,
+    for instance those sources rising or setting at the horizon, the delay between the two observing antennae are maximized and by implication w since w is usually
+    defined to point towards the tracking centre of the field. Image courtesy of A. Richard Thompson \cite[Lecture 2]{taylor1999synthesis}}
+    \label{fig_max_baseline}
+  \end{mdframed}
+\end{figure}
+
+The resulting effect on the apparent position of a source over time from this declination-dependent increase in w is plotted in Figure~\ref{fig_position_shifts_and_decorrelation}. We have 
+additionally imaged a simulated sky model consisting of point sources in a grid pattern to show the resulting decorrelation in the resolution of sources far from the delay tracking centre 
+and their corrected version in the same figure.
+
+\begin{figure}[h]
+  \begin{mdframed}
+    \centering
+    \begin{subfigure}[b]{0.62\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/apparent_position_shifts.png}
+      \caption{}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.40\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/widefield_meerkat.png}
+      \caption{}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.40\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/widefield_corrected_meerkat.png}
+      \caption{}
+    \end{subfigure}
+    \caption[Apparent shift in source position and resulting decorrelation]{In (a) the apparent source positions of several hourly-interval snapshots  on
+    the VLA at 7 declinations is plotted by Rick Perley \cite[Lecture 19]{taylor1999synthesis}. The dots of the zero hour angle is indicated on the vertical 
+    axis. The angular position errors here are measured, where $r^2=l^2+m^2$. In (b) a simulated gridded sky (without effects of the antenna beam or noise included) is 
+    synthesized as a dirty image using the regular planar transform as described in the previous section. In (c) the dirty map is synthesized again, here it is 
+    corrected using the w-projection technique explained later on. The point sources near the edge of the field are no longer smeared as in the uncorrected map.}
+    \label{fig_position_shifts_and_decorrelation}
+  \end{mdframed}
+\end{figure}
+
+To correct this effect one may consider employing a three dimensional Fourier transform. Rick \cite[Lecture 19]{taylor1999synthesis} shows that the 
+image along the sky plane can be related to the intensity cube derived by a three-dimensional Fourier transform, assuming n as an independent variable. 
+The sky then is defined by all the points in the transformed cube that lie on a shifted unit sphere. This relation is also informative about the possible 
+effects of the sampling function; the $\psf$ is not only convolved with the points on the sky sphere, but the surrounding areas in the cube.
+
+Such a full three dimensional transform is not a practical solution considering the sheer amount of memory that would be required to form several layers,
+each the size of the image and considering the computational costs because the cube layers in the $n$ dimension must be computed using a direct Fourier 
+transform to overcome the aliasing effects introduced by the longest baseline. Instead Rick \cite[Lecture 19]{taylor1999synthesis} mentions 2 more 
+solutions to the problem and Cornwell et al. \cite{cornwell2008noncoplanar} later come to a third solution:
+\begin{enumerate}
+ \item Snapshot imaging. If the observation time is sufficiently short, all the baselines of the array remain relatively coplanar\footnote{within a 
+ fraction of the cell size in n}. By neglecting the w-term a small distortion is introduced in the apparent position of sources, becoming the determinant
+ factor in deciding the maximum observation time for each snapshot image. Due to the continuous rotation of the tangent image plane in this solution it is necessary
+ to accurately interpolate the cell coordinates between snapshots. This latter operation becomes the dominant factor in snapshot imaging (see Rick Perley \cite[Lecture 19]{taylor1999synthesis}
+ and Cornwell, Voronkov and Humphreys \cite{cornwell2012wide} for details).
+ \item Facet imaging \footnote{Or a ``fly's eye'' imaging approach as Bill Cotton labels it.}. The varying w term can be assumed to be near constant across a narrow field of view. As such a wide field of view can be broken
+ up into several narrow field images, each limiting the distance between the approximating plane and the celestial sphere. There are both \emph{non-coplanar} and \emph{coplanar}
+ faceting approaches, as well as the appropriate transforms and coordinate reprojections in the measurement and image spaces to accompany these two variants. The details will be 
+ outlined in the next few sections.
+ \item W-projection \cite{cornwell2008noncoplanar} and W-stacking \cite{offringa2014wsclean}. The w-term can be thought of as a w-dependent convolution
+ in the Fourier domain. By convolving each visibility with the Fourier transform of $w(n-1)$ during the gridding process it is possible to re-introduce 
+ this multiplicative phase term in the image domain. Similarly it is also possible to divide the sky image up into several w-dependent layers and point-wise
+ multiply the w phase screen into each layer, reducing the planes into a single image afterwards (w-stacking).
+\end{enumerate}
+
+All of the approaches above attempt to either drive w down to zero (snapshots or w-projection) or drive (n-1) down to zero (facet imaging). There is no reason why
+the approaches cannot be combined, for instance Cornwell, Voronkov and Humphreys \cite{cornwell2012wide} combine w-projection and traditional snapshot imaging, while
+Offringa et al. includes a Zenithal w-snapshot synthesis mode in their work. Our work on the other hand focus on combining traditional facet imaging and w-projection, 
+in order to harness some of the positive aspects of both approaches.
+
+% Evaluating a direct 3D analytical solution over an image cube with n layers soon becomes intractable for large images, specifically in terms of sheer memory requirements for storing these layers. Over a three dimensional cube, M (the number of visibilities),
+% will be reasonably sparcely sampled, and the number of complex multiplications needed per visibility is estimated to be $\frac{4\lambda B_{max}^3}{D^4}$ \cite{yashar2009tdp}. However, the approach remains embarisingly parallel and can
+% be scalled over multiple multicore accelerators. A detailed comparison between the throughput achievable by using an analytical approach, compared to convolutional gridding approaches have not been for multicore accelerators \cite{hardy2013direct}.
 \section{Non-coplanar facet imaging}
 \section{Coplanar facet imaging}
 \section{The W-projection algorithm}
