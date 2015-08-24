@@ -621,7 +621,7 @@ The resulting effect on the apparent position of a source over time from this de
 additionally imaged a simulated sky model consisting of point sources in a grid pattern to show the resulting decorrelation in the resolution of sources far from the delay tracking centre 
 and their corrected version in the same figure.
 
-\begin{figure}[h]
+\begin{figure}[ht!]
   \begin{mdframed}
     \centering
     \begin{subfigure}[b]{0.62\textwidth}
@@ -629,18 +629,18 @@ and their corrected version in the same figure.
       \includegraphics[width=\textwidth]{images/apparent_position_shifts.png}
       \caption{}
     \end{subfigure}
-    \begin{subfigure}[b]{0.40\textwidth}
+    \begin{subfigure}[b]{0.49\textwidth}
       \centering
       \includegraphics[width=\textwidth]{images/widefield_meerkat.png}
       \caption{}
     \end{subfigure}
-    \begin{subfigure}[b]{0.40\textwidth}
+    \begin{subfigure}[b]{0.49\textwidth}
       \centering
       \includegraphics[width=\textwidth]{images/widefield_corrected_meerkat.png}
       \caption{}
     \end{subfigure}
-    \caption[Apparent shift in source position and resulting decorrelation]{In (a) the apparent source positions of several hourly-interval snapshots  on
-    the VLA at 7 declinations is plotted by Rick Perley \cite[Lecture 19]{taylor1999synthesis}. The dots of the zero hour angle is indicated on the vertical 
+    \caption[Apparent shift in source position and resulting decorrelation]{In (a) the apparent source positions for sources less than one radian from field centre in 
+    several hourly-interval snapshots on the VLA at 7 declinations is plotted by Rick Perley \cite[Lecture 19]{taylor1999synthesis}. The dots of the zero hour angle is indicated on the vertical 
     axis. The angular position errors here are measured, where $r^2=l^2+m^2$. In (b) a simulated gridded sky (without effects of the antenna beam or noise included) is 
     synthesized as a dirty image using the regular planar transform as described in the previous section. In (c) the dirty map is synthesized again, here it is 
     corrected using the w-projection technique explained later on. The point sources near the edge of the field are no longer smeared as in the uncorrected map.}
@@ -682,7 +682,103 @@ in order to harness some of the positive aspects of both approaches.
 % will be reasonably sparcely sampled, and the number of complex multiplications needed per visibility is estimated to be $\frac{4\lambda B_{max}^3}{D^4}$ \cite{yashar2009tdp}. However, the approach remains embarisingly parallel and can
 % be scalled over multiple multicore accelerators. A detailed comparison between the throughput achievable by using an analytical approach, compared to convolutional gridding approaches have not been for multicore accelerators \cite{hardy2013direct}.
 \section{Non-coplanar facet imaging}
+The goal in faceting is to approximate a wider field of view by many small narrow field image. Rick Perley and Tim Cornwell \cite{cornwell1992radio} proposes a 
+polyhedron-like faceting approach, where each narrow-field facet is tangent to the celestial sphere at its own phase tracking centre $(l_i,m_i)$. We will classify
+this basic faceting approach to be non-coplanar uvw-space faceting, because each facet lies on its own tangent plane and the coordinate transformations
+necessary for this tilted polyhedron approach are done on the uvw-coordinates (measurement coordinates) and not in the image space.
+
+Just as with regular narrow field imaging the phase term $e^{2\pi i \vec{b}\cdot(\vec{s}-\vec{s}_0)}$ are taken relative to a delay tracking centre in the direction
+$\vec{s}_0$. Synthesizing an image with a new phase tracking centre, $\vec{s}_i$, it is only necessary to employ the shift theorem. This follows naturally from the
+RIME (simplified here). Let $(l_\Delta,m_\Delta,n_\Delta) = (l_i-l_0,m_i-m_0,n_i-n_0)$, then:
+\begin{equation}
+  \label{eqn_faceting}
+  \begin{split}
+    V(u,v,w)&\approx\int{\int{B(l-l_i,m-m_i,n-n_i)e^{-2{\pi}i/\lambda[u(l-l_i)+v(m-m_i)+w(n-n_i)]}\frac{dldm}{n}}}\\
+    &\approx\int{\int{B(l-l_i,m-m_i,n-n_i)e^{-2{\pi}i/\lambda[u(l-l_0-l_\Delta)+v(m-m_0-m_\Delta)+w(n-n_0-n_\Delta)]}\frac{dldm}{n}}}\\
+    &\approx\left[\int{\int{B(l-l_0,m-m_0,n-n_0)e^{-2{\pi}i/\lambda[u(l-l_0)+v(m-m_0)+w(n-n_0)]}\frac{dldm}{n}}}\right]e^{2{\pi}i[ul_\Delta,vm_\Delta,wn_\Delta]}\\
+  \end{split}
+\end{equation}
+
+In words this says that the telescope can be electrically steered to take measurements with respect to a new phase centre by multiplying each known measurment in
+the database by a complex exponential. However, the intensity measurements are still the ones measured with respect to the original u,v,w coordinates. The result of
+the latter observation is that the sky is projected onto facet planes that are tangent to the original phase tracking centre, $(l_0,m_0)$ and not the new phase 
+tracking centres, $(l_i,m_i)$.
+
+Rick shows that only employing a phase shift per visibility without regard of the tangency of the resulting facets will require the creation of many more facets 
+further from the original field centre. This is illustrated in Figure~\ref{fig_non_rotated_facets} Employing a small angle approximation to estimate $(n-1)$ and applying the critical sampling criteria estimated in 
+Equation~\ref{eqn_wmax}, Rick estimates the maximum undistorted field of view to be:
+\begin{equation}
+ \theta_{\text{max}} \approx \frac{\lambda}{2|\vec{b}_{\text{max}}|\theta_i}
+\end{equation}
+where $\theta_i$ is the angle to the new phase centre.
+
+\begin{figure}[h]
+  \begin{mdframed}
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/non_rotated_faceting.png}
+    \caption[Faceting without regard of tangency]{By only phase steering the visibilities to new phase centres without tilting the u,v,w coordinates
+    to correspond to the new phase tracking centre significantly reduces the achievable field of view. Here instead each facet is parallel to the 
+    original tangent plane. As the new phase tracking centre is taken further away from the original phase tracking centre the effective facet size must be
+    shrunk down to achieve a comparable projection error at the edge of the synthesized facets.}
+    \label{fig_non_rotated_facets}
+  \end{mdframed}
+\end{figure}
+
+In order to make each facet tangent to the celestial sphere at $(l_i,m_i)$ it is necessary to employ the rotation matrices from Equation~\ref{EQN_LEFTHANDED_SYSTEM}
+to measure compute new u',v',w' coordinates \emph{after} the visibilities have been phase shifted using the old u,v,w coordinates.
+\begin{equation}
+ \left[\begin{array}{c}
+	u'\\
+	v'\\
+	w'\\
+       \end{array} \right] = R(\alpha_i,\delta_i)R^{T}(\alpha_0,\delta_0)\left[\begin{array}{c}
+										u\\
+										v \\
+										w \\
+									      \end{array}
+									\right]
+\end{equation}
+
+By ensuring the facets are tangent to the new phase centres one in effect ensures that the height difference between the sky and the projected facet remains
+comparable between corresponding pixels. Rick estimates that such a polyhedron approach achieves an improved field of view estimated by:
+\begin{equation}
+ \theta_{\text{max}} \approx \frac{\sqrt{\lambda}}{\sqrt{|\vec{b}_{\text{max}}|}}
+\end{equation}
 \section{Coplanar facet imaging}
+One of the biggest downfalls to Rick's non-coplanar faceting approach is that the minor cycle deconvolution becomes very complicated; the measurement
+coordinates are rotated and rotations are preserved by the Fourier transform, the $\psf$ is also rotated. Since the $\psf$ is not necessarily 
+symmetric each facet has its own $\psf$ and subtraction will require careful consideration during the minor cycle.
+
+One way around this problem would be to re-project each non-coplanar facet into a single plane after synthesis (ie. in the image-space). Doing the necessary
+re-projections and inevitable (and expensive) corrections for the areas where the facets overlap can be done through astronomical mosaicking software packages such as the
+Montage \cite{jacob2004montage} suite of tasks. It is also possible to do the necessary rotation and sheering operations in the u,v space through 
+linear\footnote{A linear operation is required to conserve the fourier relation between the sky and visibilities} operations given by 
+Sault et al. \cite[Appendix A]{sault1996approach}. Although the major cycle, would, in turn require that the regular visibilities be read off all
+the constituent facets' Fourier transforms the latter approach of re-projecting the u,v coordinates and phase steering is no more expensive than the backward 
+step.
+
+Another way to do (approximate) coplanar faceting is to consider the orthogonal projection error directly (refer back to Figure~\ref{fig_wide_field_error}):
+\begin{equation}
+\xi_{\text{max}}:=\frac{2{\pi}w_{\text{max}}\epsilon}{{\lambda_{\text{min}}}} \text{, }\epsilon:=\sqrt{1-l^2-m^2} - \sqrt{1-l_0^2-m_0^2} \text{ and ideally } 0{\leq\xi\ll}1
+\end{equation}
+
+One strategy to include $w\epsilon$ per gridded visibility is to Taylor expand the term to a first order approximation. The first order approximation
+leads to a remarkable transformation for u and v as pointed out by Leonid Kogan and Eric Greisen \cite{aipsfaceting}:
+\begin{equation}
+ \begin{split}
+  \epsilon&\approx \frac{\partial \epsilon}{\partial l}l_\Delta + \frac{\partial \epsilon}{\partial m}m_\Delta\\
+  &\approx \frac{1}{\sqrt{1-l_i^2-m_i^2}}(l_il_\Delta + m_im_\Delta)\\
+ \end{split}
+\end{equation}
+Substituting into Equation~\ref{eqn_faceting} they obtain:
+% \begin{equation}
+%  \begin{split}
+%   V(u,v,w)&\approx\left[\int{\int{B(l-l_i,m-m_i,n-n_i)e^{-2{\pi}i/\lambda[u'(l-l_i)+v'(m-m_i)]}\frac{dldm}{n}}}\right]}\\
+%   u'&= u - w\frac{l_i}{\sqrt{1-l_i^2-m_i^2}}\\
+%   v'&= v - w\frac{m_i}{\sqrt{1-l_i^2-m_i^2}}\\
+%  \end{split}
+% \end{equation}
+
 \section{The W-projection algorithm}
 \section{Error estimations}
 \section{Computational considerations}
@@ -720,7 +816,7 @@ proven very successful in removing the polarization effects contributed (predomi
 LOFAR array (see figure~\ref{fig_aprojection_lofar}). Refer to the Awimager implementation by Tasse et 
 al. \cite{tasse2013applying} for a full mathematical treatment of the algorithm.
 
-\begin{figure}[h]
+\begin{figure}[h!]
  \centering
  \begin{subfigure}[b]{0.35\textwidth}
   \includegraphics[width=\textwidth]{images/lofar_no_dd.png}
