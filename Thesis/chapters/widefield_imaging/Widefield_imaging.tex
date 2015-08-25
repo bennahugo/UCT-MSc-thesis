@@ -673,7 +673,7 @@ solutions to the problem and Cornwell et al. \cite{cornwell2008noncoplanar} late
  multiply the w phase screen into each layer, reducing the planes into a single image afterwards (w-stacking).
 \end{enumerate}
 
-All of the approaches above attempt to either drive w down to zero (snapshots or w-projection) or drive (n-1) down to zero (facet imaging). There is no reason why
+All of the approaches above attempt to either drive $w$ down to zero (snapshots or w-projection) or drive $(n-1)$ down to zero (facet imaging). There is no reason why
 the approaches cannot be combined, for instance Cornwell, Voronkov and Humphreys \cite{cornwell2012wide} combine w-projection and traditional snapshot imaging, while
 Offringa et al. includes a Zenithal w-snapshot synthesis mode in their work. Our work on the other hand focus on combining traditional facet imaging and w-projection, 
 in order to harness some of the positive aspects of both approaches.
@@ -693,9 +693,9 @@ RIME (simplified here). Let $(l_\Delta,m_\Delta,n_\Delta) = (l_i-l_0,m_i-m_0,n_i
 \begin{equation}
   \label{eqn_faceting}
   \begin{split}
-    V(u,v,w)&\approx\int{\int{B(l-l_i,m-m_i,n-n_i)e^{-2{\pi}i/\lambda[u(l-l_i)+v(m-m_i)+w(n-n_i)]}\frac{dldm}{n}}}\\
-    &\approx\int{\int{B(l-l_i,m-m_i,n-n_i)e^{-2{\pi}i/\lambda[u(l-l_0-l_\Delta)+v(m-m_0-m_\Delta)+w(n-n_0-n_\Delta)]}\frac{dldm}{n}}}\\
-    &\approx\left[\int{\int{B(l-l_0,m-m_0,n-n_0)e^{-2{\pi}i/\lambda[u(l-l_0)+v(m-m_0)+w(n-n_0)]}\frac{dldm}{n}}}\right]e^{2{\pi}i[ul_\Delta,vm_\Delta,wn_\Delta]}\\
+    V(u,v,w)&\approx\int{\int{B(l-l_i,m-m_i,n-n_i)e^{-2{\pi}i[u(l-l_i)+v(m-m_i)+w(n-n_i)]}\frac{dldm}{n}}}\\
+    &\approx\int{\int{B(l-l_i,m-m_i,n-n_i)e^{-2{\pi}i[u(l-l_0-l_\Delta)+v(m-m_0-m_\Delta)+w(n-n_0-n_\Delta)]}\frac{dldm}{n}}}\\
+    &\approx\left[\int{\int{B(l-l_0,m-m_0,n-n_0)e^{-2{\pi}i[u(l-l_0)+v(m-m_0)+w(n-n_0)]}\frac{dldm}{n}}}\right]e^{2{\pi}i[ul_\Delta,vm_\Delta,wn_\Delta]}\\
   \end{split}
 \end{equation}
 
@@ -744,6 +744,43 @@ comparable between corresponding pixels. Rick estimates that such a polyhedron a
 \begin{equation}
  \theta_{\text{max}} \approx \frac{\sqrt{\lambda}}{\sqrt{|\vec{b}_{\text{max}}|}}
 \end{equation}
+
+For reference a sketch algorithm for facet synthesis (backwards step) is given in Algorithm~\ref{alg_polyhedron_faceting_sketch}. The forward
+step will work roughly in reverse.
+\begin{algorithm}
+  \begin{algorithmic}
+  \STATE {Let $g_f^b$ be all-zero complex $n \times m$ pixel grids, one per continuum band (spectral window), $b$, of facet $f$}
+  \STATE {Given $(\alpha_0,\delta_0)$, the original field centre of the telescope (assuming field centre and phase tracking centre are the same)}
+  \FORALL {facets centres $(\alpha_i,\delta_i)$}
+    \FORALL {channels $c$ in the continuum image band}
+      \STATE {Let uvw be a set of $M$ measurement coordinate triples}
+      \STATE {Let uvw' be a set of rotated uvw coordinates, applying $R(\alpha_i,\delta_i)R^{T}(\alpha_0,\delta_0)$}
+      \STATE {Let vis be a set of $M$ measurements, each corresponding to a uvw triple}
+      \STATE {Obtain projected (assumed orthogonal/``SIN'') $(l_i,m_i,n_i)$ and $(l_0,m_0,n_0)$ coordinates}
+      \STATE {Let $\lambda$ be the channel wavelength}
+      \STATE {Let $p_f=\exp{(2\pi i/\lambda[u(l_i-l_0)+v(m_i-m_0)+w(n_i-n_0)])}$} 
+      \STATE {Let vis' = vis * $p_f$, by element-wise phase shift}
+      \STATE {Call convolve\_grid($g_f^b$,vis',uvw')}
+    \ENDFOR
+  \ENDFOR
+  \STATE{Invert $g_f^b$ using shifted Inverse FFT}
+  \end{algorithmic}
+  \caption{The Perley polyhedron faceting algorithm (sketch)}
+  \label{alg_polyhedron_faceting_sketch}
+\end{algorithm}
+
+For reference the relationship between the celestial and projected image plane coordinates are given here, where
+$\alpha_p,\delta_p$ is the tangent point\footnote{The tangent point is assumed to be the same as the phase reference 
+centre for the orthogonal projection, which is a special case of an Azimuthal projection. For more details see the 
+AIPS convention \cite{aipsnonlinearcoords} and Calabretta and Greisen \cite{calabretta2002representations}}:
+\begin{equation}
+ \begin{split}
+  l &= \cos{\delta}\sin{\alpha-\alpha_p}\\
+  m &= \sin{\delta}\cos{\delta_p}-\cos{\delta}\sin{\delta_p}\cos{\alpha-\alpha_p}\\
+  n &= \sqrt{1-l^2-m^2}\\
+ \end{split}
+\end{equation}
+
 \section{Coplanar facet imaging}
 One of the biggest downfalls to Rick's non-coplanar faceting approach is that the minor cycle deconvolution becomes very complicated; the measurement
 coordinates are rotated and rotations are preserved by the Fourier transform, the $\psf$ is also rotated. Since the $\psf$ is not necessarily 
@@ -762,27 +799,41 @@ Another way to do (approximate) coplanar faceting is to consider the orthogonal 
 \xi_{\text{max}}:=\frac{2{\pi}w_{\text{max}}\epsilon}{{\lambda_{\text{min}}}} \text{, }\epsilon:=\sqrt{1-l^2-m^2} - \sqrt{1-l_0^2-m_0^2} \text{ and ideally } 0{\leq\xi\ll}1
 \end{equation}
 
-One strategy to include $w\epsilon$ per gridded visibility is to Taylor expand the term to a first order approximation. The first order approximation
-leads to a remarkable transformation for u and v as pointed out by Leonid Kogan and Eric Greisen \cite{aipsfaceting}:
+One strategy to include $w\epsilon$ per gridded visibility is to Taylor expand the term to a first order approximation around the original phase centre. The 
+first order approximation leads to a remarkable transformation for u and v as pointed out by Leonid Kogan and Eric Greisen \cite{aipsfaceting}:
 \begin{equation}
  \begin{split}
-  \epsilon&\approx \frac{\partial \epsilon}{\partial l}l_\Delta + \frac{\partial \epsilon}{\partial m}m_\Delta\\
-  &\approx \frac{1}{\sqrt{1-l_i^2-m_i^2}}(l_il_\Delta + m_im_\Delta)\\
+  \epsilon&\approx \left[\frac{\partial \epsilon}{\partial l}\right]_{l_i}(l - l_i) + \left[\frac{\partial \epsilon}{\partial m}\right]_{m_i}(m - m_i) + \dots\\
+  &\approx \frac{1}{\sqrt{1-l_i^2-m_i^2}}(l_i(l - l_i) + m_i(l - l_i)) + \dots\\
  \end{split}
 \end{equation}
 Substituting into Equation~\ref{eqn_faceting} they obtain:
-% \begin{equation}
-%  \begin{split}
-%   V(u,v,w)&\approx\left[\int{\int{B(l-l_i,m-m_i,n-n_i)e^{-2{\pi}i/\lambda[u'(l-l_i)+v'(m-m_i)]}\frac{dldm}{n}}}\right]}\\
-%   u'&= u - w\frac{l_i}{\sqrt{1-l_i^2-m_i^2}}\\
-%   v'&= v - w\frac{m_i}{\sqrt{1-l_i^2-m_i^2}}\\
-%  \end{split}
-% \end{equation}
+\begin{equation}
+ \begin{split}
+  V(u,v,w)&\approx\int{\int{B(l-l_i,m-m_i,n-n_i)e^{-2{\pi}i[u'(l-l_i)+v'(m-m_i)]}\frac{dldm}{n}}}\\
+  u'&=u - w\frac{l_i}{\sqrt{1-l_i^2-m_i^2}}\\
+  v'&=v - w\frac{m_i}{\sqrt{1-l_i^2-m_i^2}}\\
+ \end{split}
+\end{equation}
+The first order approximation approach may also be thought of as reducing the projection error, $\epsilon$, to near zero, provided the new facet is small enough. 
+The resulting facets are thus all (nearly) parallel. Since the w-term is merely an approximation we assumed the phase steering term is the same as in the original
+polyhedron-faceting algorithm.
 
+As one would expect the first order approximation still breaks down if the facet edges are several degrees away from the facet phase centre.
+Unfortunately the second degree terms cannot easily be separated as was done for $u'$ and $v'$ and would require using a convolution in the Fourier domain
+in order to multiply the approximate $w(n-n_i)$ phase screen into the image domain. As Cyril \cite{tassefaceting} points out one can additionally improve the approximation
+using by fitting a smooth polynomial through w. Unfortunately, it should be noted that this implies that a set of w-planes have to be stored per facet, so one might
+as well do a hybrid approach between faceting and w-projection, although the W-kernels themselves might be smoother for the first approach. The last
+statement will become clearer once the original w-projection algorithm is discussed. After discussing w-projection we compare the error in doing a first 
+order expansion compared to a full w-projection approach. 
 \section{The W-projection algorithm}
+TODO
 \section{Error estimations}
+TODO
 \section{Computational considerations}
+TODO
 \section{Filter precomputation}
+TODO
 \subsection{Anti-aliasing filters}
 \subsection{Introducing the W-term}
 \subsection{Filter seperability}
@@ -861,3 +912,4 @@ matrices grows approximately as:
 \end{equation*}
 
 \section{Review of previous literature}
+TODO
