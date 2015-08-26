@@ -775,12 +775,18 @@ centre for the orthogonal projection, which is a special case of an Azimuthal pr
 AIPS convention \cite{aipsnonlinearcoords} and Calabretta and Greisen \cite{calabretta2002representations}}:
 \begin{equation}
  \begin{split}
-  l &= \cos{\delta}\sin{\alpha-\alpha_p}\\
-  m &= \sin{\delta}\cos{\delta_p}-\cos{\delta}\sin{\delta_p}\cos{\alpha-\alpha_p}\\
+  l &= \cos{\delta}\sin{(\alpha-\alpha_p)}\\
+  m &= \sin{\delta}\cos{\delta_p}-\cos{\delta}\sin{\delta_p}\cos{(\alpha-\alpha_p)}\\
   n &= \sqrt{1-l^2-m^2}\\
  \end{split}
 \end{equation}
 
+For our work we assume the projection coordinates are the orthogonal coordinates specified here. It is well worth noting 
+that the orthogonal projection of sources is not accurate for large fields of view as noted by Calabretta and Greisen 
+\cite{calabretta2002representations}.
+
+Another important remark is that the resolution of each facet image is not arbitrary, but is subject to the same Nyquest sampling 
+criteria outlined for regular images in Equation~\ref{eqn_img_sampling}.
 \section{Coplanar facet imaging}
 One of the biggest downfalls to Rick's non-coplanar faceting approach is that the minor cycle deconvolution becomes very complicated; the measurement
 coordinates are rotated and rotations are preserved by the Fourier transform, the $\psf$ is also rotated. Since the $\psf$ is not necessarily 
@@ -823,11 +829,71 @@ As one would expect the first order approximation still breaks down if the facet
 Unfortunately the second degree terms cannot easily be separated as was done for $u'$ and $v'$ and would require using a convolution in the Fourier domain
 in order to multiply the approximate $w(n-n_i)$ phase screen into the image domain. As Cyril \cite{tassefaceting} points out one can additionally improve the approximation
 using by fitting a smooth polynomial through w. Unfortunately, it should be noted that this implies that a set of w-planes have to be stored per facet, so one might
-as well do a hybrid approach between faceting and w-projection, although the W-kernels themselves might be smoother for the first approach. The last
+as well do a hybrid approach between faceting and traditional w-projection, although the W-kernels themselves arguably is smoother for the first approach. The last
 statement will become clearer once the original w-projection algorithm is discussed. After discussing w-projection we compare the error in doing a first 
 order expansion compared to a full w-projection approach. 
 \section{The W-projection algorithm}
-TODO
+As already mentioned the core idea in w-projection is to multiply the intensity distribution a w-dependent phase screen. Cornwell, Golap and Bhatnagar \cite{cornwell2008noncoplanar}
+originally noted that observations with non-zero $w$ coordinate can be related to a single observation plane (with $w=0$) through convolution in the measurement domain. To make this
+more concrete consider that a measurement of the sky brightness distribution, $B(l,m)$, is modulated by fringes defined by $\mathfrak{w}_w := e^{-2\pi i w(\sqrt{1-l^2-m^2}-\sqrt{1-l_0^2-m_0^2})}$ if the 
+w-dependent $\mathfrak{w}$ term is separated from the usual phase term. Unlike in faceting this additional phase term cannot be taken out of the integral due to the dependence on $l$ and $m$. Instead
+we consider employing the convolution theorem to multiply the phase term into the measurement integral:
+\begin{equation}
+ \begin{split}
+        V(u,v,w)&\approx\int{\int{I(l,m)e^{-2{\pi}i[u(l-l_i)+v(m-m_i)]}e^{-2{\pi}i[w(n-n_i)]}\frac{dldm}{n}}}\\
+		&\approx\int{\int{I(l,m)e^{-2{\pi}i[u(l-l_i)+v(m-m_i)]}\mathfrak{w}_w(l,m)\frac{dldm}{n}}}\\
+		&\approx V(u,v,w=0)*\mathfrak{W}_w(u,v)\\
+	V(u,v) * \mathfrak{W}_w(u,v) &\rightleftharpoons I(l,m)\mathfrak{w}_w(l,m)\\
+ \end{split}
+\end{equation}
+
+Because of the w dependence of $\mathfrak{w}$ this convolution is done while gridding (and degridding) the visibilities, just as is done with the regular 
+anti-aliasing filter, only now the filter must have complex values (as provisioned for in Equation~\ref{eqn_interp_op}). Just as with FFT-based narrow 
+field imaging, it is still important to include the response of the anti-aliasing function. There is obvious closed-form expression for the 
+Fourier transform of $\mathfrak{w}_w\mathcal{F}[\phi]$ for arbitrary $\phi$ functions, so the Fourier transform of the combined function must be precomputed 
+for several values of $w$. During convolution the nearest $w$-layer is picked depending on the value of the $w$ coordinate. Aside from this minor modification 
+of the interpolation step, the rest of the previous discussion remains valid.
+
+The immediate concern is determining how many $w$-planes must be precomputed. Here it is useful to note that the maximum difference in the $w(n-1)$ during the
+observation is responsible for the decorrelation in source brightness as explained earlier, one would therefore hope to minimize $\xi_{\text{max}}$ by introducing
+$N_{\text{planes}}$ different $w$-planes (here assumed to be linearly separated) between the $w_{\text{max}}$ and the $0^{th}$ plane, such that the difference 
+between planes is a fraction of the image cell size:
+\begin{equation}
+ 
+\end{equation}
+
+
+The next question that arise is why it may be useful to combine faceting and w-projection if w-projection can remove the widefield effects altogether. The answer
+lies in the computational complexity of the convolution operation itself. The complexity of the gridding step is given as $MC^2$ operations where $C$ is the support
+size of the convolution kernel. The support size of the kernel in turn depends on the resolution the convolution function must be sampled. Since
+$\mathfrak{w}$ is scaled by an ever-increasing $n-n_i$ term the w phase screen becomes ever-more compact further away from the delay tracking centre, as plotted 
+in Figure~\ref{fig_w_fringes}. It is clear that larger images require convolution kernels with greater support sizes. Tasse et al. \cite{tasse2013applying} give 
+an expression for computing the necessary support size of the kernel ($D_{\text{im}}$ is the diameter of the constructed image):
+\begin{equation}
+W_{\text{sup}}=\frac{4{\pi}w_{\lambda}D^2_{\text{im}}}{\sqrt{2-D^2_{\text{im}}}}
+\end{equation}
+
+\begin{figure}[h]
+  \begin{mdframed}
+    \centering
+    \begin{subfigure}[b]{0.7\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/w_fringe_low_w.png}
+      \caption{Low maximum w}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.7\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/w_fringe_high_w.png}
+      \caption{Higher maximum w}
+    \end{subfigure}
+    \caption[w fringe in one dimension]{Here the real part of the w phase term is plotted. It is clearly visible that the fringe is not scaled evenly over the field of view.
+	       Instead the oscillations increase in frequency at the edge of the field of view, and has to be sampled in the image space at a rate that
+	       satisfies the Nyquest sampling criteria. As expected for larger values of w (longer baselines) the frequency of the fringe oscilations is
+	       also increased.}
+    \label{fig_w_fringes}
+  \end{mdframed}
+\end{figure}
+
 \section{Error estimations}
 TODO
 \section{Computational considerations}
