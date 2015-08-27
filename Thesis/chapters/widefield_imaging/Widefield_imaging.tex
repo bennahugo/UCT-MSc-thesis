@@ -859,9 +859,12 @@ observation is responsible for the decorrelation in source brightness as explain
 $N_{\text{planes}}$ different $w$-planes (here assumed to be linearly separated) between the $w_{\text{max}}$ and the $0^{th}$ plane, such that the difference 
 between planes is a fraction of the image cell size:
 \begin{equation}
- 
+ n_{\text{planes}}=\frac{2{\pi}w_{\text{max}}\epsilon}{{\lambda_{\text{min}}}{\xi}} \text{ and ideally } 0{\leq\xi\ll}1
 \end{equation}
 
+It is worthwhile noting that the relation above only takes positive w values into account. The planes corresponding to negative $w$ values do not have to be computed,
+as any negative $w$ value can be related to a positive value by \emph{negating the baseline} vector and gridding the \emph{conjugate of the visibility}. This observation allows
+for a significant computational (and memory) saving in the precomputation of these filters.
 
 The next question that arise is why it may be useful to combine faceting and w-projection if w-projection can remove the widefield effects altogether. The answer
 lies in the computational complexity of the convolution operation itself. The complexity of the gridding step is given as $MC^2$ operations where $C$ is the support
@@ -894,6 +897,8 @@ W_{\text{sup}}=\frac{4{\pi}w_{\lambda}D^2_{\text{im}}}{\sqrt{2-D^2_{\text{im}}}}
   \end{mdframed}
 \end{figure}
 
+By decreasing the field of view of each of the synthesized facets, it is ensured that the phase screen do not ossilate nearly as frequently as with a regular w-projection approach,
+and decreases the required filter support size.
 \section{Error estimations}
 TODO
 \section{Computational considerations}
