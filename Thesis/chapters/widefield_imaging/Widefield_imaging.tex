@@ -27,7 +27,7 @@ a measurement is made and 0 everywhere else. The observed measurements (\emph{vi
 
 When equation~\ref{eqn_observed_vis} is inverted the extent of the problem becomes apparent:
 \begin{equation}
- I_{\text{obs}}(l,m) = (G_p(t,\nu)D_p(l,m,t,\nu)I_{\text{true}}(l,m)D_q^H(l,m,t,\nu)G_q^H(t,\nu))*\psf{(l,m,\nu)} + \eta
+ B_{\text{obs}}(l,m) = (G_p(t,\nu)D_p(l,m,t,\nu)I_{\text{true}}(l,m)D_q^H(l,m,t,\nu)G_q^H(t,\nu))*\psf{(l,m,\nu)} + \eta
 \end{equation}
 where the G terms are the directional independent gains, the D terms are the directional dependent gains and the Point Spread Function, $\psf$, is the Fourier Transform of the sampling function, $S$. Since
 the u,v coordinates depend on the wavelength the $\psf$ in turn also scales depending on wavelength. $\eta$ represents the background noise level that depends on system temperature, integration time and integration
@@ -287,11 +287,11 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  \begin{equation}
   \label{eqn_img_sampling}
   \begin{split}
-    \Delta{l} &= \frac{1}{2N_l\Delta{u}}\text{, }\Delta{l}:=\frac{1}{l_{\text{max}}},\Delta{u}:=\frac{1}{u_{\text{max}}}\\
-    \Delta{m} &= \frac{1}{2N_m\Delta{v}}\text{, }\Delta{m}:=\frac{1}{m_{\text{max}}},\Delta{v}:=\frac{1}{v_{\text{max}}}\\
+    \text{cell}_l &= \frac{1}{2N_l\Delta{u}}\text{, }\Delta{u}:=\frac{1}{u_{\text{max}}}\\
+    \text{cell}_m &= \frac{1}{2N_m\Delta{v}}\text{, }\Delta{v}:=\frac{1}{v_{\text{max}}}\\
   \end{split}
  \end{equation}
- Here $\Delta{l}$ and $\Delta{m}$ are the pixel sizes given in degrees (or equivalently arcminutes, arcseconds or radians). $N_l\Delta{u}$ and
+ Here $\text{cell}_l$ and $\text{cell}_m$ are the pixel sizes given in degrees (or equivalently arcminutes, arcseconds or radians). $N_l\Delta{u}$ and
  $N_m\Delta{v}$ correspond to the maximum frequencies in the Fourier / measurement space. If the images are 
  sub-sampled (change the equality to $>$) the longest baselines will fall off the uv grid and angular resolution will be lost. 
  
@@ -320,7 +320,7 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  Convolution with the Fourier transform of the shah function (composed itself by many band-limited impulses) creates a sum of periodic functions
  in the image domain \footnote{It is useful to note that the Fourier transform of a band-limited (non-zero over a finite range) function, 
  such as a box function, is a function that stretches over an infinite support region}. The result is a periodic field of view that repeats at
- $M\Delta{l}$ and $N\Delta{m}$ for an $M\times N$ image (ie. at multiples of the field of view). In practice not all the energy from 
+ $M\text{cell}_l$ and $N\text{cell}_m$ for an $M\times N$ image (ie. at multiples of the field of view). In practice not all the energy from 
  these replicated fields can be stopped at the edge of the field of view, and this is responsible for the aliasing seen in the images. Further
  truncation of the shah function to represent only a single field of view, as well as the truncation of the convolving function also 
  contribute to the aliasing. It should be understood that the $\psf$ sidelobes from sources outside the field of view that legitimately fall inside
@@ -482,11 +482,11 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  \begin{equation}
   \alpha^{-n}F(x/\alpha) \rightleftharpoons f(\alpha x)
  \end{equation}
- Here $n$ depends on the dimensionality of the Fourier transform. If the desired field of view (measured in radians) is multiplied to each sampled
- u,v coordinate then  the synthesized image will have a field of view ranging between $-0.5\Delta{l}N_l\leq l\leq0.5\Delta{l}N_l$ and 
- $-0.5\Delta{m}N_m\leq m\leq0.5\Delta{m}N_m$. It is further 
- important to note that, by convention, the gridded visibilities are shifted before Fourier transform such that the 0 frequency component 
- (``DC'' component) is at the centre of the grid and the corresponding centre of the observed field on the image is at the centre pixel of the image.
+ Here $n$ depends on the dimensionality of the Fourier transform. If the desired field of view (measured in radians, centred at the field centre) is multiplied to 
+ each sampled u,v coordinate then the synthesized image will have a field of view ranging between $-0.5\text{cell}_{l}N_l\leq l_{\text{deg}}\leq0.5\text{cell}_{l}N_l$ and 
+ $-0.5\text{cell}_{m}N_m\leq m_{\text{deg}}\leq0.5\text{cell}_{m}N_m$. It is further important to note that, by convention, the gridded visibilities are shifted before Fourier 
+ transform such that the 0 frequency component (``DC'' component) is at the centre of the grid and the corresponding centre of the 
+ observed field on the image is at the centre pixel of the image.
  
  To summarize the convolutional gridding process is shown in Figure~\ref{fig_synth_pipeline}.
  \begin{figure}[h]
@@ -524,7 +524,7 @@ The widefield effect arise due to the combination of two errors:
  projection of the sphere onto to the image.
 \end{enumerate}
 As Rick points out this phase difference is not a physical delay in the strictest sense of the word, but arise merely because of the geometry of the array and coordinate
-systems. In essence it arises because the sky is either too wide, or it is sampled with a tilted interferometer or both problems arise simultaneously. The effects 
+systems. In essence it arises because the field of view is too wide, or it is sampled with a tilted interferometer or both problems arise simultaneously. The effects 
 are combined as $w(\sqrt{1-l^2-m^2} - \sqrt{1-l_0^2-m_0^2})$ where $\sqrt{1-l_0^2-m_0^2} = 1$ if the projection pole is at the same coordinate as the centre
 of the field being observed (which we take to be true for the remainder of the discussion). Because the phase propagation term $\tau = \frac{\vec{b}\cdot\vec{s}}{c}$ as 
 shown in Figure~\ref{fig_interferometer} depends on the distance a source is away from the delay tracking centre at $\vec{s}_0$ it will continuously change during the course 
@@ -602,7 +602,7 @@ as A. Richard Thompson \cite[Lecture 2]{taylor1999synthesis} notes (refer to Fig
  \label{eqn_wmax}
  \begin{split}
   w_{\text{max}} &\approx |\frac{\vec{b}_{\text{max}}}{\lambda}|\\
-  \Delta{l} &= \Delta{m} = \Delta{n} \approx 0.5\frac{\lambda}{|\vec{b}_{\text{max}}|}\\
+  \text{cell}_l &= \text{cell}_m = \text{cell}_n \approx 0.5\frac{\lambda}{|\vec{b}_{\text{max}}|}\\
  \end{split}
 \end{equation}
 
@@ -719,7 +719,7 @@ where $\theta_i$ is the angle to the new phase centre.
     \caption[Faceting without regard of tangency]{By only phase steering the visibilities to new phase centres without tilting the u,v,w coordinates
     to correspond to the new phase tracking centre significantly reduces the achievable field of view. Here instead each facet is parallel to the 
     original tangent plane. As the new phase tracking centre is taken further away from the original phase tracking centre the effective facet size must be
-    shrunk down to achieve a comparable projection error at the edge of the synthesized facets.}
+    shrunk down to achieve a comparable projection error at the edge of the synthesized facets. Image adapted from Rick Perley \cite[Lecture 19]{taylor1999synthesis}}
     \label{fig_non_rotated_facets}
   \end{mdframed}
 \end{figure}
@@ -740,10 +740,27 @@ to measure compute new u',v',w' coordinates \emph{after} the visibilities have b
 \end{equation}
 
 By ensuring the facets are tangent to the new phase centres one in effect ensures that the height difference between the sky and the projected facet remains
-comparable between corresponding pixels. Rick estimates that such a polyhedron approach achieves an improved field of view estimated by:
+comparable between corresponding pixels. Rick estimates that such a polyhedron approach achieves a field of view estimated by:
 \begin{equation}
  \theta_{\text{max}} \approx \frac{\sqrt{\lambda}}{\sqrt{|\vec{b}_{\text{max}}|}}
 \end{equation}
+
+Using a polyhedron faceting approach is clearly an improvement over the naive phase steering approach if enough facets are created to satisfy the sampling 
+criterion. To determine how many facets are required we first have to define the phase error as (refer back to Figure~\ref{fig_wide_field_error}):
+\begin{equation}
+\label{eqn_phase_error}
+\xi_{\text{max}}:=\frac{2{\pi}w_{\text{max}}\epsilon}{{\lambda_{\text{min}}}} \text{, }\epsilon:=\sqrt{1-l^2-m^2} - \sqrt{1-l_0^2-m_0^2} \text{ and ideally } 0{\leq\xi\ll}1
+\end{equation}
+
+Then we derive an indication of the number of facets needed to limit this w-dependent phase error between the celestial sphere and orthogonally projected 
+facets (linearly spaced) at the corner of each facet:
+\begin{equation}
+N_{\text{facets}} = \frac{\max{(\theta_l,\theta_m)}}{2\cos^{-1}{\left[\sin{(\delta_0 + \theta_l/2)}\sin{\delta_0} + \cos{(\delta_0 + \theta_l/2)}\cos{\delta_0}\cos{(\theta_m/2)}-\frac{\lambda_{\text{min}}\xi}{2{\pi}w_{\text{max}}}\right]}}
+\end{equation}
+
+Here the half facet size (in l and m) is given as $\theta_{l_f}/2 = \theta_l/(2N_{\text{facets}})$ and $\theta_{m_f}/2 = \theta_m/(2N_{\text{facets}})$ respectively. The arc subtended by the angle to the corner of the facet has 
+length $\cos{(\theta_{l_f}/2)}\cos{(\theta_{m_f}/2)}$ using the spherical rule of cosines and assuming a unit celestial sphere and orthogonal u and v bases. The angle to the corner of the image is a small number, so 
+we might as well just use the small angle approximation.
 
 For reference a sketch algorithm for facet synthesis (backwards step) is given in Algorithm~\ref{alg_polyhedron_faceting_sketch}. The forward
 step will work roughly in reverse.
@@ -759,7 +776,7 @@ step will work roughly in reverse.
       \STATE {Obtain projected (assumed orthogonal/``SIN'') $(l_i,m_i,n_i)$ and $(l_0,m_0,n_0)$ coordinates}
       \STATE {Let $\lambda$ be the channel wavelength}
       \STATE {Let $p_f=\exp{(2\pi i/\lambda[u(l_i-l_0)+v(m_i-m_0)+w(n_i-n_0)])}$} 
-      \STATE {Let vis' = vis * $p_f$, by element-wise phase shift}
+      \STATE {Let vis' = vis * $p_f$, by element-wise multiplication}
       \STATE {Call convolve\_grid($g_f^b$,vis',uvw')}
     \ENDFOR
   \ENDFOR
@@ -781,15 +798,15 @@ AIPS convention \cite{aipsnonlinearcoords} and Calabretta and Greisen \cite{cala
  \end{split}
 \end{equation}
 
-For our work we assume the projection coordinates are the orthogonal coordinates specified here. It is well worth noting 
-that the orthogonal projection of sources is not accurate for large fields of view as noted by Calabretta and Greisen 
+For our work we assume the projection is the orthogonal coordinate system specified here. It is well worth noting 
+that the orthogonal projection of sources is not accurate for large fields of view, as noted by Calabretta and Greisen 
 \cite{calabretta2002representations}.
 
 Another important remark is that the resolution of each facet image is not arbitrary, but is subject to the same Nyquest sampling 
 criteria outlined for regular images in Equation~\ref{eqn_img_sampling}.
 \section{Coplanar facet imaging}
 One of the biggest downfalls to Rick's non-coplanar faceting approach is that the minor cycle deconvolution becomes very complicated; the measurement
-coordinates are rotated and rotations are preserved by the Fourier transform, the $\psf$ is also rotated. Since the $\psf$ is not necessarily 
+coordinates are rotated and because rotations are preserved by the Fourier transform, the $\psf$ is also rotated. Since the $\psf$ is not necessarily 
 symmetric each facet has its own $\psf$ and subtraction will require careful consideration during the minor cycle.
 
 One way around this problem would be to re-project each non-coplanar facet into a single plane after synthesis (ie. in the image-space). Doing the necessary
@@ -800,12 +817,8 @@ Sault et al. \cite[Appendix A]{sault1996approach}. Although the major cycle, wou
 the constituent facets' Fourier transforms the latter approach of re-projecting the u,v coordinates and phase steering is no more expensive than the backward 
 step.
 
-Another way to do (approximate) coplanar faceting is to consider the orthogonal projection error directly (refer back to Figure~\ref{fig_wide_field_error}):
-\begin{equation}
-\xi_{\text{max}}:=\frac{2{\pi}w_{\text{max}}\epsilon}{{\lambda_{\text{min}}}} \text{, }\epsilon:=\sqrt{1-l^2-m^2} - \sqrt{1-l_0^2-m_0^2} \text{ and ideally } 0{\leq\xi\ll}1
-\end{equation}
-
-One strategy to include $w\epsilon$ per gridded visibility is to Taylor expand the term to a first order approximation around the original phase centre. The 
+Another way to do (approximate) coplanar faceting is to consider taking the phase error in Equation~\ref{eqn_phase_error} into account while gridding the facets.
+One such strategy to include $w\epsilon$ per gridded visibility is to Taylor expand the term to a first order approximation around the original phase centre. The 
 first order approximation leads to a remarkable transformation for u and v as pointed out by Leonid Kogan and Eric Greisen \cite{aipsfaceting}:
 \begin{equation}
  \begin{split}
@@ -833,23 +846,23 @@ as well do a hybrid approach between faceting and traditional w-projection, alth
 statement will become clearer once the original w-projection algorithm is discussed. After discussing w-projection we compare the error in doing a first 
 order expansion compared to a full w-projection approach. 
 \section{The W-projection algorithm}
-As already mentioned the core idea in w-projection is to multiply the intensity distribution a w-dependent phase screen. Cornwell, Golap and Bhatnagar \cite{cornwell2008noncoplanar}
+As already mentioned the core idea in w-projection is to multiply the intensity distribution by a w-dependent phase screen. Cornwell, Golap and Bhatnagar \cite{cornwell2008noncoplanar}
 originally noted that observations with non-zero $w$ coordinate can be related to a single observation plane (with $w=0$) through convolution in the measurement domain. To make this
 more concrete consider that a measurement of the sky brightness distribution, $B(l,m)$, is modulated by fringes defined by $\mathfrak{w}_w := e^{-2\pi i w(\sqrt{1-l^2-m^2}-\sqrt{1-l_0^2-m_0^2})}$ if the 
 w-dependent $\mathfrak{w}$ term is separated from the usual phase term. Unlike in faceting this additional phase term cannot be taken out of the integral due to the dependence on $l$ and $m$. Instead
 we consider employing the convolution theorem to multiply the phase term into the measurement integral:
 \begin{equation}
  \begin{split}
-        V(u,v,w)&\approx\int{\int{I(l,m)e^{-2{\pi}i[u(l-l_i)+v(m-m_i)]}e^{-2{\pi}i[w(n-n_i)]}\frac{dldm}{n}}}\\
-		&\approx\int{\int{I(l,m)e^{-2{\pi}i[u(l-l_i)+v(m-m_i)]}\mathfrak{w}_w(l,m)\frac{dldm}{n}}}\\
+        V(u,v,w)&\approx\int{\int{B(l,m)e^{-2{\pi}i[u(l-l_i)+v(m-m_i)]}e^{-2{\pi}i[w(n-n_i)]}\frac{dldm}{n}}}\\
+		&\approx\int{\int{B(l,m)e^{-2{\pi}i[u(l-l_i)+v(m-m_i)]}\mathfrak{w}_w(l,m)\frac{dldm}{n}}}\\
 		&\approx V(u,v,w=0)*\mathfrak{W}_w(u,v)\\
-	V(u,v) * \mathfrak{W}_w(u,v) &\rightleftharpoons I(l,m)\mathfrak{w}_w(l,m)\\
+	V(u,v) * \mathfrak{W}_w(u,v) &\rightleftharpoons B(l,m)\mathfrak{w}_w(l,m)\\
  \end{split}
 \end{equation}
 
 Because of the w dependence of $\mathfrak{w}$ this convolution is done while gridding (and degridding) the visibilities, just as is done with the regular 
 anti-aliasing filter, only now the filter must have complex values (as provisioned for in Equation~\ref{eqn_interp_op}). Just as with FFT-based narrow 
-field imaging, it is still important to include the response of the anti-aliasing function. There is obvious closed-form expression for the 
+field imaging, it is still important to include the response of the anti-aliasing function. There is no obvious closed-form expression for the 
 Fourier transform of $\mathfrak{w}_w\mathcal{F}[\phi]$ for arbitrary $\phi$ functions, so the Fourier transform of the combined function must be precomputed 
 for several values of $w$. During convolution the nearest $w$-layer is picked depending on the value of the $w$ coordinate. Aside from this minor modification 
 of the interpolation step, the rest of the previous discussion remains valid.
@@ -859,14 +872,14 @@ observation is responsible for the decorrelation in source brightness as explain
 $N_{\text{planes}}$ different $w$-planes (here assumed to be linearly separated) between the $w_{\text{max}}$ and the $0^{th}$ plane, such that the difference 
 between planes is a fraction of the image cell size:
 \begin{equation}
- n_{\text{planes}}=\frac{2{\pi}w_{\text{max}}\epsilon}{{\lambda_{\text{min}}}{\xi}} \text{ and ideally } 0{\leq\xi\ll}1
+ N_{\text{planes}}=\frac{2{\pi}w_{\text{max}}\epsilon}{{\lambda_{\text{min}}}{\xi}} \text{ and ideally } 0{\leq\xi\ll}1
 \end{equation}
 
 It is worthwhile noting that the relation above only takes positive w values into account. The planes corresponding to negative $w$ values do not have to be computed,
 as any negative $w$ value can be related to a positive value by \emph{negating the baseline} vector and gridding the \emph{conjugate of the visibility}. This observation allows
 for a significant computational (and memory) saving in the precomputation of these filters.
 
-The next question that arise is why it may be useful to combine faceting and w-projection if w-projection can remove the widefield effects altogether. The answer
+The next question that arise is why it may be useful to combine faceting and w-projection if w-projection can remove the wide field effects altogether. The answer
 lies in the computational complexity of the convolution operation itself. The complexity of the gridding step is given as $MC^2$ operations where $C$ is the support
 size of the convolution kernel. The support size of the kernel in turn depends on the resolution the convolution function must be sampled. Since
 $\mathfrak{w}$ is scaled by an ever-increasing $n-n_i$ term the w phase screen becomes ever-more compact further away from the delay tracking centre, as plotted 
@@ -891,23 +904,71 @@ W_{\text{sup}}=\frac{4{\pi}w_{\lambda}D^2_{\text{im}}}{\sqrt{2-D^2_{\text{im}}}}
     \end{subfigure}
     \caption[w fringe in one dimension]{Here the real part of the w phase term is plotted. It is clearly visible that the fringe is not scaled evenly over the field of view.
 	       Instead the oscillations increase in frequency at the edge of the field of view, and has to be sampled in the image space at a rate that
-	       satisfies the Nyquest sampling criteria. As expected for larger values of w (longer baselines) the frequency of the fringe oscilations is
+	       satisfies the Nyquest sampling criteria. As expected for larger values of w (longer baselines) the frequency of the fringe osculations is
 	       also increased.}
     \label{fig_w_fringes}
   \end{mdframed}
 \end{figure}
 
-By decreasing the field of view of each of the synthesized facets, it is ensured that the phase screen do not ossilate nearly as frequently as with a regular w-projection approach,
-and decreases the required filter support size.
+By decreasing the field of view of each of the synthesized facets, it is ensured that the phase screen do not oscillate nearly as frequently as with a regular w-projection approach,
+and decreases the required filter support size. Additionally the $\mathfrak{w}_w$ term can be separated into two functions of $l$ and $m$. If a small angle 
+approximation ($\sqrt{1+x}\approx1+\frac{x}{2}$) to $\mathfrak{w}_w(l,m)$ with respect to a facet centre is used, the following linearly separable relation is obtained:
+\begin{equation}
+   \mathfrak{w}_w(l,m) = e^{2{\pi}iw[(l_i^2-l^2)/2]}e^{2{\pi}iw[(m_i^2-m^2)/2]}
+\end{equation}
+
+Separating out $l_i$ and $m_i$ to be applied by the normal faceting phase shift we get the same small angle version of the equation. Assuming the 
+normal anti-aliasing gridding function is separable as well this becomes:
+\begin{equation}
+   \begin{split}
+   \mathcal{F}[\phi](l,m)\mathfrak{W}(l,m,w) &= \mathcal{F}[\phi](l)\mathcal{F}[\phi](m)e^{-2{\pi}iw[(l^2)/2]}e^{-2{\pi}iw[(m^2)/2]}\\
+                             &= k(l)k(m)\\
+                             &= k(l,m)\\
+                             &\rightleftharpoons^\mathcal{F} K(u,v)\\
+                             &=K(u)K(v)\\
+   \end{split}
+\end{equation}
+
+This observation above improves the memory requirements considerably, though the gridding time is slightly increased since two filter positions have to be looked up
+and an additional complex multiplication is necessary during gridding. Note that the memory required to store filter is given by 
+$N_{\text{planes}}\times[W_{sup} + (W_{sup} - 1)\times(m_{\text{oversampled}} - 1)]\mathbb{C}$. This is 
+a $[W_{sup} + (W_{sup} - 1)\times(m_{\text{oversampled}} - 1)]$ reduction in memory consumption. The accuracy of this 
+small angle approximation is discussed in the next section.
+
+To conclude this section we note that the sampling step size in the image domain (where the combination of $\mathfrak{w}_w\mathcal{F}[\phi]$ is sampled) is again given
+by the Nyquest relation. Sample phase screens that include a simple $\sinc$ anti-aliasing filter are plotted in Figure~\ref{fig_phase_screen}.
+\begin{equation}
+ \begin{split}
+  \Delta^l_{\text{convolution step}}&=\frac{1}{2N_{\text{sup}}\frac{\Delta{u}}{m_{\text{oversample}}}}\\
+  \Delta^m_{\text{convolution step}}&=\frac{1}{2N_{\text{sup}}\frac{\Delta{v}}{m_{\text{oversample}}}}\\
+ \end{split}
+\end{equation}
+
+\begin{figure}[h]
+  \begin{mdframed}
+    \centering
+    \begin{subfigure}[b]{0.33\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/real_plane.png}
+      \caption{}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.33\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/imag_plane.png}
+      \caption{}
+    \end{subfigure}
+    \caption[Sample w phase screens]{Here the real (a) and imaginary (b) parts of the $\mathfrak{w}_w$ phase screens are plotted. 
+	    In this plot $w_{\text{max}}/\lambda_{\text{min}} = 2000.000$. There are 32 planes between $w=0$ and the maximum.
+	    The phase screen is simulated for a $5.1^\circ$ square image, with its half support size at 15 cells and $m_{\text{oversample}}=20$.
+	    Here only a plane near the centre of the w range is plotted. Some aliasing effects are noticeable due to under sampling (due to memory
+	    constraints).}
+    \label{fig_phase_screen}
+  \end{mdframed}
+\end{figure}
 \section{Error estimations}
 TODO
 \section{Computational considerations}
 TODO
-\section{Filter precomputation}
-TODO
-\subsection{Anti-aliasing filters}
-\subsection{Introducing the W-term}
-\subsection{Filter seperability}
 \section{Revisiting the direction-dependent effects}
 Traditional calibration pipelines assumes that the same ``apparent sky'' is sampled by all antennae, and attempts to solve only the unknown direction-independent gain terms.
 This process is known as \textit{self-calibration}. Furthermore some packages like the CASA framework consider directional dependent terms as simple effects 
@@ -965,7 +1026,7 @@ direction-dependent effects are assumed to stay constant over a small area of th
 matrices may simply be inverted and applied as part of the part of the resampling process:
 \begin{equation*}
  \begin{split}
- I_{\text{corrected,dirty}} &= \mathcal{F}^{-1}(D_p^{-1}(l_i,m_i,t,\nu)V_{\text{obs}}(u,v,t,\nu)D_q^{H^{-1}}(l_i,m_i,t,\nu))\\
+ B_{\text{corrected,dirty}} &= \mathcal{F}^{-1}(D_p^{-1}(l_i,m_i,t,\nu)V_{\text{obs}}(u,v,t,\nu)D_q^{H^{-1}}(l_i,m_i,t,\nu))\\
 			    &= \mathcal{F}^{-1}(D_p^{-1}(l_i,m_i,t,\nu)V_{\text{obs}}(u,v,t,\nu)D_q^{{-1}^H}(l_i,m_i,t,\nu))\\
  \end{split}
 \end{equation*}
