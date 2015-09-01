@@ -807,7 +807,7 @@ criteria outlined for regular images in Equation~\ref{eqn_img_sampling}.
 \section{Coplanar facet imaging}
 One of the biggest downfalls to Rick's non-coplanar faceting approach is that the minor cycle deconvolution becomes very complicated; the measurement
 coordinates are rotated and because rotations are preserved by the Fourier transform, the $\psf$ is also rotated. Since the $\psf$ is not necessarily 
-symmetric each facet has its own $\psf$ and subtraction will require careful consideration during the minor cycle.
+symmetric each facet has its own $\psf$. Combining the CLEAN components in the subtraction phase will require careful consideration during the minor cycle.
 
 One way around this problem would be to re-project each non-coplanar facet into a single plane after synthesis (ie. in the image-space). Doing the necessary
 re-projections and inevitable (and expensive) corrections for the areas where the facets overlap can be done through astronomical mosaicking software packages such as the
@@ -836,12 +836,13 @@ Substituting into Equation~\ref{eqn_faceting} they obtain:
 \end{equation}
 The first order approximation approach may also be thought of as reducing the projection error, $\epsilon$, to near zero, provided the new facet is small enough. 
 The resulting facets are thus all (nearly) parallel. Since the w-term is merely an approximation we assumed the phase steering term is the same as in the original
-polyhedron-faceting algorithm.
+polyhedron-faceting algorithm. Bill Cotton\cite{obitfacetclean}\footnote{A word of thanks goes to Bill Cotton for useful discussions on facet imaging in late 2014} 
+uses this coplanar facet synthesis method in a joint major-minor cycle deconvolution approach in Obit.
 
 As one would expect the first order approximation still breaks down if the facet edges are several degrees away from the facet phase centre.
 Unfortunately the second degree terms cannot easily be separated as was done for $u'$ and $v'$ and would require using a convolution in the Fourier domain
 in order to multiply the approximate $w(n-n_i)$ phase screen into the image domain. As Cyril \cite{tassefaceting} points out one can additionally improve the approximation
-using by fitting a smooth polynomial through w. Unfortunately, it should be noted that this implies that a set of w-planes have to be stored per facet, so one might
+by fitting a smooth polynomial through w. Unfortunately, it should be noted that this implies that a set of w-planes have to be stored per facet, so one might
 as well do a hybrid approach between faceting and traditional w-projection, although the W-kernels themselves arguably is smoother for the first approach. The last
 statement will become clearer once the original w-projection algorithm is discussed. After discussing w-projection we compare the error in doing a first 
 order expansion compared to a full w-projection approach. 
@@ -912,7 +913,7 @@ W_{\text{sup}}=\frac{4{\pi}w_{\lambda}D^2_{\text{im}}}{\sqrt{2-D^2_{\text{im}}}}
 
 By decreasing the field of view of each of the synthesized facets, it is ensured that the phase screen do not oscillate nearly as frequently as with a regular w-projection approach,
 and decreases the required filter support size. Additionally the $\mathfrak{w}_w$ term can be separated into two functions of $l$ and $m$. If a small angle 
-approximation ($\sqrt{1+x}\approx1+\frac{x}{2}$) to $\mathfrak{w}_w(l,m)$ with respect to a facet centre is used, the following linearly separable relation is obtained:
+approximation ($\sqrt{1+x}\approx1+\frac{x}{2}$) to $\mathfrak{w}_w(l,m)$ with respect to a facet centre is used, the following separable relation is obtained:
 \begin{equation}
    \mathfrak{w}_w(l,m) = e^{2{\pi}iw[(l_i^2-l^2)/2]}e^{2{\pi}iw[(m_i^2-m^2)/2]}
 \end{equation}
@@ -931,7 +932,7 @@ normal anti-aliasing gridding function is separable as well this becomes:
 
 This observation above improves the memory requirements considerably, though the gridding time is slightly increased since two filter positions have to be looked up
 and an additional complex multiplication is necessary during gridding. Note that the memory required to store filter is given by 
-$N_{\text{planes}}\times[W_{sup} + (W_{sup} - 1)\times(m_{\text{oversampled}} - 1)]\mathbb{C}$. This is 
+$N_{\text{planes}}\times[W_{sup} + (W_{sup} - 1)\times(m_{\text{oversampled}} - 1)]\times\mathbb{C}$. This is 
 a $[W_{sup} + (W_{sup} - 1)\times(m_{\text{oversampled}} - 1)]$ reduction in memory consumption. The accuracy of this 
 small angle approximation is discussed in the next section.
 
@@ -966,7 +967,31 @@ by the Nyquest relation. Sample phase screens that include a simple $\sinc$ anti
   \end{mdframed}
 \end{figure}
 \section{Error estimations}
-TODO
+Several methods of creating copanar facets have been discussed in the previous section. We give comparative plots in Figure~\ref{fig_error} where each of the methods is compared to
+a traditional w-projection approach.
+\begin{figure}[h]
+  \begin{mdframed}
+    \centering
+    \begin{subfigure}[b]{0.7\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/coplanar_error.png}
+      \caption{}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.7\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/coplanar_error_residuals.png}
+      \caption{}
+    \end{subfigure}
+    \caption[Coplanar faceting error]{In these two plots we phase error introduced by the orthogonal projection assuming $w_max\leq 1$. The dashed line is a plot of $n-1$ as
+    would be convolved into the image by classic w-projection; a full w-projection approach is assumed to be the most accurate way of dealing with the orthogonal projection geometry.
+    In green we show the deviation a first order Taylor approximation gives when compared to w-projection\cite{aipsfaceting}. Then we show the small angle w-projection
+    suggested above in magenta; it clearly performs significantly better than the first order approximation, only breaking down tens of degrees from the phase centre. Lastly we also
+    plotted the improved facet-centre-relative w-kernel approximation to $\epsilon$ that Cyril\cite{tassefaceting} suggested as an improvement on the work of 
+    Kogan and Greisen \cite{aipsfaceting} in red. Cyril's polynomial approach \cite{tassefaceting} performs even better than the latter. The error between w-projection and the three
+    approaches is plotted in (b).}
+    \label{fig_error}
+  \end{mdframed}
+\end{figure}
 \section{Computational considerations}
 TODO
 \section{Revisiting the direction-dependent effects}
