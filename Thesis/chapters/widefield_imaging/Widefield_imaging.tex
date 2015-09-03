@@ -992,18 +992,6 @@ a traditional w-projection approach.
     \label{fig_error}
   \end{mdframed}
 \end{figure}
-\section{Computational considerations}
-We now draw a comparison of the computational complexities of the methods discussed here. Much of this discussion is taken from the detailed analysis of 
-Yashar \& Kemball \cite{yashar2009tdp}.
-The data rates produced by interferometers is roughly given as:
-\begin{equation}
- \frac{1}{\tau_{\text{integration}}}N_{\text{baselines}}N_{\text{channels}}N_{\text{bands (spw)}}N_{\text{corr}}\mathbb{C}
-\end{equation}
-where $\tau_{\text{integration}}$ is the correlator integration time, which depends on the effective resolution of the instrument and the rotation speed of the earth.
-The integration time must be short enough to ensure sources don't move more than the angular resolution of the telescope:
-\begin{equation}
- \tau_{\text{integration}} \approx \frac{|\vec{B}_{\text{max}}|}{D_{\text{antenna}}}\omega_\text{earth},\text{ where } \omega_\text{earth}\approx 7.29\times10^{-5}\text{rad}/\text{sec}_\text{Mean sidereal}
-\end{equation}
 
 \section{Revisiting the direction-dependent effects}
 Traditional calibration pipelines assumes that the same ``apparent sky'' is sampled by all antennae, and attempts to solve only the unknown direction-independent gain terms.
@@ -1057,7 +1045,7 @@ however require a massive amount of memory and time to precompute the 16 baselin
 convolutions per processed visibility. As the number of baselines grow as the square of the number of antennae in this approach fast 
 becomes prohiatively expensive \cite{tasse2013applying}.
 
-An alternative strategy that can prove useful is to consider an amended faceting approach\footnote{Suggested by Cyril Tasse}. Here the 
+An alternative strategy that can prove useful is to consider an amended faceting approach\footnote{Suggested by Cyril Tasse and Oleg Smirnov}. Here the 
 direction-dependent effects are assumed to stay constant over a small area of the sky (centred at some $l_i,m_i$) and the Jones 
 matrices may simply be inverted and applied as part of the part of the resampling process:
 \begin{equation*}
@@ -1078,6 +1066,36 @@ matrices grows approximately as:
 \begin{equation*}
  N_{\text{Jones}} \approx N_{\text{sources}}N_{\text{integration steps}}N_{\text{channels}}\sqrt{N_{\text{Baselines}}}
 \end{equation*}
+
+\section{Computational considerations}
+We now draw a comparison of the computational complexities of the methods discussed here. Much of this discussion is taken from the detailed analysis of 
+Yashar \& Kemball \cite{yashar2009tdp}.
+The data rates produced by interferometers is roughly given as:
+\begin{equation}
+ r_\text{datarate} \approx \frac{1}{1024^4\tau_{\text{integration}}}N_{\text{baselines}}N_{\text{channels}}N_{\text{bands (spw)}}N_{\text{corr}}\text{sizeof}(\mathbb{C})\text{ (TiB/s)}
+\end{equation}
+where $\tau_{\text{integration}}$ is the correlator integration time, which depends on the effective resolution of the instrument and the rotation speed of the earth.
+The maximum integration time must be short enough to ensure sources don't move more than the angular resolution of the telescope:
+\begin{equation}
+ \tau_{\text{integration}} \approx \frac{|\vec{B}_{\text{max}}|}{D_{\text{antenna}}}\omega_\text{earth},\text{ where } \omega_\text{earth}\approx 7.29\times10^{-5}\text{rad}/\text{sec}_\text{Mean sidereal}
+\end{equation}
+Although a good signal to noise ratio depends on observing a large band of frequencies, but observing a bandlimited range of frequencies causes smeering in the image. In order to limit this smeering
+the bandwidth of each channel should be narrow, centred at $\nu_i$. To compensate for the associated decrease in the signal to noise ratio of the observation many adjacent channels may be integrated if 
+sources of continuim emission are being observed\footnote{We assume the intensity distribution of these sources do not vary significantly with frequency. This is in fact not true for wider bands; here 
+it may be necessary to account for the drop in emission intensity especially when deconvolving (using a Multifrequency approach, see for instance Conway and Sault \cite[Lecture 21]{taylor1999synthesis})}. In addition 
+multiple channel bands (spectral windows) may be observed simultaniously by different feeds on a directional antenna. For continuum imaging the number of channels required is at minimum\footnote{It should 
+be stressed that this number only limits the smeering in images. The actual number of channels used also depends on the science being done; spectral line imaging is just one instance where many more 
+densely-packed channels may be required.}:
+\begin{equation}
+ N_{\text{channels}} \approx \frac{|\vec{B}_{\text{max}}|}{D_{\text{antenna}}}\frac{\Delta{\nu}}{\nu_i}
+\end{equation}
+Next we use slightly different equations for $N_\text{planes}$ and $N_\text{facets}$, in order to at least critically sample $n$
+
+\begin{tabular}[c]{|l|c|p{5cm}|}
+ \hline
+\caption[]{}
+\label{tbl
+\end{tabular}
 
 \section{Review of previous literature}
 TODO
