@@ -868,10 +868,10 @@ Fourier transform of $\mathfrak{w}_w\mathcal{F}[\phi]$ for arbitrary $\phi$ func
 for several values of $w$. During convolution the nearest $w$-layer is picked depending on the value of the $w$ coordinate. Aside from this minor modification 
 of the interpolation step, the rest of the previous discussion remains valid.
 
-The immediate concern is determining how many $w$-planes must be precomputed. Here it is useful to note that the maximum difference in the $w(n-1)$ during the
+The immediate concern is determining how many $w$-planes must be precomputed. Here it is useful to note that the difference in the $w(n-1)$ during the
 observation is responsible for the decorrelation in source brightness as explained earlier, one would therefore hope to minimize $\xi_{\text{max}}$ by introducing
-$N_{\text{planes}}$ different $w$-planes (here assumed to be linearly separated) between the $w_{\text{max}}$ and the $0^{th}$ plane, such that the difference 
-between planes is a fraction of the image cell size:
+$N_{\text{planes}}$ different $w$-planes (here assumed to be linearly separated\footnote{For arrays that is dense in the core region it may be better to consider
+a denser distribution of planes for lower w}) between the $w_{\text{max}}$ and the $0^{th}$ plane, such that the difference between planes is a fraction of the image cell size:
 \begin{equation}
  N_{\text{planes}}=\frac{2{\pi}w_{\text{max}}\epsilon}{{\lambda_{\text{min}}}{\xi}} \text{ and ideally } 0{\leq\xi\ll}1
 \end{equation}
@@ -993,7 +993,18 @@ a traditional w-projection approach.
   \end{mdframed}
 \end{figure}
 \section{Computational considerations}
-TODO
+We now draw a comparison of the computational complexities of the methods discussed here. Much of this discussion is taken from the detailed analysis of 
+Yashar \& Kemball \cite{yashar2009tdp}.
+The data rates produced by interferometers is roughly given as:
+\begin{equation}
+ \frac{1}{\tau_{\text{integration}}}N_{\text{baselines}}N_{\text{channels}}N_{\text{bands (spw)}}N_{\text{corr}}\mathbb{C}
+\end{equation}
+where $\tau_{\text{integration}}$ is the correlator integration time, which depends on the effective resolution of the instrument and the rotation speed of the earth.
+The integration time must be short enough to ensure sources don't move more than the angular resolution of the telescope:
+\begin{equation}
+ \tau_{\text{integration}} \approx \frac{|\vec{B}_{\text{max}}|}{D_{\text{antenna}}}\omega_\text{earth},\text{ where } \omega_\text{earth}\approx 7.29\times10^{-5}\text{rad}/\text{sec}_\text{Mean sidereal}
+\end{equation}
+
 \section{Revisiting the direction-dependent effects}
 Traditional calibration pipelines assumes that the same ``apparent sky'' is sampled by all antennae, and attempts to solve only the unknown direction-independent gain terms.
 This process is known as \textit{self-calibration}. Furthermore some packages like the CASA framework consider directional dependent terms as simple effects 
