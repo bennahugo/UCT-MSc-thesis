@@ -596,7 +596,8 @@ by this shift as those further away from the field centre. Refer to Figure~\ref{
 To add to this problem the difference in the w-term between the antennae increases for observations at lower elevation angles (ie. those observations near the horizon). To see why that
 is true consider that the baseline tracks of observations near NCP consists almost entirely of level concentric circles. As the declination (and elevation) angle are decreased 
 more and more of the circles have non-zero w-components, to the point that their projection onto the uv plane becomes a straight line at $\delta=0$. This last observation
-gives us an estimation for the absolute of the maximum w-value the observation may contain, as well as the sample spacing needed to satisfy the Shannon-Nyquest sampling constraint, 
+gives us an estimation for the absolute of the maximum w-value the observation may contain\footnote{This is a conservative estimate for imaging at lower elevation angles (near the horizon),
+the maximum w-value will be significantly less near Zenith}, as well as the sample spacing needed to satisfy the Shannon-Nyquest sampling constraint, 
 as A. Richard Thompson \cite[Lecture 2]{taylor1999synthesis} notes (refer to Figure~\ref{fig_max_baseline} for an illustration of the argument):
 \begin{equation}
  \label{eqn_wmax}
@@ -658,7 +659,7 @@ each the size of the image and considering the computational costs because the c
 transform to overcome the aliasing effects introduced by the longest baseline. Instead Rick \cite[Lecture 19]{taylor1999synthesis} mentions 2 more 
 solutions to the problem and Cornwell et al. \cite{cornwell2008noncoplanar} later come to a third solution:
 \begin{enumerate}
- \item Snapshot imaging. If the observation time is sufficiently short, all the baselines of the array remain relatively coplanar\footnote{within a 
+ \item Warped snapshot imaging. If the observation time is sufficiently short, all the baselines of the array remain relatively coplanar\footnote{within a 
  fraction of the cell size in n}. By neglecting the w-term a small distortion is introduced in the apparent position of sources, becoming the determinant
  factor in deciding the maximum observation time for each snapshot image. Due to the continuous rotation of the tangent image plane in this solution it is necessary
  to accurately interpolate the cell coordinates between snapshots. This latter operation becomes the dominant factor in snapshot imaging (see Rick Perley \cite[Lecture 19]{taylor1999synthesis}
@@ -1070,14 +1071,14 @@ matrices grows approximately as:
 \section{Computational considerations}
 We now draw a comparison of the computational complexities of the methods discussed here. Much of this discussion is taken from the detailed analysis of 
 Yashar \& Kemball \cite{yashar2009tdp}.
-The data rates produced by interferometers is roughly given as:
+The data\footnote{There are additional terms such as tapering weights, flags and metadata to consider, but these are ignored for now} rates produced by interferometers is roughly given as:
 \begin{equation}
  r_\text{datarate} \approx \frac{1}{1024^4\tau_{\text{integration}}}N_{\text{baselines}}N_{\text{channels}}N_{\text{bands (spw)}}N_{\text{corr}}\text{sizeof}(\mathbb{C})\text{ (TiB/s)}
 \end{equation}
 where $\tau_{\text{integration}}$ is the correlator integration time, which depends on the effective resolution of the instrument and the rotation speed of the earth.
 The maximum integration time must be short enough to ensure sources don't move more than the angular resolution of the telescope:
 \begin{equation}
- \tau_{\text{integration}} \approx \frac{|\vec{B}_{\text{max}}|}{D_{\text{antenna}}}\omega_\text{earth},\text{ where } \omega_\text{earth}\approx 7.29\times10^{-5}\text{rad}/\text{sec}_\text{Mean sidereal}
+ \tau_{\text{integration}} \approx \frac{|\vec{b}_{\text{max}}|}{D_{\text{antenna}}}\omega_\text{earth},\text{ where } \omega_\text{earth}\approx 7.29\times10^{-5}\text{rad}/\text{sec}_\text{Mean sidereal}
 \end{equation}
 Although a good signal to noise ratio depends on observing a large band of frequencies, but observing a bandlimited range of frequencies causes smeering in the image. In order to limit this smeering
 the bandwidth of each channel should be narrow, centred at $\nu_i$. To compensate for the associated decrease in the signal to noise ratio of the observation many adjacent channels may be integrated if 
@@ -1087,15 +1088,42 @@ multiple channel bands (spectral windows) may be observed simultaniously by diff
 be stressed that this number only limits the smeering in images. The actual number of channels used also depends on the science being done; spectral line imaging is just one instance where many more 
 densely-packed channels may be required.}:
 \begin{equation}
- N_{\text{channels}} \approx \frac{|\vec{B}_{\text{max}}|}{D_{\text{antenna}}}\frac{\Delta{\nu}}{\nu_i}
+ N_{\text{channels}} \approx \frac{|\vec{b}_{\text{max}}|}{D_{\text{antenna}}}\frac{\Delta{\nu}}{\nu_i}
 \end{equation}
-Next we use slightly different equations for $N_\text{planes}$ and $N_\text{facets}$, in order to at least critically sample $n$
-
-\begin{tabular}[c]{|l|c|p{5cm}|}
- \hline
-\caption[]{}
-\label{tbl
-\end{tabular}
+Next we use slightly different equations for $N_\text{planes}$ and $N_\text{facets}$, in order to at least sample $n$ at the Nyquest rate in 3D imaging, W-projection (and W-stacking) and facet imaging. 
+These equations assume only the primary beam is being imaged at the full effective resolution of the array (see e.g. Perley \cite[Lecture 19]{taylor1999synthesis}) for details on the derivation). 
+Yashar \& Kemball \cite{yashar2009tdp} also use a different relation for the support of the convolution filters for W-projection.
+\begin{equation}
+ \begin{split}
+  N_\text{planes} &\approx \frac{\lambda_{\text{max}}|\vec{b}_{\text{max}}|}{D_{\text{antenna}}}\\
+  N_\text{facets}^2 &\approx \left(\frac{2\lambda_{\text{max}}|\vec{b}_{\text{max}}|}{\xi D_{\text{antenna}}}\right)^2\\
+  w_\text{sup}^2 &\approx \left(\frac{2\lambda_{\text{max}}|\vec{b}_{\text{max}}|}{D_{\text{antenna}}}\right)^2\\
+ \end{split}
+\end{equation}
+Table~\ref{tbl_computational complexities} outlines the computational complexities for the backward synthesis step only. Some of these methods may have additional computational costs for prediction, deconvolution and reprojections.
+\begin{table}[ht]
+  \begin{tabular}[c]{|p{3cm}|c|p{7cm}|}
+  \hline
+  (Cubed) Direct Fourier Transform & $MN^3$ & This is a per voxel\footnote{``3D pixel''} complex exponential and multiplication. The real sky lies on a unit sphere in the cube. The approach is prohibitively expensive both
+  in terms of memory and computational complexity ($M$ scales as $N^2$), though arbitrarily accurate.\\
+  \hline
+  3D Imaging using FFT &$N_\text{planes}(M + MC^2 + 2N^2\log{N})$&Each plane has it's visibilities phase steared, then interpolated onto a grid and fourier transformed seperately using a 2D fourier transform \cite[Lecture 19]{taylor1999synthesis}. 
+  Alternatively if there are enough planes in the $n$ dimension the visibilties can be interpolated directly into a cube and a three-dimensional Fast Fourier Transform taken \cite{yashar2009tdp}. Prohibitive memory requirements.\\
+  \hline
+  Traditional non-coplanar faceting & $N_\text{facets}(M + MC^2 + 2N_f^2\log{N_f})$&The visibilties are phase-steered and sampling coordinates transformed while gridding and a Fourier transform of each smaller field is taken. Each field hare approximately 
+  $N_f^2=\left(\frac{0.4|\vec{b}_\text{max}|}{D_\text{antenna}}\right)^2$ pixels for $\xi=0.2$\\
+  \hline
+  W-projection & $Mw_\text{sup}^2+2N^2\log{N}$&Approach becomes expensive with a large field of view, but can be faster than w-stacking for a small number of visibilities. Keeping many oversampled w-layers in memory is one drawback
+  of this method unless a small-angle approximation can be applied to the kernels, or by limiting the support size of the convolution filters in the lower w-layers\cite{offringa2014wsclean}\\
+  \hline
+  W-stacking & $N_\text{planes}(MC^2 + 2N^2\log{N} + N)$ &Each visibility is gridded with the usual gridding convolution function $\phi$ but the visibilities are gridded to a different planes, fourier transformed and 
+  multiplied by a complex phase screen. This approach works well for large sets of visibilities where the FFT costs per grid is negligible \cite{offringa2014wsclean}. The approach can be demanding in terms of memory\\
+  \hline
+  W-snapshots & &\\
+  \end{tabular}
+  \caption[]{}
+  \label{tbl_computational complexities}
+\end{table}
 
 \section{Review of previous literature}
 TODO
