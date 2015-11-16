@@ -502,8 +502,8 @@ how images can be efficiently synthesized (Fourier-inverted / ``backwards-proces
  
 \section{Wide field distortions and the problem of non-coplanar baselines}
 Up to this point the discussion on employing the Fast Fourier Transform to invert interferometer measurements and discretize the sky has relied on the assumption
-that the the field of view under consideration can be well-approximated by a tangent projection plane. Lower-frequency instruments with a beam that is more 
-sensitive over a wider field of view (for instance LOFAR) can be used to synthesize an image that breaks this fundamental assumption. Much of the remainder of this 
+that the the field of view under consideration can be well-approximated by a tangent projection plane. When synthesizing an image over a larger field of view
+this assumption is broken. This is especially true for lower-frequency instruments such as LOFAR. Much of the remainder of this 
 chapter will focus on the effects the additional phase delay term $w(n-1)$ in the RIME has on the synthesized image. The effect has been extensively studied over 
 the past two decades and is quite well understood. Our discussion will include the proposed solutions in the literature and will draw extensively on the works of 
 Rick Perley \cite[Lecture 19]{taylor1999synthesis}\footnote{A word of thanks to Rick for his insightful discussions on the problem and clarification on his 
@@ -516,8 +516,8 @@ The widefield effect arise due to the combination of two errors:
 \begin{enumerate}
  \item Firstly the array geometry in significantly non-coplanar arrays will lead to w-values that cannot be ignored. Similarly the non-East-West baselines
  in arrays will not remain coplanar over the duration of an observation. These will be rotated up into the w direction as the Earth rotates, even if the physical 
- array layout is on a very flat plane (as with the EVLA for example).
- \item Secondly the image projection geometry adds to the signal phase difference between antennae. The distance between the planar projection of the sky and the 
+ array layout is on a very flat plane (as is true for the EVLA for example).
+ \item Secondly the image projection geometry worsens the signal phase difference between antennae. The distance between the planar projection of the sky and the 
  celestial sphere (or unit radius ``sky dome'') cannot be ignored far away from the tangent point of the image. This error in distance is expressed 
  as $n-n_0$ where $n = \sqrt{1-l^2-m^2}$ at the correct position of the source on the celestial sphere, and $n_0=\sqrt{1-l_0^2-m_0^2}$ is the 
  tangent point / projection pole of the image produced using the Fast Fourier Transform, assuming this projection is the ordinary orthogonal 
@@ -562,7 +562,7 @@ by this shift as those further away from the field centre. Refer to Figure~\ref{
 	\node [right] at ({1*2},{0*2}) {$l=1$};
 	\node [left] at ({-1*2},{0*2}) {$l=-1$};
       \end{tikzpicture}
-      \caption{Error between the orthogonal planar FFT approximation to the sky and their actual positions on the celestial sphere}
+      \caption{Error between the orthogonal planar FFT approximation to the sky and the correct position on the celestial sphere}
     \end{subfigure}
     \begin{subfigure}[b]{0.45\textwidth}
       \centering
@@ -582,7 +582,7 @@ by this shift as those further away from the field centre. Refer to Figure~\ref{
       \end{tikzpicture}
       \caption{Delay in signal propagation between antennas in an array-based telescope at some instant in time}
     \end{subfigure}
-    \caption[Widefield phase delay]{In (a) the projected of the source on the sky dome onto the plane tangent to the projection pole is shown. The baseline tracks
+    \caption[Widefield phase delay]{In (a) the projected position of a source on the sky dome onto the plane tangent to the projection pole is shown. The baseline tracks
     are concentric circles exactly parallel to the Earth's equator in the case of East-West arrays. Image adapted from A. Richard Thompson \cite[Lecture 2]{taylor1999synthesis}. 
     The combined propagation delay of emission from sources far away from the telescope pointing centre is a combination
     of the error between the planar approximation and the celestial sphere (b) and the phase difference between pairs of antennae in the telescope
@@ -594,7 +594,7 @@ by this shift as those further away from the field centre. Refer to Figure~\ref{
 \end{figure}
 
 To add to this problem the difference in the w-term between the antennae increases for observations at lower elevation angles (ie. those observations near the horizon). To see why that
-is true consider that the baseline tracks of observations near NCP consists almost entirely of level concentric circles. As the declination (and elevation) angle are decreased 
+is true consider that the baseline tracks of observations near NCP consists almost entirely of level concentric circles. As the declination (and elevation) angle is decreased 
 more and more of the circles have non-zero w-components, to the point that their projection onto the uv plane becomes a straight line at $\delta=0$. This last observation
 gives us an estimation for the absolute of the maximum w-value the observation may contain\footnote{This is a conservative estimate for imaging at lower elevation angles (near the horizon),
 the maximum w-value will be significantly less near Zenith}, as well as the sample spacing needed to satisfy the Shannon-Nyquest sampling constraint, 
@@ -641,10 +641,10 @@ and their corrected version in the same figure.
       \caption{}
     \end{subfigure}
     \caption[Apparent shift in source position and resulting decorrelation]{In (a) the apparent source positions for sources less than one radian from field centre in 
-    several hourly-interval snapshots on the VLA at 7 declinations is plotted by Rick Perley \cite[Lecture 19]{taylor1999synthesis}. The dots of the zero hour angle is indicated on the vertical 
+    several hourly-interval snapshots on the VLA at 7 declinations are plotted by Rick Perley \cite[Lecture 19]{taylor1999synthesis}. The dots of the zero hour angle is indicated on the vertical 
     axis. The angular position errors here are measured, where $r^2=l^2+m^2$. In (b) a simulated gridded sky (without effects of the antenna beam or noise included) is 
     synthesized as a dirty image using the regular planar transform as described in the previous section. In (c) the dirty map is synthesized again, here it is 
-    corrected using the w-projection technique explained later on. The point sources near the edge of the field are no longer smeared as in the uncorrected map.}
+    corrected using the w-projection technique explained later on. The point sources near the edge of the field are no longer smeared.}
     \label{fig_position_shifts_and_decorrelation}
   \end{mdframed}
 \end{figure}
@@ -660,35 +660,32 @@ transform to overcome the aliasing effects introduced by the longest baseline. I
 solutions to the problem and Cornwell et al. \cite{cornwell2008noncoplanar} later come to a third solution:
 \begin{enumerate}
  \item Warped snapshot imaging. If the observation time is sufficiently short, all the baselines of the array remain relatively coplanar\footnote{within a 
- fraction of the cell size in n}. By neglecting the w-term a small distortion is introduced in the apparent position of sources, becoming the determinant
+ fraction of the cell size in n}. By neglecting the w-term a small distortion is introduced in the apparent position of sources This becomes the determinant
  factor in deciding the maximum observation time for each snapshot image. Due to the continuous rotation of the tangent image plane in this solution it is necessary
  to accurately interpolate the cell coordinates between snapshots. This latter operation becomes the dominant factor in snapshot imaging (see Rick Perley \cite[Lecture 19]{taylor1999synthesis}
  and Cornwell, Voronkov and Humphreys \cite{cornwell2012wide} for details).
- \item Facet imaging \footnote{Or a ``fly's eye'' imaging approach as Bill Cotton labels it.}. The varying w term can be assumed to be near constant across a narrow field of view. As such a wide field of view can be broken
- up into several narrow field images, each limiting the distance between the approximating plane and the celestial sphere. There are both \emph{non-coplanar} and \emph{coplanar}
+ \item Facet imaging \footnote{Or a ``fly's eye'' imaging approach as Bill Cotton labels it.}. The varying w term can be assumed to be near-constant across a narrow field of view, therefore a 
+ wide field of view can be broken up into several narrow field images, each limiting the distance between the approximating plane and the celestial sphere. There are both \emph{non-coplanar} and \emph{coplanar}
  faceting approaches, as well as the appropriate transforms and coordinate reprojections in the measurement and image spaces to accompany these two variants. The details will be 
  outlined in the next few sections.
  \item W-projection \cite{cornwell2008noncoplanar} and W-stacking \cite{offringa2014wsclean}. The w-term can be thought of as a w-dependent convolution
  in the Fourier domain. By convolving each visibility with the Fourier transform of $w(n-1)$ during the gridding process it is possible to re-introduce 
  this multiplicative phase term in the image domain. Similarly it is also possible to divide the sky image up into several w-dependent layers and point-wise
- multiply the w phase screen into each layer, reducing the planes into a single image afterwards (w-stacking).
+ multiply the w phase screen into each layer in image space, reducing the planes into a single image afterwards (w-stacking).
 \end{enumerate}
 
-All of the approaches above attempt to either drive $w$ down to zero (snapshots or w-projection) or drive $(n-1)$ down to zero (facet imaging). There is no reason why
+The approaches above attempt to either drive $w$ down to zero (snapshots or w-projection) or drive $(n-1)$ down to zero (facet imaging). There is no reason why
 the approaches cannot be combined, for instance Cornwell, Voronkov and Humphreys \cite{cornwell2012wide} combine w-projection and traditional snapshot imaging, while
 Offringa et al. includes a Zenithal w-snapshot synthesis mode in their work. Our work on the other hand focus on combining traditional facet imaging and w-projection, 
 in order to harness some of the positive aspects of both approaches.
 
-% Evaluating a direct 3D analytical solution over an image cube with n layers soon becomes intractable for large images, specifically in terms of sheer memory requirements for storing these layers. Over a three dimensional cube, M (the number of visibilities),
-% will be reasonably sparcely sampled, and the number of complex multiplications needed per visibility is estimated to be $\frac{4\lambda B_{max}^3}{D^4}$ \cite{yashar2009tdp}. However, the approach remains embarisingly parallel and can
-% be scalled over multiple multicore accelerators. A detailed comparison between the throughput achievable by using an analytical approach, compared to convolutional gridding approaches have not been for multicore accelerators \cite{hardy2013direct}.
 \section{Non-coplanar facet imaging}
-The goal in faceting is to approximate a wider field of view by many small narrow field image. Rick Perley and Tim Cornwell \cite{cornwell1992radio} proposes a 
+The goal in faceting is to approximate a wider field of view by many small narrow field images. Rick Perley and Tim Cornwell \cite{cornwell1992radio} proposes a 
 polyhedron-like faceting approach, where each narrow-field facet is tangent to the celestial sphere at its own phase tracking centre $(l_i,m_i)$. We will classify
 this basic faceting approach to be non-coplanar uvw-space faceting, because each facet lies on its own tangent plane and the coordinate transformations
 necessary for this tilted polyhedron approach are done on the uvw-coordinates (measurement coordinates) and not in the image space.
 
-Just as with regular narrow field imaging the phase term $e^{2\pi i \vec{b}\cdot(\vec{s}-\vec{s}_0)}$ are taken relative to a delay tracking centre in the direction
+Just as with regular narrow field imaging the phase term $e^{-2\pi i \vec{b}\cdot(\vec{s}-\vec{s}_0)}$ are taken relative to a delay tracking centre in the direction
 $\vec{s}_0$. Synthesizing an image with a new phase tracking centre, $\vec{s}_i$, it is only necessary to employ the shift theorem. This follows naturally from the
 RIME (simplified here). Let $(l_\Delta,m_\Delta,n_\Delta) = (l_i-l_0,m_i-m_0,n_i-n_0)$, then:
 \begin{equation}
@@ -726,7 +723,7 @@ where $\theta_i$ is the angle to the new phase centre.
 \end{figure}
 
 In order to make each facet tangent to the celestial sphere at $(l_i,m_i)$ it is necessary to employ the rotation matrices from Equation~\ref{EQN_LEFTHANDED_SYSTEM}
-to measure compute new u',v',w' coordinates \emph{after} the visibilities have been phase shifted using the old u,v,w coordinates.
+to compute new u',v',w' coordinates \emph{after} the visibilities have been phase shifted using the old u,v,w coordinates.
 \begin{equation}
  \left[\begin{array}{c}
 	u'\\
@@ -764,12 +761,12 @@ length $\cos{(\theta_{l_f}/2)}\cos{(\theta_{m_f}/2)}$ using the spherical rule o
 we might as well just use the small angle approximation.
 
 For reference a sketch algorithm for facet synthesis (backwards step) is given in Algorithm~\ref{alg_polyhedron_faceting_sketch}. The forward
-step will work roughly in reverse.
+step will work roughly in reverse. The faceting transformations in practice are combined with the gridding algorithm.
 \begin{algorithm}
   \begin{algorithmic}
   \STATE {Let $g_f^b$ be all-zero complex $n \times m$ pixel grids, one per continuum band (spectral window), $b$, of facet $f$}
   \STATE {Given $(\alpha_0,\delta_0)$, the original field centre of the telescope (assuming field centre and phase tracking centre are the same)}
-  \FORALL {facets centres $(\alpha_i,\delta_i)$}
+  \FORALL {facet centres $(\alpha_i,\delta_i)$}
     \FORALL {channels $c$ in the continuum image band}
       \STATE {Let uvw be a set of $M$ measurement coordinate triples}
       \STATE {Let uvw' be a set of rotated uvw coordinates, applying $R(\alpha_i,\delta_i)R^{T}(\alpha_0,\delta_0)$}
@@ -808,12 +805,12 @@ criteria outlined for regular images in Equation~\ref{eqn_img_sampling}.
 \section{Coplanar facet imaging}
 One of the biggest downfalls to Rick's non-coplanar faceting approach is that the minor cycle deconvolution becomes very complicated; the measurement
 coordinates are rotated and because rotations are preserved by the Fourier transform, the $\psf$ is also rotated. Since the $\psf$ is not necessarily 
-symmetric each facet has its own $\psf$. Combining the CLEAN components in the subtraction phase will require careful consideration during the minor cycle.
+symmetric each facet has its own $\psf$. Combining the CLEAN components in the subtraction phase will also require careful consideration during the minor cycle.
 
 One way around this problem would be to re-project each non-coplanar facet into a single plane after synthesis (ie. in the image-space). Doing the necessary
 re-projections and inevitable (and expensive) corrections for the areas where the facets overlap can be done through astronomical mosaicking software packages such as the
 Montage \cite{jacob2004montage} suite of tasks. It is also possible to do the necessary rotation and sheering operations in the u,v space through 
-linear\footnote{A linear operation is required to conserve the fourier relation between the sky and visibilities} operations given by 
+linear\footnote{A linear operation is required to conserve the Fourier relation between the sky and visibilities} operations given by 
 Sault et al. \cite[Appendix A]{sault1996approach}. Although the major cycle, would, in turn require that the regular visibilities be read off all
 the constituent facets' Fourier transforms the latter approach of re-projecting the u,v coordinates and phase steering is no more expensive than the backward 
 step.
@@ -849,7 +846,7 @@ statement will become clearer once the original w-projection algorithm is discus
 order expansion compared to a full w-projection approach. 
 \section{The W-projection algorithm}
 As already mentioned the core idea in w-projection is to multiply the intensity distribution by a w-dependent phase screen. Cornwell, Golap and Bhatnagar \cite{cornwell2008noncoplanar}
-originally noted that observations with non-zero $w$ coordinate can be related to a single observation plane (with $w=0$) through convolution in the measurement domain. To make this
+notes that observations with non-zero $w$ coordinate can be related to a single observation plane (with $w=0$) through convolution in the measurement domain. To make this
 more concrete consider that a measurement of the sky brightness distribution, $B(l,m)$, is modulated by fringes defined by $\mathfrak{w}_w := e^{-2\pi i w(\sqrt{1-l^2-m^2}-\sqrt{1-l_0^2-m_0^2})}$ if the 
 w-dependent $\mathfrak{w}$ term is separated from the usual phase term. Unlike in faceting this additional phase term cannot be taken out of the integral due to the dependence on $l$ and $m$. Instead
 we consider employing the convolution theorem to multiply the phase term into the measurement integral:
@@ -871,20 +868,20 @@ of the interpolation step, the rest of the previous discussion remains valid.
 
 The immediate concern is determining how many $w$-planes must be precomputed. Here it is useful to note that the difference in the $w(n-1)$ during the
 observation is responsible for the decorrelation in source brightness as explained earlier, one would therefore hope to minimize $\xi_{\text{max}}$ by introducing
-$N_{\text{planes}}$ different $w$-planes (here assumed to be linearly separated\footnote{For arrays that is dense in the core region it may be better to consider
+$N_{\text{planes}}$ different $w$-planes (here assumed to be linearly separated\footnote{For arrays that are dense in the core region it may be better to consider
 a denser distribution of planes for lower w}) between the $w_{\text{max}}$ and the $0^{th}$ plane, such that the difference between planes is a fraction of the image cell size:
 \begin{equation}
  N_{\text{planes}}=\frac{2{\pi}w_{\text{max}}\epsilon}{{\lambda_{\text{min}}}{\xi}} \text{ and ideally } 0{\leq\xi\ll}1
 \end{equation}
 
 It is worthwhile noting that the relation above only takes positive w values into account. The planes corresponding to negative $w$ values do not have to be computed,
-as any negative $w$ value can be related to a positive value by \emph{negating the baseline} vector and gridding the \emph{conjugate of the visibility}. This observation allows
-for a significant computational (and memory) saving in the precomputation of these filters.
+as any negative $w$ value can be related to a positive value by negating the baseline vector and gridding the conjugate of the visibility. This observation allows
+for a significant computational (and memory) savings in the precomputation of these filters.
 
 The next question that arise is why it may be useful to combine faceting and w-projection if w-projection can remove the wide field effects altogether. The answer
 lies in the computational complexity of the convolution operation itself. The complexity of the gridding step is given as $MC^2$ operations where $C$ is the support
 size of the convolution kernel. The support size of the kernel in turn depends on the resolution the convolution function must be sampled. Since
-$\mathfrak{w}$ is scaled by an ever-increasing $n-n_i$ term the w phase screen becomes ever-more compact further away from the delay tracking centre, as plotted 
+$\mathfrak{w}$ is scaled by an ever-increasing $n-n_i$ term the w-phase screen becomes ever-more compact further away from the delay tracking centre, as plotted 
 in Figure~\ref{fig_w_fringes}. It is clear that larger images require convolution kernels with greater support sizes. Tasse et al. \cite{tasse2013applying} give 
 an expression for computing the necessary support size of the kernel ($D_{\text{im}}$ is the diameter of the constructed image):
 \begin{equation}
@@ -916,11 +913,10 @@ By decreasing the field of view of each of the synthesized facets, it is ensured
 and decreases the required filter support size. Additionally the $\mathfrak{w}_w$ term can be separated into two functions of $l$ and $m$. If a small angle 
 approximation ($\sqrt{1+x}\approx1+\frac{x}{2}$) to $\mathfrak{w}_w(l,m)$ with respect to a facet centre is used, the following separable relation is obtained:
 \begin{equation}
-   \mathfrak{w}_w(l,m) = e^{2{\pi}iw[(l_i^2-l^2)/2]}e^{2{\pi}iw[(m_i^2-m^2)/2]}
+   \mathfrak{w}_w(l,m) = e^{-2{\pi}iw[(l_i^2-l^2)/2]}e^{2{\pi}iw[(m_i^2-m^2)/2]}
 \end{equation}
 
-Separating out $l_i$ and $m_i$ to be applied by the normal faceting phase shift we get the same small angle version of the equation. Assuming the 
-normal anti-aliasing gridding function is separable as well this becomes:
+Assuming the normal anti-aliasing gridding function is separable as well this becomes:
 \begin{equation}
    \begin{split}
    \mathcal{F}[\phi](l,m)\mathfrak{W}(l,m,w) &= \mathcal{F}[\phi](l)\mathcal{F}[\phi](m)e^{-2{\pi}iw[(l^2)/2]}e^{-2{\pi}iw[(m^2)/2]}\\
@@ -931,11 +927,11 @@ normal anti-aliasing gridding function is separable as well this becomes:
    \end{split}
 \end{equation}
 
-This observation above improves the memory requirements considerably, though the gridding time is slightly increased since two filter positions have to be looked up
+This observation above decreases the memory requirements considerably, though the gridding time is slightly increased since two filter positions have to be looked up
 and an additional complex multiplication is necessary during gridding. Note that the memory required to store filter is given by 
 $N_{\text{planes}}\times[W_{sup} + (W_{sup} - 1)\times(m_{\text{oversampled}} - 1)]\times\mathbb{C}$. This is 
-a $[W_{sup} + (W_{sup} - 1)\times(m_{\text{oversampled}} - 1)]$ reduction in memory consumption. The accuracy of this 
-small angle approximation is discussed in the next section.
+a $[W_{sup} + (W_{sup} - 1)\times(m_{\text{oversampled}} - 1)]$ reduction in memory consumption. This opens up the possibility of increasing $N_{\text{planes}}$ as well
+as the oversampling rate. The accuracy of this small angle approximation is discussed in the next section.
 
 To conclude this section we note that the sampling step size in the image domain (where the combination of $\mathfrak{w}_w\mathcal{F}[\phi]$ is sampled) is again given
 by the Nyquest relation. Sample phase screens that include a simple $\sinc$ anti-aliasing filter are plotted in Figure~\ref{fig_phase_screen}.
@@ -983,9 +979,9 @@ a traditional w-projection approach.
       \includegraphics[width=\textwidth]{images/coplanar_error_residuals.png}
       \caption{}
     \end{subfigure}
-    \caption[Coplanar faceting error]{In these two plots we phase error introduced by the orthogonal projection assuming $w_max\leq 1$. The dashed line is a plot of $n-1$ as
+    \caption[Coplanar faceting error]{In these two plots the phase error introduced by the orthogonal projection is plotted; the dashed line is a plot of $n-1$ as
     would be convolved into the image by classic w-projection; a full w-projection approach is assumed to be the most accurate way of dealing with the orthogonal projection geometry.
-    In green we show the deviation a first order Taylor approximation gives when compared to w-projection\cite{aipsfaceting}. Then we show the small angle w-projection
+    In green we show the deviation between a first order Taylor approximation and w-projection\cite{aipsfaceting}. Then we show the small angle w-projection
     suggested above in magenta; it clearly performs significantly better than the first order approximation, only breaking down tens of degrees from the phase centre. Lastly we also
     plotted the improved facet-centre-relative w-kernel approximation to $\epsilon$ that Cyril\cite{tassefaceting} suggested as an improvement on the work of 
     Kogan and Greisen \cite{aipsfaceting} in red. Cyril's polynomial approach \cite{tassefaceting} performs even better than the latter. The error between w-projection and the three
@@ -1003,7 +999,7 @@ ionosphere and modulation effects by the primary beam, violates this premis.
 The self-calibration process relies on a knowing some aspects of the sky and can include one or more well-described sources. The directional
 independent and directional dependent terms can be solved for by a fitting the predicted model visibilities to the observed 
 data \cite{noordam2010meqtrees}. Only adjusting the gains based on directional-independent effects cannot remove the complex 
-polarization effects due to the primary beam, nor can it solve for unknown slow-varying directional dependent gain terms. If we, for 
+polarization effects caused by the primary beam, nor can it solve for unknown slow-varying directional dependent gain terms. If we, for 
 the moment, only consider the known polarization effects of the antenna beam (which can be modeleled or measured using holography) it 
 becomes clear that some sources will be more resolved than others for the same amount of observation time, 
 depending on their position in the sky. In practice, the beam pattern is also anisotropic; one possible cause can be 
@@ -1021,7 +1017,7 @@ involves iteratively removing the effects from the brightest sources through dir
 gains simultaniously solves for the gain effects from bright and faint sources \cite{2011A&A...527A.107S,2011A&A...527A.108S}. 
 When dealing with known (or modeled) directional-dependent effects the A-projection algorithm \cite{bhatnagar2008correcting} has 
 proven very successful in removing the polarization effects contributed (predominantly) by the primary beam for the 
-LOFAR array (see figure~\ref{fig_aprojection_lofar}). Refer to the Awimager implementation by Tasse et 
+LOFAR array (see figure~\ref{fig_aprojection_lofar}). Refer to the LOFAR imager implementation by Tasse et 
 al. \cite{tasse2013applying} for a full mathematical treatment of the algorithm.
 
 \begin{figure}[h!]
@@ -1042,7 +1038,7 @@ al. \cite{tasse2013applying} for a full mathematical treatment of the algorithm.
 In A-projection the ``union-form'' of the RIME stated before can be rewritten in terms of 16-element Muler matricies, for which first-order 
 inverses can be computed. Provided that the 16 element terms vary slowly over the sky the inverses can be sampled at a limited number
 of support points (far fewer than the w term stated previously) and can be convolved as part of the inversion step. A-projection does 
-however require a massive amount of memory and time to precompute the 16 baseline-dependent (due to individual antenna pointing error) 
+however require a significant amount of memory and time to precompute the 16 baseline-dependent (due to individual antenna pointing error) 
 convolutions per processed visibility. As the number of baselines grow as the square of the number of antennae in this approach fast 
 becomes prohiatively expensive \cite{tasse2013applying}.
 
@@ -1078,52 +1074,93 @@ The data\footnote{There are additional terms such as tapering weights, flags and
 where $\tau_{\text{integration}}$ is the correlator integration time, which depends on the effective resolution of the instrument and the rotation speed of the earth.
 The maximum integration time must be short enough to ensure sources don't move more than the angular resolution of the telescope:
 \begin{equation}
- \tau_{\text{integration}} \approx \frac{|\vec{b}_{\text{max}}|}{D_{\text{antenna}}}\omega_\text{earth},\text{ where } \omega_\text{earth}\approx 7.29\times10^{-5}\text{rad}/\text{sec}_\text{Mean sidereal}
+ \tau_{\text{integration}}^{-1} = Q_t\frac{|\vec{b}_{\text{max}}|}{D_{\text{antenna}}}\omega_\text{earth},\text{ where } \omega_\text{earth}\approx 7.29\times10^{-5}\text{rad}/\text{sec}_\text{Mean sidereal}
 \end{equation}
-Although a good signal to noise ratio depends on observing a large band of frequencies, but observing a bandlimited range of frequencies causes smeering in the image. In order to limit this smeering
-the bandwidth of each channel should be narrow, centred at $\nu_i$. To compensate for the associated decrease in the signal to noise ratio of the observation many adjacent channels may be integrated if 
-sources of continuim emission are being observed\footnote{We assume the intensity distribution of these sources do not vary significantly with frequency. This is in fact not true for wider bands; here 
-it may be necessary to account for the drop in emission intensity especially when deconvolving (using a Multifrequency approach, see for instance Conway and Sault \cite[Lecture 21]{taylor1999synthesis})}. In addition 
-multiple channel bands (spectral windows) may be observed simultaniously by different feeds on a directional antenna. For continuum imaging the number of channels required is at minimum\footnote{It should 
+Observing a bandlimited range of frequencies causes smeering in the image. Although a good signal to noise ratio depends on observing a large band of frequencies the smeering is only limited
+by keeping bandwidth, $\Delta\nu$, of each channel narrow, centred at $\nu_i$. To compensate for the associated decrease in the signal to noise ratio of the observation many adjacent channels may be integrated if 
+sources of continuum emission are being observed\footnote{We assume the intensity distribution of these sources do not vary significantly with frequency. This is in fact not true for wider bands; here 
+it may be necessary to account for the drop in emission intensity, especially when deconvolving (using a Multifrequency approach, see for instance Conway and Sault \cite[Lecture 21]{taylor1999synthesis})}. In addition 
+multiple channel bands (spectral windows) may be observed simultaniously. For continuum imaging the number of channels required is at minimum\footnote{It should 
 be stressed that this number only limits the smeering in images. The actual number of channels used also depends on the science being done; spectral line imaging is just one instance where many more 
 densely-packed channels may be required.}:
 \begin{equation}
- N_{\text{channels}} \approx \frac{|\vec{b}_{\text{max}}|}{D_{\text{antenna}}}\frac{\Delta{\nu}}{\nu_i}
+ N_{\text{channels}} = Q_c\frac{|\vec{b}_{\text{max}}|}{D_{\text{antenna}}}\frac{\Delta{\nu}}{\nu_i}
 \end{equation}
+
+Both $Q_t$ and $Q_c$ are quality factors.
+
 Next we use slightly different equations for $N_\text{planes}$ and $N_\text{facets}$, in order to at least sample $n$ at the Nyquest rate in 3D imaging, W-projection (and W-stacking) and facet imaging. 
 These equations assume only the primary beam is being imaged at the full effective resolution of the array (see e.g. Perley \cite[Lecture 19]{taylor1999synthesis}) for details on the derivation). 
 Yashar \& Kemball \cite{yashar2009tdp} also use a different relation for the support of the convolution filters for W-projection.
 \begin{equation}
  \begin{split}
-  N_\text{planes} &\approx \frac{\lambda_{\text{max}}|\vec{b}_{\text{max}}|}{D_{\text{antenna}}}\\
+  N_\text{planes} &\approx \frac{\lambda_{\text{max}}|\vec{b}_{\text{max}}|}{\xi D_{\text{antenna}}}\\
   N_\text{facets}^2 &\approx \left(\frac{2\lambda_{\text{max}}|\vec{b}_{\text{max}}|}{\xi D_{\text{antenna}}}\right)^2\\
   w_\text{sup}^2 &\approx \left(\frac{2\lambda_{\text{max}}|\vec{b}_{\text{max}}|}{D_{\text{antenna}}}\right)^2\\
  \end{split}
 \end{equation}
 Table~\ref{tbl_computational complexities} outlines the computational complexities for the backward synthesis step only. Some of these methods may have additional computational costs for prediction, deconvolution and reprojections.
 \begin{table}[ht]
-  \begin{tabular}[c]{|p{3cm}|c|p{7cm}|}
+  \centering
+  \begin{tabular}[c]{|p{7cm}|c|}
   \hline
-  (Cubed) Direct Fourier Transform & $MN^3$ & This is a per voxel\footnote{``3D pixel''} complex exponential and multiplication. The real sky lies on a unit sphere in the cube. The approach is prohibitively expensive both
-  in terms of memory and computational complexity ($M$ scales as $N^2$), though arbitrarily accurate.\\
+  \textbf{Approach} & \textbf{Computational complexity (backwards step only)}\\
   \hline
-  3D Imaging using FFT &$N_\text{planes}(M + MC^2 + 2N^2\log{N})$&Each plane has it's visibilities phase steared, then interpolated onto a grid and fourier transformed seperately using a 2D fourier transform \cite[Lecture 19]{taylor1999synthesis}. 
-  Alternatively if there are enough planes in the $n$ dimension the visibilties can be interpolated directly into a cube and a three-dimensional Fast Fourier Transform taken \cite{yashar2009tdp}. Prohibitive memory requirements.\\
+  (Cubed) Direct Fourier Transform & $MN^3$\\
   \hline
-  Traditional non-coplanar faceting & $N_\text{facets}(M + MC^2 + 2N_f^2\log{N_f})$&The visibilties are phase-steered and sampling coordinates transformed while gridding and a Fourier transform of each smaller field is taken. Each field hare approximately 
-  $N_f^2=\left(\frac{0.4|\vec{b}_\text{max}|}{D_\text{antenna}}\right)^2$ pixels for $\xi=0.2$\\
+  3D Imaging using FFT &$N_\text{planes}(M + MC^2 + 2N^2\log{N})$\\
   \hline
-  W-projection & $Mw_\text{sup}^2+2N^2\log{N}$&Approach becomes expensive with a large field of view, but can be faster than w-stacking for a small number of visibilities. Keeping many oversampled w-layers in memory is one drawback
-  of this method unless a small-angle approximation can be applied to the kernels, or by limiting the support size of the convolution filters in the lower w-layers\cite{offringa2014wsclean}\\
+  Traditional non-coplanar faceting & $N_\text{facets}^2(M + MC^2 + 2N_f^2\log{N_f})$\\
   \hline
-  W-stacking & $N_\text{planes}(MC^2 + 2N^2\log{N} + N)$ &Each visibility is gridded with the usual gridding convolution function $\phi$ but the visibilities are gridded to a different planes, fourier transformed and 
-  multiplied by a complex phase screen. This approach works well for large sets of visibilities where the FFT costs per grid is negligible \cite{offringa2014wsclean}. The approach can be demanding in terms of memory\\
+  W-projection & $Mw_\text{sup}^2+2N^2\log{N}$\\
   \hline
-  W-snapshots & &\\
+  W-stacking & $MC^2 + N_\text{planes}(2N^2\log{N} + N^2)$\\
+  \hline
   \end{tabular}
   \caption[]{}
   \label{tbl_computational complexities}
 \end{table}
 
+The cubed Direct Fourier Transform is a per-voxel complex exponential and multiplication. The real sky lies on a unit sphere in the cube. The approach is prohibitively expensive both
+in terms of memory and computational complexity ($M$ scales as $N^2$), though arbitrarily accurate. 
+
+The FFT-based 3D Imaging approach each plane has it's visibilities phase steared, then interpolated onto a grid and fourier transformed seperately using a 2D fourier transform \cite[Lecture 19]{taylor1999synthesis}. 
+Alternatively if there are enough planes in the $n$ dimension the visibilties can be interpolated directly into a cube and a three-dimensional Fast Fourier Transform taken \cite{yashar2009tdp}. This approach also has prohibative memory
+requirements.
+
+A faceting approach requires that the set of visibilties are phase-steered and sampling coordinates transformed while gridding and a Fourier transform of each smaller field is taken. Each field hare approximately 
+$N_f^2=\left(\frac{0.4|\vec{b}_\text{max}|}{D_\text{antenna}}\right)^2$ pixels for $\xi=0.2$.
+
+W-projection becomes expensive with a large field of view, but can be faster than w-stacking for a small number of visibilities. Keeping many oversampled convolution kernel layers in memory is one drawback
+of this method, unless a small-angle approximation can be applied to the kernels, or by limiting the support size of the convolution filters in the lower w-layers \cite{offringa2014wsclean}.
+
+In W-stacking each visibility is gridded with the usual gridding convolution function $\phi$, but to different planes depending on w. Each plane is fourier transformed and 
+multiplied by a complex phase screen. This approach works well for large sets of visibilities where the FFT costs per grid is negligible. The approach can be demanding in terms of memory depending
+on the number of w-planes being gridded, and may require presorting and gridding only a subset of layers at a time, increasing disk access. The approach is faster than w-projection
+for larger fields of view and at lower elevation angles. Offringa et al. also shows that w-snapshots are only faster than w-stacking for very large fields of view at lower elivation angles \cite{offringa2014wsclean}.
+
+From the estimates above for number of projection planes and facets it is clear that w-stacking will outperform faceting if all the planes can be kept in memory and the gridding costs exceed fourier transformation costs. 
+However, as already pointed out faceting has more moderate memory requirements than w-stacking and can furthermore be used as an approximate method for correcting Directional Dependent Effects.
 \section{Review of previous literature}
-TODO
+The imaging pipeline has been investigated extensively in recent years. In particular the gridding operation has been parallelized multiple architectures including CPU \cite{offringa2014wsclean,golap2015mutithreading,obitfaceting}, 
+GPU \cite{humphreys2011analysis,romein2012efficient,muscat2014high,edgar2010enabling}, as well as the CELL/B.E. processor \cite{varbanescu2008performance}. 
+
+Both scatter- and gather-based GPU gridding algorithms have been investigated in the literature. In gridding scatter-based approaches lead to race conditions between
+threads when updating grid cells, since multiple visibilties may be interpolated over the same grid cells. Edgar et al. \cite{edgar2010enabling} used a gather approach where 
+threads would scan through a subset of visibilities and add those that contribute to a the grid point in question. Edgar et al. attains a 22x speedup compared to a CPU implemented pipeline.  
+
+Humphreys and Cornwell \cite{humphreys2011analysis} benchmarked a scatter-based GPU w-projection gridder that assigns a thread per convolution filter tap and can grid multiple visibilities in parallel when there is no overlap
+between the convolution regions. They report figures up to 3.5 Giga grid point additions per second (abbreviated as ``G'' is the number of grid point updates - $C^2$ updates per visibility record) on a Tesla C2070 compared to 
+just over 1.5 G on a multicore Intel Xeon X5570 CPU architecture. 
+
+Romein \cite{romein2012efficient} presents a novel scatter distribution strategy, where global memory accesses are limited by accumulating visibilities in register memory instead of atomically updating
+each grid points for every visibility record. The locality of consecutive integration periods on the loci of each baseline is used to accumulate consecutive visibilities to great succcess. 
+Muscat \cite{muscat2014high} uses this distribution strategy in a new imager called the \textit{Malta Imager}. He achieves gridding rates of around 55-60G when gridding 4 correlations. He also
+shows that the main limiting factor in this distribution strategy is the time spent looking up convolution filter values and extends Romein's strategy by accumulating measurements that have a high probability
+of being equal. When this ``compression'' mode is enabled he achieves gridding rates more than 250G. We will be using an adapted strategy based on Romein's distribution strategy in this thesis. The exact algorithmic details will be given in the design chapter.
+
+The CPU-based parallel strategies are somewhat different to the GPU-based strategies. A simple data-parallel approach in spectral imaging consists of splitting the image cube up between threads as is done by Humphreys and Cornwell \cite{humphreys2011analysis} for
+their CPU-based benchmark. A data-parallel approach for continuim imaging consists of keeping multiple copies of the uv grid and reducing the grids into one average
+afterwards. This is not feasible when the uv grids become very large. Kumar Goulap \cite{golap2015mutithreading} investigates several CPU-based gather approaches applicable to w-projection and show that
+this can achieve near-linear speedups (compared to a serial implementation). When doing faceting another lock-free data-parallel approach is to process each facet in parallel, ensuring lock-free accumulation
+to each facet uv grid. Bill Cotton \cite{obitfaceting} achieved speedups up to 50\% using data-parallel approaches.
