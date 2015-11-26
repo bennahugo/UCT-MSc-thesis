@@ -1,18 +1,35 @@
 \chapter{Performance analysis}
 \section{Testing aparatus}
-Some of the results in this section was generated using one node of the UCT ICTS High Performance HEX cluster, which has 4 16-core AMD Opteron 6376 CPUs. The CPUs
-have have a maximum memory bandwidth of 51.2 GB/s \footnote{According to AMD, \url{http://www.amd.com/en-us/products/server/opteron/6000/6300\#}}
+The following machines were used in generating the results in this chapter:
+\begin{itemize}
+ \item System A:\\
+ One node of the UCT ICTS High Performance HEX cluster, which has 4 16-core AMD Opteron 6376 CPUs. The CPUs have have a maximum memory bandwidth of 
+ 51.2 GB/s and average power consumption of 115W \footnote{According to AMD, \url{http://www.amd.com/en-us/products/server/opteron/6000/6300\#}}.
+ \item System B:\\
+ Most of the GPU results were generated on a machine with 4 8-core Intel Xeon E5-2690 with 1 NVIDIA Tesla K40m co-processor (compute capability 3.5) at Rhodes University. The K40m has a maximum
+ memory bandwidth of 288 GB/s and maximum power usage of 215W \footnote{According to the Nvidia Tesla K40 GPU Active Accelerator Board Specification}. The Nvidia CUDA toolkit 
+ version 6.5 was used to compile our imager. 
+ \item System C:\\
+ A development machine with an Intel Core i7-4770, a quad-core processor with a maximum memory bandwidth of 25.6 GB/s \footnote{\url{http://ark.intel.com/products/75122/Intel-Core-i7-4770-Processor-8M-Cache-up-to-3_90-GHz}}. 
+ The machine has a Nvidia GTX 770 card installed with a maximum memory bandwidth of 224.3 and power usage of 
+ 230W \footnote{According to Nvidia \url{http://www.geforce.com/hardware/desktop-gpus/geforce-gtx-770/specifications}}. The Nvidia toolkit version 6.5 was used to compile our imager.
+\end{itemize}
 
-The GPU results were generated on a machine with 4 8-core Intel Xeon E5-2690 with 1 NVIDIA Tesla K40m co-processor (compute capability 3.5) at Rhodes University. The K40m has a maximum
-memory bandwidth of 288 GB/s \footnote{According to the Nvidia Tesla-Kepler Family Datasheet}. The Nvidia CUDA toolkit version 6.5 was used to compile our imager. 
 \section{Metrics}
 The primary performance metric used to measure gridder performance was Giga Grid Point Additions per second (abbriviated ``G''). This metric includes the size of the
 convolution filter support, number of correlations and number of channels being gridded per dataset record:
 \begin{equation}
- \text{Giga grid point additions per second} := \frac{\tau_\text{observed}}{\tau_\text{integration}}N_\text{baselines}N_\text{channel}N_\text{corr}C_\text{sup}^210^{-9}s^{-1}
+ \text{Giga grid point additions per second} (G) := \frac{\tau_\text{observed}}{\tau_\text{integration}}N_\text{baselines}N_\text{channel}N_\text{corr}C_\text{sup}^210^{-9}s^{-1}
 \end{equation}
 
 In our discussion we include the time needed to copy visibilities onto the GPU and images back to the host in this calculation, but exclude fourier transform costs.
+
+Another important cost to consider is the power efficiency of the gridding operation, in order to consider the running costs of a CPU vs. GPU-based solution.
+To this end we define the following ratio:
+\begin{equation}
+ \text{Power Efficiency} := GW^{-1}
+\end{equation}
+We will use the advertised power consumption (in Watts) in our discussion at the end of this chapter.
 \section{Dataset simulation pipelines}
 Three datasets were simulated for the experiments presented in this chapter. The datasets in measurement set format was generated using makems tool\footnote{Available at
 \url{https://github.com/ska-sa/makems}}. Dataset 1 is generated using a benchmarking tool included with our imager. It should be noted that both EVLA and MeerKAT observations
@@ -160,7 +177,7 @@ case the total field of view was kept constant. W-projection is kept disabled.
   \end{mdframed}
 \end{figure}
 
-The next experiment used dataset 1 and was run using the Rhodes machine. It shows the dependance of gridding 
+The next experiment used dataset 1 and was run using system C. It shows the dependance of gridding 
 performance on the facet transforms. Again no w-projection was enabled, full support of 7 pixels was used and 
 only a single facet is created. The results are shown in Figure~\ref{FIG_FACETING_SUPPORT_CPU}.
 \begin{figure}[ht!]
@@ -253,7 +270,8 @@ were disabled. Only a single correlation was gridded here.
 \end{figure}
 
 The CPU implementation uses vectorization when w-projection is enabled. Figure~\ref{FIG_WPROJECTION_AVX} shows the speedup between
-AVX-vectorized gridding compared to a non-vectorized implementation gridding 1, 2 and 4 correlations.
+AVX-vectorized gridding compared to a non-vectorized implementation gridding 1, 2 and 4 correlations. System C was used in generating
+these results.
 \begin{figure}[ht!]
  \begin{mdframed}
  \centering
@@ -295,7 +313,8 @@ AVX-vectorized gridding compared to a non-vectorized implementation gridding 1, 
 \end{figure}
 
 Figure~\ref{FIG_REAL_VS_WPROJ_CPU} shows the performance of w-projection (2D filter lookup table) with 
-AVX enabled, as well as the performance of real-valued (separable 1D kernel) on the CPU, gridding dataset 1.
+AVX enabled, as well as the performance of real-valued (separable 1D kernel) on the CPU, gridding dataset 1 on
+system C.
 \begin{figure}[ht!]
  \begin{mdframed}
  \centering
@@ -379,7 +398,12 @@ single precision.
   \label{FIG_FACET_VS_NO_FACET_GPU}
   \end{mdframed}
 \end{figure}
-\section{Performance comparison against other imagers}
-\subsection{Available software packages}
-\subsection{Comparison}
 \section{Discussion}
+Figure~\ref{FIG_FACETING_CPU_VS_GPU} shows that, at least for small facets GPU performance is slightly better than that of a multicore CPU node when gridding in
+single precision. In terms of power efficiency the K40 outperforms the CPU node with $0.01883 GW^{-1}$ compared to $0.00854 GW^{-1}$ for the
+4 processor node at peak performance. Although GPU double precision performance is deminished it still outperforms the CPU cluster $0.00907 GW^{-1}$ 
+compared to $0.00815 GW^{-1}$ in gridding efficiency.
+
+As expected the double precision performance  
+
+
