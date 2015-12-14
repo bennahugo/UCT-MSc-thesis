@@ -75,16 +75,30 @@ is located in the middle of the grids, thus shifting the image phase centre to t
 \subsection{NRAO Measurement Set 2.0}
 The Measurement Set standard \cite{ms10,ms20} is an AIPS++ (later CASA) database format containing telescope observation data, 
 along with observation metadata. Correlated observation data is stored in a ``MAIN'' table, along with uvw coordinates, antenna ids, 
-timestamp information, weighting and flagging information, along with foreign keys to subtables with meta data to the observation. The 
-metadata describes everything from the antenna positions and mounts to feeds, spectral window descriptions and the observed fields.
+timestamp information, weighting and flagging information and foreign keys to subtables with meta data to the observation. The 
+metadata describes everything from the antenna positions and mounts to feeds, spectral window descriptions and the observed fields. The
+standard database schema is summarized in Figure~\ref{FIG_MS_RELATIONS}.
+\begin{figure}[ht!]
+ \begin{mdframed}
+  \centering
+  \includegraphics[width=0.975\textwidth]{images/ms_relations.png}
+  \caption[Measurement Set schema]{This diagram depicts the standard layout of a Measurement Set database. Only some of the optional fields
+  are included in this diagram, for instance the MAIN table may have multiple data columns and per channel weights. Only the most important
+  relations are shown in this diagram. Data can be queried using a SQL-like language known as TaQL.}
+  \label{FIG_MS_RELATIONS}
+ \end{mdframed}
+\end{figure}
 
 Each row in the MAIN table contains measurements for a particular spectral band and may contain multiple correlations per spectral channel. Each
 row contains $N_\text{channel}\times N_\text{correlation}$ measurements. The rows is not necessarily 
 ordered by either baseline, time or antenna IDs by default and in total the Measurement Set MAIN table
-will contain $N_\text{baseline}\times N_\text{timestamp}$ rows, including autocorrelated antennas. It is worth noting 
+will contain $N_\text{baseline}\times \frac{\tau_\text{observed time}}{\tau_\text{integration length}}$ rows, including autocorrelated antennas. It is worth noting 
 that during flagging and calibration some rows may be deleted from the Measurement Set.
 
+Bullseye is designed to handle observations split into multiple Measurement Sets as input. When more than one Measurement Set is specified as input it is assumed that
+the two measurement sets contain observations of the same set of fields and that all the metadata remains the same between the two databases.
 \subsection{The Flexible Image Transport System}
+Bullseye 
 \section{Targeted faceting and image mosaicking options}
 \section{Continuum imaging vs. spectral line imaging}
 \section{Work distribution strategies considered}
