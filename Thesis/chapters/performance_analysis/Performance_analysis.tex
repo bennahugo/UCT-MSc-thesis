@@ -79,9 +79,11 @@ with enough pixels to account for the size of the convolution filter.
 \end{table}
 \section{Scalability}
 \subsection{Faceting only}
+This set of performance benchmarks focus on creating narrow field facets using the first order approximation to $w(n-1)$. As such full w-projection is disabled.
+
 For the first experiment 144 facets are created on both the CPU and GPU. For this experiment w-projection is disabled and the convolution filter
 (real) is limited to full support of 7 pixels. Only a single correlation of dataset 2 is gridded. Both single and double precision performance is indicated in
-Figure~\ref{FIG_FACETING_CPU_VS_GPU}.
+Figure~\ref{FIG_FACETING_CPU_VS_GPU}, along with their respecitive power efficiencies in Figure~\ref{FIG_FACETING_CPU_VS_GPU_POWER_EFFICIENCY}.
 \begin{figure}[ht!]
  \begin{mdframed}
  \centering
@@ -114,7 +116,7 @@ Figure~\ref{FIG_FACETING_CPU_VS_GPU}.
     grid=major,    
     visualization depends on=y \as \rawy,
     scale only axis, % The height and width argument only apply to the actual axis
-    height=0.30\textheight,
+    height=0.25\textheight,
     width=0.85\textwidth,
     minor y tick num=1,
     ybar interval=0.75
@@ -125,7 +127,55 @@ Figure~\ref{FIG_FACETING_CPU_VS_GPU}.
   \end{axis}
     
   \end{tikzpicture}
-  \caption[]{}
+  \caption{GPU vs CPU Facet Imaging Performance}
+  \label{FIG_FACETING_CPU_VS_GPU_POWER_EFFICIENCY}
+  \end{mdframed}
+\end{figure}
+
+\begin{figure}[ht!]
+ \begin{mdframed}
+ \centering
+ \begin{tikzpicture}
+  \pgfplotstableread{ % Read the data into a table macro
+    Cores	Single		Double
+    1		0.0014636248	0.0014655459
+    2		0.0029219248	0.0028866866
+    4		0.005822173	0.0058237442
+    8		0.0115893795	0.0115235668
+    12		0.0166559615	0.0165265787
+    16		0.0216735361	0.0213126526
+    32		0.0129867345	0.0129295295
+    48		0.0111565878	0.0108793668
+    64		0.0085436839	0.0073698744
+    128		0.008263218	0.0074669446
+    GT770	0.0147645991	0.0044952578
+    K40m	0.018883417	0.0090775645
+    c		0		0
+  }\datatable
+
+  \begin{axis}[
+    legend style={at={(0.5,-0.20)}, anchor=north,legend columns=-1},
+    ymin=0,         % Start y axis at 0
+    xmin=1,
+    xmax=c,
+    symbolic x coords={1,2,4,8,12,16,32,48,64,128,GT770,K40m,c},
+    xlabel=Threads/GPU,
+    ylabel=Power Efficiency ($GW^{-1}$),
+    grid=major,    
+    visualization depends on=y \as \rawy,
+    scale only axis, % The height and width argument only apply to the actual axis
+    height=0.25\textheight,
+    width=0.85\textwidth,
+    minor y tick num=1,
+    ybar interval=0.75
+    ]
+    \addplot table [x=Cores, y=Single] {\datatable};
+    \addplot table [x=Cores, y=Double] {\datatable};
+    \legend{Single Precision , Double Precision}
+  \end{axis}
+    
+  \end{tikzpicture}
+  \caption{CPU vs GPU Facet Imaging Power Efficiency}
   \label{FIG_FACETING_CPU_VS_GPU}
   \end{mdframed}
 \end{figure}
@@ -172,7 +222,7 @@ case the total field of view was kept constant. W-projection is kept disabled.
   \end{axis}
     
   \end{tikzpicture}
-  \caption[]{}
+  \caption{Scalability of GPU-based faceting (first order phase approximation)}
   \label{FIG_FACETING_GPU}
   \end{mdframed}
 \end{figure}
@@ -203,7 +253,7 @@ only a single facet is created. The results are shown in Figure~\ref{FIG_FACETIN
     visualization depends on=x \as \rawx,
     visualization depends on=y \as \rawy,
     scale only axis, % The height and width argument only apply to the actual axis
-    height=0.25\textheight,
+    height=0.20\textheight,
     width=0.85\textwidth,
     minor y tick num=1,
     nodes near coords,
@@ -217,7 +267,7 @@ only a single facet is created. The results are shown in Figure~\ref{FIG_FACETIN
   \end{axis}
     
   \end{tikzpicture}
-  \caption[]{}
+  \caption{Effect of facet transforms (CPU imaging)}
   \label{FIG_FACETING_SUPPORT_CPU}
   \end{mdframed}
 \end{figure}
@@ -264,7 +314,7 @@ were disabled. Only a single correlation was gridded here.
     \legend{SP (Real), DP (Real), SP (W-Projection), DP (W-Projection)}
   \end{axis}
   \end{tikzpicture}
-  \caption[]{}
+  \caption{GPU-based scaling }
   \label{FIG_WPROJECTION_SUPPORT_SCALING_GPU}
   \end{mdframed}
 \end{figure}
@@ -307,7 +357,7 @@ these results.
     \legend{SP (1-corr), DP (1-corr), SP (2-corr), DP (2-corr), SP (4-corr), DP (4-corr)}
   \end{axis}
   \end{tikzpicture}
-  \caption[]{}
+  \caption{Speedups obtained due to vectorizing (CPU-based w-projection)}
   \label{FIG_WPROJECTION_AVX}
   \end{mdframed}
 \end{figure}
@@ -350,7 +400,7 @@ system C.
     \legend{SP (Real), DP (Real), SP (W-projection), DP (W-projection)}
   \end{axis}
   \end{tikzpicture}
-  \caption[]{}
+  \caption{CPU performance using real and w-projection filtering.}
   \label{FIG_REAL_VS_WPROJ_CPU}
   \end{mdframed}
 \end{figure}
@@ -394,16 +444,26 @@ single precision.
     \legend{No Faceting (SP), Faceting (SP)}
   \end{axis}
   \end{tikzpicture}
-  \caption[]{}
+  \caption{GPU scaling performance when employing both faceting and w-projection}
   \label{FIG_FACET_VS_NO_FACET_GPU}
   \end{mdframed}
 \end{figure}
 \section{Discussion}
 Figure~\ref{FIG_FACETING_CPU_VS_GPU} shows that, at least for small facets GPU performance is slightly better than that of a multicore CPU node when gridding in
-single precision. In terms of power efficiency the K40 outperforms the CPU node with $0.01883 GW^{-1}$ compared to $0.00854 GW^{-1}$ for the
-4 processor node at peak performance. Although GPU double precision performance is deminished it still outperforms the CPU cluster $0.00907 GW^{-1}$ 
-compared to $0.00815 GW^{-1}$ in gridding efficiency.
+single precision. It is also clear that the parallel CPU imager do not scale linearly with number of cores, most likely due to an imbalance in the workload (the number of
+facets being gridded cannot be divided evenly between CPU cores. This leads to an overall drop in power
+efficiency when using multiple cores. In terms of power efficiency the K40 outperforms the CPU node when comparing the peak performance
+of the CPU cluster at 64 cores, but is slightly less power-efficient than when employing a single multi-core CPU.
 
-As expected the double precision performance  
+As expected the double precision performance on the GPU is significantly lower than single precision performance. The gridding algorithm contains a significant amount of
+integer arithmetic (profiling shows this to be about 50\% when gridding single correlations) and 
+is bounded by memory latencies, the latter can explain why performance is not a third of the single precision
+performance\footnote{The Kepler Architecture has 1 double precision arithmetic unit for every 3 single precision units}. 
+Forgoing effects of the L2 caches we estimate that a maximum of 64.8 GB/s is transferred over the memory bus of the GPU at a gridding rate of 
+4.05 G, this transfer is significantly lower than the theoretical maximum of the card. The GPU is outperformed by a single multicore CPU and is
+therefore significantly less power efficient when compared to a single 16-core Opteron CPU, of course assuming that
+that enough facets are created to fully utilize the CPU. Considering that the double precision performance achieved on the Haswell series Intel CPUs
+are 2x higher than its single precision performance (Figure~\ref{FIG_FACETING_SUPPORT_CPU}) it is clear that the prefered architecture is a multi-core (even multi-processor)
+CPU node when gridding in double precision.
 
-
+Figure~\ref{FIG_FACETING_GPU} shows that once the GPU is saturated with enough work gridding performance increases up to around 4.3 G. 
