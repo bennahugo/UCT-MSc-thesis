@@ -378,7 +378,7 @@ the targeted device.
 \end{algorithm}
 \section{GPU filter caching option}
 The GPU has several on- and off-chip memory types and caching mechanisms as already discussed. Due to the spacial locality of the convolution filter lookups it is advantageous to
-store the filter values in a memory that is cached on chip. GPU texture memory is off-chip memory, but 64 KB (Kepler architecture) is 
+store the filter values in a memory that is cached on chip. GPU texture memory is off-chip read-only memory, but 48 KB (Kepler architecture) is 
 cached on-chip and is ideal for storing convolution kernels. 
 
 When convolving with seperable filters like those used in narrow field imaging this is plenty. However, as we already pointed out
@@ -392,9 +392,95 @@ the GPU.
 We have provided an alternative cache-less implementation of the GPU imager for comparison and compatibility.
 If the stack of filters are too big to fit into memory the caching code can be turned off at compile time. We have seen
 a ~20\% drop in performance on compute 3.0 hardware with this option disabled.
+
 \section{Precision}
+During the course of an observation the gridding operation accumulates thousands of complex-valued visibilities into a set of grid bins. Since this operation
+is done in finite precision the summation of such a large number of visibilities is prone to rounding error. Nicholas Higham \cite{higham1993accuracy} shows that
+an upper bound for summation error is given by the following for any well-behaved summation method:
+\begin{equation}
+ |E_n| \leq (n-1)u\sum_{i=1}^{n}{|x_i|} + O(u^2), u := \frac{\beta}{2}\beta^{-\rho}
+\end{equation}
+Here $u$ is the machine epsilon and assumed to have $\beta=2$ and $\rho=24$ or $\rho=53$ for IEEE 754 single and double precision respectively (David Goldberg \cite{goldberg1991every}
+gives a detailed discussion), and hence the $u^2$ term can be ignored.
+
+The error scales with the number of terms as well as the magnitude of the terms. This is concerning because recent trends in interferometers have
+seen a significant growth in the number of baselines and channels, and hence the number of visibilities being accumulated. Large arrays also require
+convolution kernels with large support which will futher worsten the effects of total rounding error accross the grid. We have decided to provide 
+a set of single and double precision gridding routines in order to test how this effects the accuracy of the synthesized images. Since the FFT preserves
+the total energy between the spacial and frequency domains (Parseval's theorem) we expect the rounding error to be present in the brightness of sources in 
+the reconstructed images. The difference between single and double precision synthesis for extended observations will be investigated in the results section.
+
+The choice between single and double precision synthesis has a significant performance impact on GPUs where the number of double precision units are significantly
+less than single precision units (1 to 3 in the case of Kepler generation GPUs). The performance impact will be determined experimentally in the results section.
 \section{Faceting options}
+Our imager supports both targeted and continuous faceting. In the instance of targeted faceting (demonstrated in Figure~\ref{FIG_TARGET_GUI}) the user specifies a set of coordinates 
+for the facet centres, along with the size of the facet images to be created. In continuous faceting mode the user specifies the size of the facets along with the number of facets in
+both l and m. The current implementation joins the facets at the facet edges, with no overlap. It is therefore necessary to pad each of the facet images to
+reduce the remaining aliasing energy that is normally encountered right at the edge of the image (as discussed not all the energy is stopped due to filter roll off).
+
+It is important to note that the \texttt{CRVALn} keywords for the l and m coordinates in each of the facet image cubes are the coordiantes of the original phase tracking centre $l_0,m_0$, even
+if those coordinates fall outside the area of the facet images. This is necessary to ensure that the facets all share the same divergence in coordinates that follows from using the 
+orthogonal (``SIN'') projection.
+
+We have included a prototype graphical interface to demonstrate facet imaging, shown here in Figure~\ref{FIG_TARGETED_FACETING}. The prototype tool is implemented in Python and uses the GTK
+framework. It calls directly on the command line interface of our imager.
+\begin{figure}[ht!]
+ \begin{mdframed}
+  \centering
+  \includegraphics[width=0.75\textwidth]{images/targeted_faceting.png}
+  \caption[Targeted faceting in action]{The result of faceting a narrow piece of sky that is far away from the phase tracking centre of the telescope. Here a simulated gridded sky pattern
+  shows the widefield distortions of sources far away from the field centre. In the facet image of this area all the sources are corrected.}
+  \label{FIG_TARGETED_FACETING}
+ \end{mdframed}
+\end{figure}
+
+When constructing continuous images the user has the option to reproject and combine the individual facet images using the Montage \cite{jacob2004montage} suite of tasks after the facets have been
+synthesized.
+
 \section{Image normalization}
+Each of the images are normalized by a counter that takes weights, flagged and visibilties that are not gridded into account:
+\begin{equation}
+ N = \sum_{k=0}^{M-1}{\sum_{u_\text{tap}=0}^{\text{full sup}}{\sum_{v_\text{tap}=0}^{\text{full sup}}{c[(u_\text{tap}+u[k]_\text{frac} + 1)\times c_\text{oversamp},(v_\text{tap}+v[k]_\text{frac} + 1)\times c_\text{oversamp}]}} W[k]\neg F[k]}
+\end{equation}
+Due to the linearity of the fourier transform this normalization can be applied per grid point or synthesized image pixel. On the GPU it is necessary to keep an extra register per thread and reduce
+to a single value after gridding is completed.
+
+It is also possible to normalize by the centre value of the point spread function, but this requires that the PSF always be synthesized. When a full deconvolution pipeline is added to the imager this step
+can be changed.
+
 \section{Validation and testing}
-\subsection{Targeted faceting demonstrator}
-\subsection{Validation on observed EVLA data}
+We used both simulated and real data to to test our imager. We chose to support the Measurement Set format because of its widespread use in radio astronomy. Thus far we have tested our imager only on real data generated
+by the EVLA. Specifically we followed the calibration and flagging guidelines for the supernova remnant G55.7+3.4 observed by the EVLA in L-band. The guide is available at \url{https://casaguides.nrao.edu/index.php/EVLA_Wide-Band_Wide-Field_Imaging:_G55.7_3.4-CASA4.4}.
+The observed field contains sources that had been identified as being distorted by the widefield effect. These sources are also bright enough to be clearly visible in the dirty images, making this dataset ideal for use in
+testing our imager.
+
+\begin{figure}[h!]
+  \centering
+ \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/validation/mosaic.png}
+    \caption{Mosaiced faceted image (2x2 facets, 1.2\% padding each). No additional w-projection.}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/validation/wproj.png}
+    \caption{W-projected image. No faceting.}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/validation/uncorrected.png}
+    \caption{Uncorrected image (normal narrow field imaging).}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/validation/corrections.png}
+    \caption{Up close, from the left: the uncorrected source, the faceted source and 
+    finally the w-projected source}
+ \end{subfigure}
+ \caption[Supernova reminant G55.7+3.4]{In this field there is a clear widefield distorition near
+ right assention $19h26m$, declination $21^\circ7'$. Both the faceting and w-projection
+ implementations corrects the distortion as expected. The w-projected image here uses no faceting
+ and simularly the faceting was done by enabling only a first order approximation for w and disabling
+ w-projection.}
+ \label{FIG_SUPERNOVA}
+\end{figure}
