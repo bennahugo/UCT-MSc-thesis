@@ -1,6 +1,88 @@
-\chapter{Review of multicore architectures and parallel platforms}
-\section{CPU architecture overview}
-\section{OpenMP}
-\section{Vector instruction sets}
-\section{GPU architecture overview} 
-\section{The Nvidia Compute Unified Device Architecture (CUDA)}
+\chapter{Review of multi- and many-core processing models}
+\section{Multicore CPU architectures}
+\section{Many core GPU architectures}
+\subsection{Historical development}
+Today's modern programmable GPU devices have evolved from the fixed-pipeline graphics hardware of the 1980's and 1990's. Driven by the demand
+for high resolution graphics in the video game industry modern devices must be able to render billions of pixels per second (72 giga pixels per second 
+for the latest Maxwell GTX980 devices \cite{gtx980}). As such these devices are geared towards achieving high throughput over higher operational latencies compared to traditional
+CPU-based computing. The steps involved with transforming primatives (typically triangles) in world space to rasterized images rendered by a display takes thousands
+of compute cycles from start to finish. However the coordinate, lighting and per-pixel shading operations are highly data-parallel operations. In addition the stages within
+the graphics pipeline can be computed in parallel; while new primatives enter the pipeline the rasterization and fragment processing of primatives previously transformed is 
+completed, enabling both data- and task-parallelism on GPUs. The major steps in the graphics pipeline is shown in Figure~\ref{fig_graphics_pipeline} for reference.
+
+\begin{figure}[ht!]
+ \begin{mdframed}
+ \centering
+  \begin{tikzpicture}[node distance=2.8cm,  
+    block/.style={
+      draw,
+      fill=white,
+      rectangle, 
+      text width=2.0cm,
+      inner sep=0.2cm}]
+    \node (app) [block] {3D application / game};
+    \node (api) [block, right of=app] {3D API \& drivers};
+    \node (fe) [block, below of=app] {GPU front end};
+    \node (assembly) [block, right of=fe] {Primitive assembly};
+    \node (rasterization) [block, right of=assembly] {Rasterization and interpolation};
+    \node (rasterops) [block, right of=rasterization] {Raster operations};
+    \node (fb) [block, right of=rasterops] {Framebuffer};
+    \draw [dashed,transform canvas={yshift=-1.4cm}] ($(app) - (0.5cm,0)$) -- (fb |- app) node [right, above] (cpu) {CPU} node [right, below] (gpu) {GPU};
+    \draw [rarrow] (app) -- (api);
+    \draw [rarrow] (api) -- (fe);
+    \draw [rarrow] (fe) -- (assembly);
+    \draw [rarrow] (assembly) -- (rasterization);
+    \draw [rarrow] (rasterization) -- (rasterops);
+    \draw [rarrow] (rasterops) -- (fb);
+  \end{tikzpicture}
+ \caption[Graphics pipeline]{The classical graphics pipeline. At the front end of the pipeline verticies are transformed, colours assigned,
+ texture coordinates and normals calculated. The rasterization step interpolate per-vertex data, such as colour accross all the pixels 
+ touched by the triangle formed between vertex tripples. Raster operations performs final blending and anti-aliasing operations, before the images written
+ out to the display frame buffer.}
+ \label{fig_graphics_pipeline}
+ \end{mdframed}
+\end{figure}
+
+The requirement of transforming, rasterizing and shading possibly millions of triangle primatives driving GPU development clearly diverges from the requirements behind the
+design of traditional CPUs. CPU development is driven by the need to process large sequential programs per CPU core, each containing complex branching and diverse memory access patterns, 
+whereas GPUs are driven by the need to apply the same set of basic operations to many elements (or ``Single Instruction Multiple Data'' [SIMD]) paradigm that graphics processing subscribes to. 
+Whereas CPUs use several tiers of large caches to hide the latencies of memory accesses GPUs have relatively little on-chip cache memory per basic compute (``Streaming Processor'' [SP]) 
+unit. Instead of caching GPUs rely mostly on the amount of parallel work available to each SP unit and a fast context switching / work scheduling mechanism to ensure each of the SPs are 
+occupied with work while memory transactions are completed for threads stalled by load and store operations.
+
+Although the hardware platform could potentially be employed for applications other than 3D graphics it wasn't until the early 2000's that programmable graphics hardware became widely
+available. For instance the NVIDIA GeForce 3 exposed the internal instruction set of the vertex processor to the application developer. Soon the ATI Radion 9700 and GeForce FX 
+made the fragment shading process normally part of the rasterization and interpolation step reprogrammable. At this point the vertex and fragment shading units were run on seperate
+hardware. The XBox 360 (2005) introduced an early unified vertex and fragment shader processor.
+
+Even though the hardware now supported extending the traditional graphics pipeline to do more complex operations it was still impractical to use the highly parallel hardware for 
+computational processes other than graphics on any large scale products. Computational problems had to be mapped to the standard graphics operands: verticies and textures. Other problems
+such as the lack of scattered memory writes limited the applicability of the platform to a small number of problems.
+
+This was addressed by a series of software (along with necessary hardware modifications) developments that aimed to to give application developers access to the processors without having to call
+on Graphics APIs. Of those developments BrookGPU \cite{buck2004brook} was an early abstraction away from graphics primatives. It recasted computation in terms of small programs (``kernels'') operating
+on ``streams'' of input data elements (arrays of values that can be operated on in parallel). This paradigm sets GPUs aside from ordinary vector processors that loads a series of values from global
+memory, performs a simple mathematical operation on each of the elements and write the results back to global memory. Instead stream processors can load values from local register memory, performing multiple
+operations on each of these values before storing the results (possibly to local memory). The paradigm allows for achieving greater arithmetic intensity (a single memory operation is followed
+by many computations) and is critical for hiding the high latencies of memory accesses experienced on GPUs. 
+
+More recently NVIDIA's CUDA \cite{cuda} and the OpenCL \cite{opencl} have become the defacto standard ways of 
+programming GPUs to perform general scientific computing used in a variety of fields including the signal 
+processing domain. Both lend themselves to the streaming processor paradigm and facilitate the implementation
+of the following generally-used parallel computing primatives:
+\begin{itemize}
+ \item Scatter/gather: The addresses used in memory accesses (both load and store) can be computed.
+ \item Map: an operation is applied to every element in the stream. Typically many threads will be launched
+       each reading an element from the stream, performing the operation on that element and writing the value
+       back to memory afterwards.
+ \item Reduce: By applying a binary associative operation repeatedly a sequence of values is reduced to a single value.
+       An example is ordinary summation, minimums/maximums, variance, etc. These operations typically split the data up into
+       subsets, performing many additions in parallel and repeating the process on the set of results until a single value is
+       obtained. 
+ \item Scans: Scan and prefix scan operations are widely used in parallel programming (for instance index calculations as used
+       in our work). A scan of an array contains the running accumulations (in the case of summation) of elements in an array. 
+\end{itemize}
+
+\subsection{Modern programmable GPU architecture}
+The difference in design philosophhy is reflected in the substantial differences in the architectures of modern GPUs and CPUs. 
+\subsection{GPU memory layout}
