@@ -84,5 +84,69 @@ of the following generally-used parallel computing primatives:
 \end{itemize}
 
 \subsection{Modern programmable GPU architecture}
-The difference in design philosophhy is reflected in the substantial differences in the architectures of modern GPUs and CPUs. 
+The difference in design philosophy is reflected in the substantial differences in the architectures of modern GPUs and CPUs. CPUs dedicate a significant portion die area to large caches and complex control logic dealing with
+branch prediction and scheduling. GPUs on the other hand dedicate a significant portion of die area to arithmetic and other execution units and rely on having enough arithmetic work to occupy most of those units most of the time.
+Figure~\ref{fig_cpu_gpu_diff} illustrates the proportions of both CPU and GPU die area spent on artithmetic.
+\begin{figure}[ht!]
+ \begin{mdframed}
+  \centering
+  \includegraphics[width=0.5\textwidth]{images/gpu-devotes-more-transistors-to-data-processing.png}
+  \caption[CPU vs. GPU architecture]{The proportion of transistors allocated to arithmetic processing in CPUs and GPUs. Taken from the NVIDIA programming reference \cite{cuda}}
+  \label{fig_cpu_gpu_diff}
+ \end{mdframed}
+\end{figure}
+
+Modern GPUs works best in problem contexts where a significant portion of the computation is data-parallel. In CUDA nomenclature (similar concepts exist in OpenCL) the parallel work is broken up into a \textit{grid} of
+separate thread \textit{blocks} (see Figure~\ref{fig_grid_blocks} for an illustration). In each of these blocks on-chip memory resources is shared, limiting the size of the individual blocks. On current NVIDIA GPUs there is a hard limit (1024) to the number of threads size, 
+however the amount of special memory (including register memory) available to each of these blocks may further limit the number threads in the block that can physically execute simulaniously. Each of the 
+blocks would therefore process a portion of stream memory. Blocks are in turn subdevided into \textit{warps} of threads (currently 32 threads form a warp) that execute instructions in lockstep. This means that when one
+thread inside a warp is stalled (for instance a memory access or a synchronization barrier) the entire warp is stalled. Unlike the instruction scheduling units of CPUs the schedulers in GPUs also don't contain complex branch prediction logic; when some
+threads in a warp require the execution of one of the directions in a branch while the rest take another direction both sides of the branch is evaluated and the results are simply masked out for the threads that are uneffected
+by the branch. This places a heafty penalty on branch divergence within the instruction kernels and memory accesses that don't adhere to the alignment specifications of the GPU. Note that this description of how work is layed out in a high level programming language is independent of specifics of the device the work is to be run on. The individual blocks can be mapped onto the targeted device
+in any order and in any quantity, depending on the resources of the device. Each block of work should therefore perform its computation in isolation of the remaining blocks. Although intra-block communication between threads 
+and synchronization is possible, inter-block communication is only possible through accesses to off-chip memory and should be avoided.
+\begin{figure}[ht!]
+ \begin{mdframed}
+  \centering
+  \includegraphics[width=0.3\textwidth]{images/grid-of-thread-blocks.png}
+  \caption[Thread layout in CUDA]{The layout of work threads in CUDA. Taken from the NVIDIA programming reference \cite{cuda}}
+  \label{fig_cpu_gpu_diff}
+ \end{mdframed}
+\end{figure}
+
+At a hardware level GPUs comprise of multiple \textit{Streaming Multiprocessors}, each containing many \textit{Stream Processors} capable of performing arithmetic (predominantly IEEE 754 single precisision floating point) along
+with several special function units, warp-schedulers and memory load/store units. Figure~\ref{fig_kepler_arch} shows the layout of Kepler-generation NVIDIA GPUs. The exact number of Streaming Multiprocessors and Stream Processors
+vary between generations of GPUs, but the total number of Streaming Multiprocessors per GPU tend to double every 2 years. Depending on resource constraints of each of the thread blocks several blocks may be mapped to a single 
+Streaming Multiprocessor for simultanious execution. The warp schedulers schedule warps that have instructions (along with the required operand data) ready for execution onto sets of Stream Processors, dispatching independent 
+instructions onto individual Stream Processors per clock cycle (depending on the number of dispatch units available per Multiprocessor). Warps that are stalled (for example waiting on a load/store operation) is switched out of context
+and replaced with warps that have operands ready for processing, thereby hiding memory access latencies. Ideal kernels should therefore:
+\begin{itemize}
+ \item Contain enough independent arithmetic instructions to occupy all the Stream Processors during
+       any given clock cycle.
+ \item Access to both on- and especially off-chip memory should be kept to a minimum and subscribe to coalesced access patterns, especially considering that the number of load/store units are far fewer than the number of
+       single precision units and peak memory bandwidth is on the order of 60x lower (Kepler generation) than peak single precision compute throughput of the device. In other words the arithmetic intensity should be high, as
+       is the case in typical graphics shading operations for instance.
+ \item There must be enough warps of work scheduled to the GPU to keep the Multiprocessors occupied most of the time.
+ \item Special memory resources (including registers) should be used sparingly to ensure the Streaming Multiprocessor is not starved of resources as this lowers the number of warps that can be executed at any given point in time 
+      (``effective occupancy'').
+\end{itemize}
+\begin{figure}[ht!]
+ \begin{mdframed}
+  \centering
+  \begin{subfigure}[b]{0.7\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/kepler_arch.png}
+    \caption{}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.6\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/kepler_smx_arch.png}
+    \caption{}
+  \end{subfigure}
+  \caption[Kepler architecture]{Kepler die architecture. (a) shows the overall die layout, containing 15 Streaming Multiprocessors. (b) shows the layout of each multiprocessor, containing one double precision unit for every 
+				3 single precision units, 1 load/store and 1 special function unit for every 6 single precision units. The total number of registers, local and shared memory is split between the number of threads per 
+				block, determining how many blocks can be executed simultaniously. Taken from the Kepler whitepaper \cite{kepler}}
+  \label{fig_kepler_arch}
+ \end{mdframed}
+\end{figure}
 \subsection{GPU memory layout}
