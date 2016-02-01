@@ -1,5 +1,53 @@
 \chapter{Review of multi- and many-core processing models}
 \section{Multicore CPU architectures}
+\subsection{Switch to MIMD processing paradigm}
+Traditionally software development was geared towards Single Instruction Single Data (SISD) processing architectures, where instructions were executed in the same 
+order they were issued to the processor. For a long period this approach worked well; the growth in the number of transistors in processors and associated 
+advancements in cache, hardware scheduling and execution logic meant that software kept becoming faster without the need for any serious modifications. Processor clock
+speeds continued to increase dramatically throughout the 1980s to the early 2000s (see Figure~\ref{fig_clocks}), driving enormous growth in the capabilities of both
+desktop and server computers. However, since processor power usage is a function of the clock rate, the significant increase in the achievable processor clock rates 
+also brought about increased power consumption and associated heat dispersion problems. Hardware manufacturers could no longer continue to drop the input 
+voltages to processors to successfully overcome this power requirement and CPU clockrates stagnated. This brought about a sea change in the software industry: 
+future software can no longer rely on significant improvements stemming solely from hardware improvements. Since 2002 the response time of programs have slowed 
+from a factor 50\% decrease to less than a 20\% decrease per year (see Figure~\ref{fig_runtime_decrease_cpu}).
+
+\begin{figure}[ht!]
+ \begin{mdframed}
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/cpu_clocks.png}
+  \caption[Power wall]{The growth in CPU clock rates for 8 generations of x86 Intel processors and associated power consumption. By reducing input voltages to the processors
+  engineers were able to keep power requirements low while increasing clock frequencies throughout the 1980s and 1990s. Limitations in semiconductor technology has, however,
+  limited further increases in clock cycle rate.}
+  \label{fig_clocks}
+ \end{mdframed}
+\end{figure}
+
+\begin{figure}[ht!]
+ \begin{mdframed}
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/runtime_decrease_cpu.png}
+  \caption[Program response time decline]{Here processor performance is plotted relative to the VAX-11/780 measured by the SPECint benchmarks. The substantial growth seen after the mid-1980s
+  are primarily due to increasingly advanced processor architectures. Since 2002 the growth has been slowed to below 25\% primarily due to the power wall and high memory latencies.}
+  \label{fig_runtime_decrease_cpu}
+ \end{mdframed}
+\end{figure}
+
+Since the latter half of the 2000s most desktop processors started subscribing to the Multiple Instruction Multiple Data (MIMD) paradigm where several processes 
+(or threads of execution within a single process) is executed simultaneously within multiple \textit{microprocessors} on the same processor die (also known as processing cores). 
+See Figure~\ref{fig_amd_barcelona_arch} for an example of such a multi-core layout. Modern processors is thus geared towards attaining higher throughput by better exploiting the 
+abundance of task-level parallelism in modern day computer usage, instead of increasing the response rate of individual processes. Whereas once only a select number of compute 
+programs warranted nodes with multiple processors (physical chips) per compute node, today any desktop software has to be able to use multiple compute streams (``threads'') 
+in order to fully exploit the compute capacity of modern hardware. 
+\begin{figure}[ht!]
+ \begin{mdframed}
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/amd_barcelona.png}
+  \caption[AMD Barcelona]{Microphotograph and layout of the quad-core AMD Barcelona processor. It is common that each of the cores have their own private caches as well as a shared
+  cache between cores.}
+  \label{fig_runtime_decrease_cpu}
+ \end{mdframed}
+\end{figure}
+
 \section{Many core GPU architectures}
 Much of the discussion in this chapter is drawn from Kirk and Hwu \cite[ch. 1-3]{kirk2012programming}, Owens et al. \cite{owens2008gpu} and the CUDA
 programming reference \cite{cuda}.
