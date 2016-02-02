@@ -1,7 +1,13 @@
 \chapter{Review of multi- and many-core processing models}
-\section{Multicore CPU architectures}
+In this chapter we focus on two shared-memory architectures widely used in parallel computing: multi-core CPU architectures and many-core GPU architectures. Recent trends in computing
+have favored the growth in throughput-driven parallel architectures of which these two are the most common at the time of writing. Our imaging software will compare implementations on both these platforms and it is
+therefore necessary to give the reader the necessary background of the underlying concepts, as well as the terminology used later when describing our imaging solution. Distributed solutions are 
+out of scope for our current implementation and therefore only shared-memory architectures are considered.
+\section{Multi-core CPU architectures}
+In this section we give the reader a brief overview of the historic development of CPUs and outline key design considerations in modern CPU architecture. The discussion is drawn mostly from 
+Patterson and Hennessy \cite[ch. 1,4,5 and 7]{patterson2009computer}, and Akhter and Roberts \cite[ch. 1,3 and 6]{akhter2006multi}.
 \subsection{Switch to MIMD processing paradigm}
-Traditionally software development was geared towards Single Instruction Single Data (SISD) processing architectures, where instructions were executed in the same 
+Historically software development was geared towards Single Instruction Single Data (SISD) processing architectures, where instructions were executed in the same 
 order they were issued to the processor. For a long period this approach worked well; the growth in the number of transistors in processors and associated 
 advancements in cache, hardware scheduling and execution logic meant that software kept becoming faster without the need for any serious modifications. Processor clock
 speeds continued to increase dramatically throughout the 1980s to the early 2000s (see Figure~\ref{fig_clocks}), driving enormous growth in the capabilities of both
@@ -9,7 +15,7 @@ desktop and server computers. However, since processor power usage is a function
 also brought about increased power consumption and associated heat dispersion problems. Hardware manufacturers could no longer continue to drop the input 
 voltages to processors to successfully overcome this power requirement and CPU clockrates stagnated. This brought about a sea change in the software industry: 
 future software can no longer rely on significant improvements stemming solely from hardware improvements. Since 2002 the response time of programs have slowed 
-from a factor 50\% decrease to less than a 20\% decrease per year (see Figure~\ref{fig_runtime_decrease_cpu}).
+from a factor 50\% decrease to less than a 20\% decrease per year (see Figure~\ref{fig_runtime_decrease_cpu}) \cite{patterson2009computer}.
 
 \begin{figure}[ht!]
  \begin{mdframed}
@@ -17,7 +23,7 @@ from a factor 50\% decrease to less than a 20\% decrease per year (see Figure~\r
   \includegraphics[width=0.8\textwidth]{images/cpu_clocks.png}
   \caption[Power wall]{The growth in CPU clock rates for 8 generations of x86 Intel processors and associated power consumption. By reducing input voltages to the processors
   engineers were able to keep power requirements low while increasing clock frequencies throughout the 1980s and 1990s. Limitations in semiconductor technology has, however,
-  limited further increases in clock cycle rate.}
+  limited further increases in clock cycle rate. Taken from Patterson and Hennessy \cite[ch. 1]{patterson2009computer}.}
   \label{fig_clocks}
  \end{mdframed}
 \end{figure}
@@ -27,30 +33,107 @@ from a factor 50\% decrease to less than a 20\% decrease per year (see Figure~\r
   \centering
   \includegraphics[width=0.8\textwidth]{images/runtime_decrease_cpu.png}
   \caption[Program response time decline]{Here processor performance is plotted relative to the VAX-11/780 measured by the SPECint benchmarks. The substantial growth seen after the mid-1980s
-  are primarily due to increasingly advanced processor architectures. Since 2002 the growth has been slowed to below 25\% primarily due to the power wall and high memory latencies.}
+  are primarily due to increasingly advanced processor architectures. Since 2002 the growth has been slowed to below 25\% primarily due to the power wall and high memory latencies. Taken from Patterson and Hennessy \cite[ch. 1]{patterson2009computer}.}
   \label{fig_runtime_decrease_cpu}
  \end{mdframed}
 \end{figure}
 
 Since the latter half of the 2000s most desktop processors started subscribing to the Multiple Instruction Multiple Data (MIMD) paradigm where several processes 
-(or threads of execution within a single process) is executed simultaneously within multiple \textit{microprocessors} on the same processor die (also known as processing cores). 
+(or \textit{threads}\footnote{Here a thread of execution is taken to be the basic unit of execution, with its own program counter and stack space, but sharing the address space with other threads started by the same process} of execution 
+within a single process) is executed simultaneously within multiple \textit{microprocessors} on the same processor die (also known as processing cores). 
 See Figure~\ref{fig_amd_barcelona_arch} for an example of such a multi-core layout. Modern processors is thus geared towards attaining higher throughput by better exploiting the 
 abundance of task-level parallelism in modern day computer usage, instead of increasing the response rate of individual processes. Whereas once only a select number of compute 
 programs warranted nodes with multiple processors (physical chips) per compute node, today any desktop software has to be able to use multiple compute streams (``threads'') 
-in order to fully exploit the compute capacity of modern hardware. 
+in order to fully exploit the compute capacity of modern hardware \cite{patterson2009computer} \cite{akhter2006multi}. 
 \begin{figure}[ht!]
  \begin{mdframed}
   \centering
   \includegraphics[width=0.8\textwidth]{images/amd_barcelona.png}
-  \caption[AMD Barcelona]{Microphotograph and layout of the quad-core AMD Barcelona processor. It is common that each of the cores have their own private caches as well as a shared
-  cache between cores.}
-  \label{fig_runtime_decrease_cpu}
+  \caption[AMD Barcelona]{Microphotograph and layout of the quad-core AMD Barcelona processor. Taken from Patterson and Hennessy \cite[ch. 1]{patterson2009computer}.}
+  \label{fig_amd_barcelona_arch}
  \end{mdframed}
 \end{figure}
 
-\section{Many core GPU architectures}
-Much of the discussion in this chapter is drawn from Kirk and Hwu \cite[ch. 1-3]{kirk2012programming}, Owens et al. \cite{owens2008gpu} and the CUDA
-programming reference \cite{cuda}.
+\subsection{Fine- and course-grained hardware parallelism}
+Due to the shift towards the MIMD paradigm most modern processors have both levels of fine- and course-grained parallelism. Well-before the advent of multi-core processors instruction-level parallelism
+existed. The original Pentium processor was able to pipeline instructions so that more than one instruction could be executed in a single clock cycle, by having 2 execution units. Keeping the execution units
+busy most of the time has since become one of the key focuses of pipeline architectures. As such instructions without dependencies between them are no longer executed in parallel (starting with Pentium 
+Pro processor [1995]). Newer processors, such as the Pentium 4 (2002) has multiple units dealing with interrupt logic and processor state and is able to execute 2 logical threads concurrently per 
+processor (and later processor core). This is known as \textit{simultaneous multithreading} \cite{gerber2002software,akhter2006multi}. See Figure~\ref{fig_cpu_arch_skylake} for an overview of the latest 
+Intel Skylake generation microarchitecture.
+\begin{figure}[ht!]
+ \begin{mdframed}
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/cpu_intel_skylake.png}
+  \caption[Intel Skylake Generation Architecture]{Architecture of the $6^\text{th}$ generation (Skylake) Intel Core processors. As with many modern processors the front-end instruction fetch and decode components (apart from 
+  the branch prediction unit) and back-end instruction retire components are all in-order components. Each logical core has access to an out-of-order execution engine with many arthmetic units in order to pipeline, issue and 
+  execute multiple independent instructions simultaneously at hardware-level. Like most modern AMD and Intel processors each core has access to a level 1 cache to store instructions and data, as well as a larger L2 
+  cache (32KB and 256 KB respectively for Skylake processors). All of the cores share a large L3 cache (up to 2MB per core). Picture and information from Intel Architecture Optimization Guide \cite{intelArch}}
+  \label{fig_cpu_arch_skylake}
+ \end{mdframed}
+\end{figure}
+
+The advanced multiple-issue out-of-order execution engines parallelizes instruction execution at a hardware level, hidden from the application programmer. However, the ALUs of modern CPUs also support short 
+SIMD vector operations. Figure~\ref{fig_SIMD} illustrates a typical SIMD computation. These instructions extend the original x86 instruction set with vector equivalents for many common operations. Originally
+the MMX instruction set allowed only integer arithmetic operations on packed byte, word and doubleword registers and added eight additional 64-bit registers to the processor. Later extensions included 
+various versions of Streaming SIMD Extensions (SSE) and Advanced Vector eXtensions (AVX), respectively adding floating point and integer arithmetic on packed 128-bit and 256-bit registers respectively. These
+SIMD vector operations improves the performance of tasks like 3D graphics and signal/image processing, that are inherently parallel, have localized recurring operations on data streams and have data-independent 
+control flow. Most compilers (including the GNU Compiler suite) vectorize code automatically when optimizations are enabled, but it may be necessary to write assembly code by hand in cases where the compiler fails
+to do so (deeply nested loops is one such situation) \cite{intelArch}.
+\begin{figure}[ht!]
+ \begin{mdframed}
+ \centering
+  \begin{tikzpicture}[node distance=2.0cm,  
+    block/.style={
+      draw,
+      fill=white,
+      rectangle, 
+      text width=2.0cm,
+      inner sep=0.2cm}]
+    \node (x4) [block] {x4};
+    \node (x3) [block, right of=x4] {x3};
+    \node (x2) [block, right of=x3] {x2};
+    \node (x1) [block, right of=x2] {x1};
+    \node (y4) [block, below of=x4] {y4};
+    \node (y3) [block, below of=x3] {y3};
+    \node (y2) [block, below of=x2] {y2};
+    \node (y1) [block, below of=x1] {y1};
+    \node (o4) [below of=y4]{$\oplus$};
+    \node (o3) [below of=y3]{$\oplus$};
+    \node (o2) [below of=y2]{$\oplus$};
+    \node (o1) [below of=y1]{$\oplus$};
+    \node (r4) [block, below of=o4] {x4$\oplus$y4};
+    \node (r3) [block, below of=o3] {x3$\oplus$y3};
+    \node (r2) [block, below of=o2] {x2$\oplus$y2};
+    \node (r1) [block, below of=o1] {x1$\oplus$y1};
+    \draw [rarrow] ($(y4) - (0.5,0)$) -- (o4);
+    \draw [rarrow] ($(y3) - (0.5,0)$) -- (o3);
+    \draw [rarrow] ($(y2) - (0.5,0)$) -- (o2);
+    \draw [rarrow] ($(y1) - (0.5,0)$) -- (o1);
+    \draw [rarrow] (x4) -- (o4);
+    \draw [rarrow] (x3) -- (o3);
+    \draw [rarrow] (x2) -- (o2);
+    \draw [rarrow] (x1) -- (o1);
+    \draw [rarrow] (o4) -- (r4);
+    \draw [rarrow] (o3) -- (r3);
+    \draw [rarrow] (o2) -- (r2);
+    \draw [rarrow] (o1) -- (r1);
+  \end{tikzpicture}
+ \caption[Vector operation]{A typical Single Instruction Multiple Data (SIMD) vector operation. Here $\oplus$ is any binary arithmetic or logical operator. Some variants on this instruction layout exist, but they all perform the same operation
+			    on multiple data elements}
+ \label{fig_SIMD}
+ \end{mdframed}
+\end{figure}
+
+Both instruction-level parallelism and SIMD vector operations are fine-grained parallel processes handled by hardware. Since most modern processors have multiple processing cores operating systems can not only achieve concurrent thread execution 
+(where the execution of multiple threads are interleaved on physical hardware), but truly parallel execution of threads on multiple processor cores. One threading API that has found widespread cross-platform use is the OpenMP standard \cite{openmp}, which is currently
+implemented by the major Fortran, C and C++ compilers, including the Microsoft C++, Intel and GNU compiler suites. OpenMP provide parallelization options for both task- and data-parallel problems, is based on the lightweight fork-join threading pattern and
+takes care of thread instantiation and termination automatically. Most sections and loops can therefore be parallelized by simply specifying a single compiler directive in front of the block of code to be parallelized. OpenMP also support static and dynamic
+scheduling options that are useful in problems that require load-balancing to perform well \cite{openmp,akhter2006multi}.
+\section{Many-core GPU architectures}
+Much of the discussion in this chapter is drawn from Kirk and Hwu \cite[ch. 1-3]{kirk2012programming}, Owens et al. \cite{owens2008gpu} and the Compute Uniform Device Architecture (CUDA)
+programming reference \cite{cuda}. Our discussion is focused towards implementation on the NVIDIA CUDA. We start by giving the reader an historical overview and then highlight the key differences
+in architecture that set GPUs appart from CPUs.
 \subsection{Historical development}
 Today's modern programmable GPU devices have evolved from the fixed-pipeline graphics hardware of the 1980's and 1990's. Driven by the demand
 for high resolution graphics in the video game industry modern devices must be able to render billions of pixels per second (72 giga pixels per second 
