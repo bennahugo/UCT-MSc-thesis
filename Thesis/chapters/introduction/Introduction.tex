@@ -1,4 +1,34 @@
 \chapter{Introduction}
-\section{Widefield synthesis imaging in radio astronomy}
-\section{Research objectives}
+\section{The synthesis imaging widefield problem}
+In radio astronomy there is a well-known Fourier relationship between the sky brightness distribution and the measurements taken by antenna arrays, see for instance 
+Clark \cite[Lecture 1]{taylor1999synthesis}. To synthesize an image of the sky intensity distribution the measurements taken by these so-called radio \textit{interferometers}
+are normalle inverted by resampling the points onto a regularly-spaced grid and performing an inverse Fast Fourier Transform \cite{cochran1967fast} on the resampled measurements see for instance 
+Thompson \cite{thompson1974interpolation}. Due to sparsity of the sampling domain the images are convolved with the inverse of the sampling pattern of the array, requiring that
+the inversion step be called upon multiple times in an iterative deconvolution strategy such as Cotton-Schwab CLEAN (see Thompson et al. \cite[ch 11]{thompson2008interferometry}).
+
+When synthesizing wide field images using an array of telescopes with non-East-West antenna pairs (``baselines'') the simple Fourier relationship between the sky brightness 
+distribution and interferometer measurements break down since the Fast Fourier Transform only approximates the sky by a plane and the measurements taken by the telescope do not
+remain coplanar over the course of longer observations. Due to this ``tilting'' of the sampling plane the projected position of sources far away from the centre of the synthesized 
+fields do not remain constant and the brightness of the sources is smeared out as more measurements are integrated into the image. These two sources of error is collectively known
+as the problem of non-coplanar widefield imaging, see for instance Cornwell and Perley \cite{cornwell1992radio}.
+
+One strategy for resolving the sources affected by this smearing is to split the sky up into small narrow field (``facet'') images, tiling the sky in a 
+polyhedron-like fashion \cite{cornwell1992radio}, since the degree to which sources are smeared depends on the distance those sources are from the individual facet image centres. The synthesized
+images produced by such a non-coplanar faceting approach is hard to deconvolve and require reprojection and intensity correction in the overlapping areas. Another strategy uses 
+convolution to introduce a correcting phase shift into each of the individual measurements taken by the instrument over time and is known as w-projection \cite{cornwell2008noncoplanar}. This approach
+relates the non-coplanar measurements to a single plane, eliminating the phase delay introduced by the tilted interferometer baselines. 
+
+In w-projection the resampling cost can be related to the size of the produced images, where as in traditional faceting the cost rise with number of facets. Unlike w-projection faceting 
+is less memory intensive, especially for large images and arrays with very long baseline components. The work in this thesis concentrates on creating coplanar facet images by combining facet 
+imaging and w-projection in what we call \textit{w-faceting}. Due to the nature of imaging using interferometers it is desirable to have baselines as long as possible to improve the resolving
+capability of the telescope, enough baselines in-between to create uniform sampling coverage in the measurement domain and as much collecting area as possible to improve the sensitivity of 
+the instrument. Instruments such as the Square Kilometre Array \cite{carilli2004science} and its pathfinders MeerKAT \cite{booth2009meerkat} and ASKAP \cite{johnston2008science} have significantly more
+baselines than their predecessors such as the Jansky Very Large Array \cite{2041-8205-739-1-L1}. As the baselines grow roughly as the square of the number of antennas, and improved spatial resolving 
+capability and sensitivity decreases the integration time for each measurement made per baseline the data rates from these telescopes provide a tough computational problem for image synthesis. Luckily 
+the linearity of the underlying relationship between the sky and the measurements, and dimensions of the input data and output products, the synthesis pipeline lends itself to the parallel and 
+distributed nature of modern processing equipment. The work in this thesis focus on investigating scalability within shared memory environments, comparing CPU- and GPU-based w-facet imaging.
+Distributed implementation is not within the scope of this work, although the shared memory w-facet technique can be expanded to include multiple processing cluster nodes due to its data-parallel 
+nature.
+\section{Research questions and aims}
+\section{Approach}
 \section{Outline}
