@@ -7,12 +7,12 @@ The following machines were used in generating the results in this chapter:
  51.2 GB/s and average power consumption of 115W \footnote{According to AMD, \url{http://www.amd.com/en-us/products/server/opteron/6000/6300\#}}.
  \item System B:\\
  Most of the GPU results were generated on a machine with 4 8-core Intel Xeon E5-2690 with 1 NVIDIA Tesla K40m co-processor (compute capability 3.5) at Rhodes University. The K40m has a maximum
- memory bandwidth of 288 GB/s and maximum power usage of 215W \footnote{According to the Nvidia Tesla K40 GPU Active Accelerator Board Specification}. The Nvidia CUDA toolkit 
+ memory bandwidth of 288 GB/s and maximum power usage of 215W \footnote{According to the NVIDIA Tesla K40 GPU Active Accelerator Board Specification}. The NVIDIA CUDA toolkit 
  version 6.5 was used to compile our imager. 
  \item System C:\\
  A development machine with an Intel Core i7-4770, a quad-core processor with a maximum memory bandwidth of 25.6 GB/s \footnote{\url{http://ark.intel.com/products/75122/Intel-Core-i7-4770-Processor-8M-Cache-up-to-3_90-GHz}}. 
- The machine has a Nvidia GTX 770 card installed with a maximum memory bandwidth of 224.3 and power usage of 
- 230W \footnote{According to Nvidia \url{http://www.geforce.com/hardware/desktop-gpus/geforce-gtx-770/specifications}}. The Nvidia toolkit version 6.5 was used to compile our imager.
+ The machine has a NVIDIA GTX 770 card installed with a maximum memory bandwidth of 224.3 and power usage of 
+ 230W \footnote{According to NVIDIA \url{http://www.geforce.com/hardware/desktop-gpus/geforce-gtx-770/specifications}}. The Nvidia toolkit version 6.5 was used to compile our imager.
 \end{itemize}
 
 \section{Metrics}
@@ -31,9 +31,10 @@ To this end we define the following ratio:
 \end{equation}
 We will use the advertised power consumption (in Watts) in our discussion at the end of this chapter.
 \section{Dataset simulation pipelines}
-Three datasets were simulated for the experiments presented in this chapter. The datasets in measurement set format was generated using makems tool\footnote{Available at
-\url{https://github.com/ska-sa/makems}}. Dataset 1 is generated using a benchmarking tool included with our imager. It should be noted that both EVLA and MeerKAT observations
-have many more available channels than the number used; the Expanded Very Large Array has a minimum of 16384 spectral channels\cite{2041-8205-739-1-L1} for instance.
+Ten datasets were simulated for the experiments presented in this chapter. The datasets in measurement set format was generated using the Makems tool\footnote{Available at
+\url{https://github.com/ska-sa/makems}}. Dataset 1 is generated using a benchmarking tool included with our imager. Both the JVLA and MeerKAT observations
+have many more available channels than the number used: the JVLA has a minimum of 16384 spectral channels \cite{2041-8205-739-1-L1} for instance, but we decided to produce
+continuum images with far fewer channels to cut down on the run-time of these experiments.
 
 For each of the telescopes the approximate diffraction limited beam radius is shown, as well as the minimum Nyquest cell size and corresponding number of pixels. The experiments used grids padded
 with enough pixels to account for the size of the convolution filter.
@@ -41,37 +42,39 @@ with enough pixels to account for the size of the convolution filter.
   \centering
   \begin{tabular}[c]{|c||c|c|c|}
   \hline
-  & (1) EVLA (small) & (2) EVLA (large) & (3) MeerKAT (large) \\
+  & (1) JVLA (small) & (2) JVLA (large) & (3) MeerKAT (small to large)\\
   \hline
-  $\tau_\text{observed}$ & 4hrs & 4hrs &\\
+  $\tau_\text{observed}$ & 4hrs & 4hrs & \multicolumn{1}{m{4cm}|}{5mins, 10mins, 15mins, 30mins, 45mins, 60mins, 2hrs \& 3hrs}\\
   \hline
-  $\tau_\text{integration}$ & 8.49056 & 3.00 &\\
+  $\tau_\text{integration}$ & 8.49056s & 3.00s & 3.00s\\
   \hline
-  $\nu_\text{min}$ & 1.2 GHz (L-band) & 1.2 GHz &\\
+  $\nu_\text{min}$ & 1.2 GHz (L-band) & 1.2 GHz & 1.0 GHz (L-band)\\
   \hline
-  D & 25m & 25m &\\
+  $\Delta{\nu}$ & 1.0 MHz & 1.0 MHz & 1.0 MHz\\
   \hline
-  B & 1km (D-conf) & 1km &\\
+  D & 25m & 25m & 13.5m\\
   \hline
-  $N_\text{ant}$ & 27 & 27 &\\
+  B & 1km (D-conf) & 1km & 8km\\
   \hline
-  $N_\text{bl}$ & 378 & 378 &\\
+  $N_\text{ant}$ & 27 & 27 & 64\\
   \hline
-  $N_\text{spw}$ & 1 & 1 &\\
+  $N_\text{bl}$ & 378 & 378 & 2080\\
   \hline
-  $N_\text{chan}$ & 128 & 128 &\\
+  $N_\text{spw}$ & 1 & 1 & 1\\
   \hline
-  $N_\text{corr}$ & 1,2,4 & 4 &\\
+  $N_\text{chan}$ & 128 & 128 & 256\\
   \hline
-  Type & benchmark & ms &\\
+  $N_\text{corr}$ & 1,2,4 & 4 & 4\\
   \hline
-  Dataset size (vis only) & 313.03 MiB & 6.92 GiB &\\
+  Type & benchmark & ms & ms\\
   \hline
-  Diffraction limited Image Radius & 34.35368 arcmins & 34.35368 arcmins &\\
+  Dataset size (vis only) & 313.03 MiB & 6.92 GiB & \multicolumn{1}{m{4cm}|}{1.59 GiB, 3.17 GiB, 4.76 GiB, 9.52 GiB, 14.28 GiB, 19.04 GiB, 38 GiB \& 57.13 GiB} \\
   \hline
-  Critical sampling cell size & 0.42942 arcmins & 0.42942 arcmins &\\
+  Diffraction limited Image Radius & 34.35368 arcmins & 34.35368 arcmins & 84.8239 arcmins\\
   \hline
-  Minimum number of pixels & $80^2$ & $80^2$ &\\
+  Critical sampling cell size & 0.42942 arcmins & 0.42942 arcmins & 0.07157 arcmins\\
+  \hline
+  Minimum number of pixels & $80^2$ & $80^2$ & $1186^2$\\
   \hline
   \end{tabular}
   \caption[]{}
@@ -79,11 +82,11 @@ with enough pixels to account for the size of the convolution filter.
 \end{table}
 \section{Scalability}
 \subsection{Faceting only}
-This set of performance benchmarks focus on creating narrow field facets using the first order approximation to $w(n-1)$. As such full w-projection is disabled.
+This set of performance benchmarks focus on creating narrow-field facets using the first order approximation to $w(n-1)$. As such full w-projection is disabled.
 
 For the first experiment 144 facets are created on both the CPU and GPU. For this experiment w-projection is disabled and the convolution filter
 (real) is limited to full support of 7 pixels. Only a single correlation of dataset 2 is gridded. Both single and double precision performance is indicated in
-Figure~\ref{FIG_FACETING_CPU_VS_GPU}, along with their respecitive power efficiencies in Figure~\ref{FIG_FACETING_CPU_VS_GPU_POWER_EFFICIENCY}.
+Figure~\ref{FIG_FACETING_CPU_VS_GPU}, along with their respective power efficiencies in Figure~\ref{FIG_FACETING_CPU_VS_GPU_POWER_EFFICIENCY}.
 \begin{figure}[ht!]
  \begin{mdframed}
  \centering
@@ -128,7 +131,7 @@ Figure~\ref{FIG_FACETING_CPU_VS_GPU}, along with their respecitive power efficie
     
   \end{tikzpicture}
   \caption{GPU vs CPU Facet Imaging Performance}
-  \label{FIG_FACETING_CPU_VS_GPU_POWER_EFFICIENCY}
+  \label{FIG_FACETING_CPU_VS_GPU}
   \end{mdframed}
 \end{figure}
 
@@ -176,7 +179,7 @@ Figure~\ref{FIG_FACETING_CPU_VS_GPU}, along with their respecitive power efficie
     
   \end{tikzpicture}
   \caption{CPU vs GPU Facet Imaging Power Efficiency}
-  \label{FIG_FACETING_CPU_VS_GPU}
+  \label{FIG_FACETING_CPU_VS_GPU_POWER_EFFICIENCY}
   \end{mdframed}
 \end{figure}
 
@@ -228,8 +231,8 @@ case the total field of view was kept constant. W-projection is kept disabled.
 \end{figure}
 
 The next experiment used dataset 1 and was run using system C. It shows the dependance of gridding 
-performance on the facet transforms. Again no w-projection was enabled, full support of 7 pixels was used and 
-only a single facet is created. The results are shown in Figure~\ref{FIG_FACETING_SUPPORT_CPU}.
+performance on the facet transforms. Again no w-projection was enabled, full filter support of 7 pixels 
+was used and only a single facet is created. The results are shown in Figure~\ref{FIG_FACETING_SUPPORT_CPU}.
 \begin{figure}[ht!]
  \begin{mdframed}
  \centering
@@ -320,7 +323,7 @@ were disabled. Only a single correlation was gridded here.
 \end{figure}
 
 The CPU implementation uses vectorization when w-projection is enabled. Figure~\ref{FIG_WPROJECTION_AVX} shows the speedup between
-AVX-vectorized gridding compared to a non-vectorized implementation gridding 1, 2 and 4 correlations. System C was used in generating
+AVX-vectorized gridding compared to a non-vectorized implementation when gridding 1, 2 and 4 correlations. System C was used to generate
 these results.
 \begin{figure}[ht!]
  \begin{mdframed}
@@ -363,8 +366,8 @@ these results.
 \end{figure}
 
 Figure~\ref{FIG_REAL_VS_WPROJ_CPU} shows the performance of w-projection (2D filter lookup table) with 
-AVX enabled, as well as the performance of real-valued (separable 1D kernel) on the CPU, gridding dataset 1 on
-system C.
+AVX enabled, as well as the performance of real-valued (separable 1D kernel) filtering on the CPU. Here we 
+gridded dataset 1 on system C.
 \begin{figure}[ht!]
  \begin{mdframed}
  \centering
@@ -407,7 +410,7 @@ system C.
 \subsection{W-faceting}
 The next experiment shows scaling performance over filter support size for the K40m 
 when faceting transforms are added to w-projection. Dataset 2 was used in generating
-these results. Figure~\ref{FIG_FACET_VS_NO_FACET_GPU} shows the results of gridding in
+these results. Figure~\ref{FIG_WFACETING} shows the results of gridding in
 single precision.
 \begin{figure}[ht!]
  \begin{mdframed}
@@ -445,25 +448,249 @@ single precision.
   \end{axis}
   \end{tikzpicture}
   \caption{GPU scaling performance when employing both faceting and w-projection}
-  \label{FIG_FACET_VS_NO_FACET_GPU}
+  \label{FIG_WFACETING}
+  \end{mdframed}
+\end{figure}
+\section{Precision}
+Although single precision gridding is desirable in terms of GPU performance the floating point error introduced to the images cannot be ignored and has (to our knowledge) not been documented
+in previous literarure on the subject. We propose the following two experiments:
+\begin{itemize}
+ \item Determine the relative error introduced in measured source brightness by longer observations on a large telescope such as MeerKAT.
+ \item Determine how the relative error grows with filter support size.
+\end{itemize}
+
+For the first experiment we used datasets 3-10. Prior to imaging we set all the visibilities equal to $1+0i$, which must produce a 1 Jy source in the centre of the image. The relative error is then computed as
+follows:
+\begin{equation}
+ \text{Relative Brightness Error (RBE)} := ||\frac{\text{Measured brightness}}{\text{True brightness}}||
+\end{equation}
+
+The relative brightness of the produced source is not the only important metric to consider. We also include an indication of the noise level in the image. Since the simulated data does not contain the expected
+instrumentation and environmental noise, we expect to see a combination of noise introduced by floating point error and gridding interpolation error. By comparing the relative noise level between single and double 
+precision gridding at various integration times and filter support sizes the latter interpolation error, as well as the differences in the amplification effects of the sidelobes of the instrument's PSF can be 
+eliminated as additional noise and noise-amplification sources. To that end we propose the following relative measure of summation error:
+\begin{equation}
+ \text{Relative Summation Noise (RSN)} := \frac{\text{SNR}(I_\text{single})}{\text{SNR}(I_\text{double})}, \text{SNR}(I) := ||\frac{\text{Measured brightness}}{\text{mean}(I)}||
+\end{equation}
+
+Ideally this measure should be very close to 1.0 if there was no inaccuracy introduced by single precision gridding. Since the image is mostly void of emission the signal to noise defined by the mean
+over the entire image should give a good estimation of the background noise levels of the images.
+\subsection{Effect of longer observation time}
+For this experiment we used measurement sets of 5, 10, 15, 30, 45, 60, 120 and 180 minutes in length. We fixed the filter support size at 7 pixels with an oversampling factor of 63 pixels and used the truncated (box-windowed)
+sinc function. A continuum image is made by averaging all 256 channels per observation. The RBE and RSN for these continuum images are plotted in Figure~\ref{FIG_RBE_OBS}.
+\begin{figure}[ht!]
+ \begin{mdframed}
+ \centering
+ \begin{subfigure}[b]{0.95\textwidth}\centering
+  \begin{tikzpicture}
+    \pgfplotstableread{ % Read the data into a table macro
+    Integration	Single		Double
+    5		0.997669994831	1.0
+    10		0.994422316551	1.0
+    15		0.992054581642	1.0
+    30		0.986483573914	1.0
+    45		0.981435239315	1.0
+    60		0.972818374634	1.0
+    120		0.941322088242	1.0
+    180		0.91152715683	1.00000011921
+    }\datatable
+
+    \begin{axis}[
+      legend style={at={(0.5,-0.20)}, anchor=north,legend columns=-1},
+      ymin=0,         % Start y axis at 0
+      xlabel=Integration time (minutes),
+      ylabel=Relative Brightness Error,
+      grid=major,    
+      visualization depends on=x \as \rawx,
+      visualization depends on=y \as \rawy,
+      scale only axis, % The height and width argument only apply to the actual axis
+      height=0.2\textheight,
+      width=0.75\textwidth,
+      nodes near coords,
+      every node near coord/.append style={font=\tiny},
+      minor y tick num=1]
+      \addplot [every node near coord/.append style={shift={(0pt,-15pt)},font=\tiny}, mark=square*, color=blue] table [x=Integration, y=Single] {\datatable};
+      \addplot table [x=Integration, y=Double] {\datatable};
+      \legend{Single Precision, Double Precision}
+    \end{axis}
+    \end{tikzpicture}
+    \caption{}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.95\textwidth}\centering
+    \begin{tikzpicture}
+    \pgfplotstableread{ % Read the data into a table macro
+    Integration	Single		Double		RSN
+    5		33.6028		33.096		1.015313029
+    10		35.3174		33.0377		1.069002987
+    15		36.2047		32.9696		1.098123726
+    30		37.2475		32.7733		1.136519667
+    45		37.6114		32.6921		1.150473662
+    60		42.5812		32.6542		1.304003773
+    120		82.2422		32.5675		2.525284409
+    180		113.129		32.5643		3.474019095
+    }\datatable
+
+    \begin{axis}[
+      legend style={at={(0.5,-0.20)}, anchor=north,legend columns=-1},
+      ymin=0,         % Start y axis at 0
+      xlabel=Integration time (minutes),
+      ylabel=Relative Summation Noise,
+      grid=major,    
+      visualization depends on=x \as \rawx,
+      visualization depends on=y \as \rawy,
+      scale only axis, % The height and width argument only apply to the actual axis
+      height=0.2\textheight,
+      width=0.75\textwidth,
+      nodes near coords,
+      every node near coord/.append style={font=\tiny},
+      minor y tick num=1]
+      \addplot table [x=Integration, y=RSN] {\datatable};
+    \end{axis}
+    \end{tikzpicture}
+    \caption{}
+  \end{subfigure}
+
+  \caption{(a) The RBE is plotted for single and double precision gridding for various observation times. (b) The associated RSNs are shown at the same observation times.}
+  \label{FIG_RBE_OBS}
+  \end{mdframed}
+\end{figure}
+\subsection{Effect of increasing convolution filter support}
+For this experiment we kept the observation time constant at 5 mins and varied the filter support size: 7, 15, 23, 31, 63 and 95px. Again all 256 channels are averaged into
+a single continuum image. Both the RBE and RSN are plotted in Figure~\ref{FIG_RBE_SUP}.
+\begin{figure}[ht!]
+ \begin{mdframed}
+ \centering
+ \begin{subfigure}[b]{0.95\textwidth}\centering
+  \begin{tikzpicture}
+    \pgfplotstableread{ % Read the data into a table macro
+    Integration		Double		Single
+    7			1.0		0.997669994831
+    15			1.0		0.990194618702
+    23			1.0		0.979484
+    31			1.0		0.965025126934
+    63			1.0		0.890448629856
+    95			1.0		0.813774049282
+    }\datatable
+
+    \begin{axis}[
+      legend style={at={(0.5,-0.20)}, anchor=north,legend columns=-1},
+      ymin=0,         % Start y axis at 0
+      xlabel=Filter support size (px),
+      ylabel=Relative Brightness Error,
+      grid=major,    
+      visualization depends on=x \as \rawx,
+      visualization depends on=y \as \rawy,
+      scale only axis, % The height and width argument only apply to the actual axis
+      height=0.2\textheight,
+      width=0.75\textwidth,
+      nodes near coords,
+      every node near coord/.append style={font=\tiny},
+      minor y tick num=1]
+      \addplot [every node near coord/.append style={shift={(0pt,-15pt)},font=\tiny}, mark=square*, color=blue] table [x=Integration, y=Single] {\datatable};
+      \addplot table [x=Integration, y=Double] {\datatable};
+      \legend{Single Precision, Double Precision}
+    \end{axis}
+    \end{tikzpicture}
+    \caption{}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.95\textwidth}\centering
+    \begin{tikzpicture}
+    \pgfplotstableread{ % Read the data into a table macro
+    Integration	Single		Double		RSN
+    7		33.6028		33.096		1.015313029
+    15		34.4974		32.6632		1.056154939
+    23		34.7798		32.6028		1.066773406
+    31		35.9649		32.575		1.104064467
+    63		39.3206		32.5542		1.207850293
+    95		40.4463		32.5522		1.242505883
+    }\datatable
+
+    \begin{axis}[
+      legend style={at={(0.5,-0.20)}, anchor=north,legend columns=-1},
+      ymin=0,         % Start y axis at 0
+      xlabel=Filter support size (px),
+      ylabel=Relative Summation Noise,
+      grid=major,    
+      visualization depends on=x \as \rawx,
+      visualization depends on=y \as \rawy,
+      scale only axis, % The height and width argument only apply to the actual axis
+      height=0.2\textheight,
+      width=0.75\textwidth,
+      nodes near coords,
+      every node near coord/.append style={font=\tiny},
+      minor y tick num=1]
+      \addplot table [x=Integration, y=RSN] {\datatable};
+    \end{axis}
+    \end{tikzpicture}
+    \caption{}
+  \end{subfigure}
+
+  \caption{(a) The RBE is plotted for single and double precision gridding and the RSN is plotted in (b) for various filter support sizes.}
+  \label{FIG_RBE_SUP}
   \end{mdframed}
 \end{figure}
 \section{Discussion}
-Figure~\ref{FIG_FACETING_CPU_VS_GPU} shows that, at least for small facets GPU performance is slightly better than that of a multicore CPU node when gridding in
+Figure~\ref{FIG_FACETING_CPU_VS_GPU} shows that, at least, for small facets GPU performance is slightly better than that of a multicore CPU node when gridding in
 single precision. It is also clear that the parallel CPU imager do not scale linearly with number of cores, most likely due to an imbalance in the workload (the number of
-facets being gridded cannot be divided evenly between CPU cores. This leads to an overall drop in power
-efficiency when using multiple cores. In terms of power efficiency the K40 outperforms the CPU node when comparing the peak performance
-of the CPU cluster at 64 cores, but is slightly less power-efficient than when employing a single multi-core CPU.
+facets being gridded cannot be divided evenly between CPU cores). This leads to an overall drop in power
+efficiency when using multiple cores (Figure~\ref{FIG_FACETING_CPU_VS_GPU_POWER_EFFICIENCY}). In terms of power efficiency the K40 outperforms the CPU node when 
+comparing the peak performance of the CPU cluster at 64 cores, but is slightly less power-efficient than when employing a single multi-core CPU.
 
 As expected the double precision performance on the GPU is significantly lower than single precision performance. The gridding algorithm contains a significant amount of
 integer arithmetic (profiling shows this to be about 50\% when gridding single correlations) and 
-is bounded by memory latencies, the latter can explain why performance is not a third of the single precision
+is bounded by memory latencies. The latter can explain why performance is not a third of the single precision
 performance\footnote{The Kepler Architecture has 1 double precision arithmetic unit for every 3 single precision units}. 
 Forgoing effects of the L2 caches we estimate that a maximum of 64.8 GB/s is transferred over the memory bus of the GPU at a gridding rate of 
-4.05 G, this transfer is significantly lower than the theoretical maximum of the card. The GPU is outperformed by a single multicore CPU and is
-therefore significantly less power efficient when compared to a single 16-core Opteron CPU, of course assuming that
-that enough facets are created to fully utilize the CPU. Considering that the double precision performance achieved on the Haswell series Intel CPUs
-are 2x higher than its single precision performance (Figure~\ref{FIG_FACETING_SUPPORT_CPU}) it is clear that the prefered architecture is a multi-core (even multi-processor)
-CPU node when gridding in double precision.
+4.05 G, this transfer is significantly lower than the theoretical maximum of the card. When gridding in double precision the GPU is outperformed 
+by a single multi-core CPU and is therefore significantly less power efficient when compared to a single 16-core Opteron CPU, of course assuming that
+that enough facets are created to fully utilize the CPU.
 
-Figure~\ref{FIG_FACETING_GPU} shows that once the GPU is saturated with enough work gridding performance increases up to around 4.3 G. 
+Figure~\ref{FIG_FACETING_GPU} shows that once the GPU is saturated with enough work gridding performance increases up to around 4.3 G when faceting and 3.42 G when doing 
+w-projection (Figure~\ref{FIG_WPROJECTION_SUPPORT_SCALING_GPU}. In both single and double precision w-projection filtering is significantly slower than using real filters 
+of the same size. By combining w-projection and faceting to create smaller coplanar facets the drop in gridding performance observed for large filters can be avoided. In this
+context smaller w-facets scales slightly better than regular w-projection with large filters (Figure~\ref{FIG_WFACETING}).
+
+When the CPU-implementation of the imager is run on newer Intel (Haswell Generation) hardware double precision outperfroms single precision (Figure~\ref{FIG_REAL_VS_WPROJ_CPU}). Considering that
+the faceting transforms have very little effect on the run-time for larger convolution kernels (Figure~\ref{FIG_FACETING_SUPPORT_CPU}) in the CPU imager this result is yet another argument against using GPUs when gridding
+in double precision. Assuming near-linear scaling for the first 4 cores (a well-balanced faceting workload as that seen in Figure~\ref{FIG_FACETING_CPU_VS_GPU} for the Opteron hardware) this indicates that
+a single newer generation processor will outperform the K40 when synthesizing multiple larger w-facets using AVX-vectorized convolution operations. The power consumption of that single processor is also much less than the power
+consumption of the K40 (84W compared to 230W).
+
+It should be pointed out that the performance difference between real-valued and w-projection filters for both single and double precision on the CPU can be explained by the fact that the w-projection logic is vectorized (single correlation
+gridding is ~1.35x faster than its counter-part as shown in Figure~\ref{FIG_WPROJECTION_AVX}), whereas in the real-valued logic is not - we don't expect that the anti-aliasing filter will ever need such large support sizes and hence did not
+provide a vectorized implementation for it. Figure~\ref{FIG_WPROJECTION_AVX} also shows that when gridding more correlations at a time (necessary when creating multiple Stokes images or doing Jones corrections per facet) the speedup 
+due to vectorization increase to more than 2.5x when gridding with larger filters.
+
+The results from our precision experiments show that constructing continuum images for a MeerKAT-sized telescope using single precision will introduce significant floating point error. Even though we used input data of the same magnitude (all
+visibilities were $1+0i$) there was a significant divergence in the brightness of the produced source, culminating in a brightness error of $9\%$ for the 3 hour observation (Figure~\ref{FIG_RBE_OBS}). This is likely a slight underestimate 
+for realistic calibrated observations where the observed visibilities may differ more in magnitude). Even more concerning is the fact that the error is distributed across the image and grows even more rapidly than the RBE with 
+increased observation time. Even though the measured brightness of the source is decreasing the SNR of the single precision image increases with observation time, while the SNR of the double precision image stayed close to 
+constant across all the observations. This indicates that the mean value in the single precision images is decreasing with observation time and is also decreasing much faster than the measured brightness. This supports our 
+intuition that the low frequency components of the image (as sampled by the shortest baselines) are worse-effected than the high frequency components (such as the point source in the centre of the image) sampled by the longer baselines. It 
+also apears that the growth in the error of the low-frequency components increases non-linearly with observation time, whereas the error in the measured brightness increases linearly. Figure~\ref{FIG_RBE_SUP} shows that the brightness error 
+grows more rapidly with an increase in filter size than the error seen with increasing observation time. In this figure the RSN grows slower compared to the RSN with increasing observation time - this may be because there are far 
+fewer measurements taken in the central region of the uv plane with a short observation than with a longer observation. 
+
+For comparison we re-run the same support-size experiment on the long 3 hour observation and saw devastating effects in the fidelity of the images produced using single precision gridding (while the images synthesized using double precision
+gridding were uneffected), see Figure~\ref{FIG_PREC_ERROR_IMAGES}. The error in the PSF sidelobe structure across the images support out statement that the low frequency terms are more susceptible to the noise introduced by this rounding
+error than the high frequency components.
+\begin{figure}[ht!]
+ \begin{mdframed} \centering
+    \begin{subfigure}[b]{0.3\textwidth}\centering
+      \includegraphics[width=\textwidth]{images/180min_single_7.png}
+      \caption{7px full support}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}\centering
+      \includegraphics[width=\textwidth]{images/180min_single_15.png}
+      \caption{15px full support}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}\centering
+      \includegraphics[width=\textwidth]{images/180min_single_23.png}
+      \caption{23px full support}
+    \end{subfigure}
+    \caption[Precision error in simulated 3 hour MeerKAT observations]{This figure contains synthesized images when resampling 3 hour observations using filters with 7, 15 and 23 px full support sizes in single precision. We suspect 
+    that there may be overflows on some of the grid cells because the measured brightness on the 23 px filter support image is negative. We eliminated the normalization counter as the cause of this problem since it is always computed in double precision
+    and the double precision images remain accurate at a measured brightness of 1 Jy with a constant SNR.}
+    \label{FIG_PREC_ERROR_IMAGES}
+ \end{mdframed}
+\end{figure}
