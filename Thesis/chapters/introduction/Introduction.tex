@@ -24,11 +24,19 @@ imaging and w-projection in what we call \textit{w-faceting}. Due to the nature 
 capability of the telescope, enough baselines in-between to create uniform sampling coverage in the measurement domain and as much collecting area as possible to improve the sensitivity of 
 the instrument. Instruments such as the Square Kilometre Array \cite{carilli2004science} and its pathfinders MeerKAT \cite{booth2009meerkat} and ASKAP \cite{johnston2008science} have significantly more
 baselines than their predecessors such as the Jansky Very Large Array \cite{2041-8205-739-1-L1}. As the baselines grow roughly as the square of the number of antennas, and improved spatial resolving 
-capability and sensitivity decreases the integration time for each measurement made per baseline the data rates from these telescopes provide a tough computational problem for image synthesis. Luckily 
+capability and sensitivity decreases the integration time for each measurement made per baseline the data rates from these telescopes provide a tough computational problem for image synthesis. Luckily due to
 the linearity of the underlying relationship between the sky and the measurements, and dimensions of the input data and output products, the synthesis pipeline lends itself to the parallel and 
-distributed nature of modern processing equipment. The work in this thesis focus on investigating scalability within shared memory environments, comparing CPU- and GPU-based w-facet imaging.
+distributed nature of modern processing equipment. The work in this thesis focus on investigating resampling scalability within shared memory environments, comparing CPU- and GPU-based w-facet imaging.
 Distributed implementation is not within the scope of this work, although the shared memory w-facet technique can be expanded to include multiple processing cluster nodes due to its data-parallel 
 nature.
 \section{Research questions and aims}
+We have identified the following research questions for our research:
+\begin{enumerate}
+ \item Is GPU-based w-faceting more scalable than a CPU-based parallel and vectorized implementation?
+ \item Does single precision gridding introduce any significant error in the synthesized images?
+ \item What effect does double precision resampling have on resampling performance?
+\end{enumerate}
+
+
 \section{Approach}
 \section{Outline}
