@@ -1,23 +1,23 @@
 \chapter{Conclusion and future work}
-In this work we investigated coplanar faceting as a solution to the problem wide field synthesis imaging using non-coplanar baselines.
-Our work combines the approaches w-projection with traditional facet imaging in order to cut down on the significant memory requirements of 
+In this work we investigated coplanar faceting as a solution to the problem of wide field synthesis imaging using non-coplanar baselines.
+Our work combines the approaches of w-projection and traditional facet imaging in order to cut down on the significant memory requirements of 
 storing and looking up values in the large convolution filters associated with large fields of view. We compared the scalability of this coplanar
 faceting approach to w-projection in both single and double precision, drawing a comparison between an optimized multi-threaded CPU facet imager and a 
 GPU imager. We also investigated the accuracy of gridding in single and double precision.
 
 In line with previous work, we found that single precision imaging scales well on the GPU. Our work shows that the GPU is substantially (2.28x) more 
 power-efficient than using a multi-core multi-processor processing solution. Muscat \cite{muscat2014high} points out that double precision 
-gridding will be slower on GPUs, but did not investigate this further. Our work sheds some light on GPU double precisiong scalability and found that w-projection
+gridding will be slower on GPUs, but did not investigate this further. Our work sheds some light on GPU double precision scalability and found that w-projection
 using double precision is only on average ~71\% slower than single precision w-projection from filter support sizes of 23px and upward, primarily because 
 the performance of gridding is constrained by memory access latencies. 
 
-We showed that the combination of w-projection and faceting (which we refer to as ``w-faceting'') will scale slightly better than when using w-projection only on GPUs, 
-since the efficiency of the w-projection algorithm drops with increasing filter size. In light of the results generated using newer CPU hardware we recommend that w-faceting be
+We showed that the combination of w-projection and faceting (which we refer to as ``w-faceting'') will scale slightly better than when using w-projection, 
+since the efficiency of the w-projection algorithm drops with increasing filter size on GPUs. In light of the results generated using newer CPU hardware we recommend that w-faceting be
 performed on a multi-core (possibly multi-processor) CPU environment instead of a GPU when imaging using double precision.
 
 Our investigations into the accuracy of single and double precision yielded concerning results, especially since current GPU implementations assume single precision gridding. We found
 that for arrays containing a larger number of antennae, such as MeerKAT the error introduced in images due to choice of precision is considerable (9\% when using only small 7px filters). 
-We also found that this additional source of noise effect the lower frequency components of the image more than it effects higher frequency terms, such as point sources. This 
+We also found that this additional source of noise effect the lower frequency components of the image more than it effects higher frequency terms (such as point sources). This 
 non-uniform nature in the noise is worrisome because it will adversely effect the dynamic range of images with extended emission structure. This merits further investigation
 to determine the suitability of current imaging implementations for core-dense arrays such as the SKA \cite{skaconfig}. We note that the image oversampling factor 
 (cell size above Nyquest rate) and gridding implementations using time and frequency compression may decrease this error on the short baselines, but should be investigated 
