@@ -1,11 +1,110 @@
+\begin{titlepage}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
+
+\center % Center everything on the page
+ 
+%----------------------------------------------------------------------------------------
+%	LOGO SECTION
+%----------------------------------------------------------------------------------------
+
+\includegraphics[width=0.25\textwidth]{images/UCT-logo.jpg}\\[1cm] % Include a department/university logo - this will require the graphicx package
+
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\HRule \\[0.4cm]
+{ \huge \bfseries Accelerated coplanar facet radio synthesis imaging}\\[0.4cm]
+\HRule \\[1.5cm]
+
+
+\begin{center}
+ {\large Dissertation presented in fulfillment of the requirements for the degree of} \\
+ {\large \textbf{MASTERS OF SCIENCE}} \\
+ {\large in the Department of Computer Science} \\
+ {\large University of Cape Town}
+\end{center}
+\vspace{0.15\textheight}
+%----------------------------------------------------------------------------------------
+%	AUTHOR SECTION
+%----------------------------------------------------------------------------------------
+\begin{minipage}{0.4\textwidth}
+\begin{flushleft} \large
+\emph{Author:} \\
+Benjamin \textsc{Hugo} \\
+{\small \textit{Department of Computer Science, University of Cape Town}}\\
+\end{flushleft}
+\end{minipage}
+~
+\begin{minipage}{0.4\textwidth}
+\begin{flushright} \large
+\emph{Supervisors:} \\
+James \textsc{Gain} \\
+{\small \textit{Department of Computer Science, University of Cape Town}}\\
+Oleg \textsc{Smirnov} \\
+Cyril \textsc{Tasse} \\
+{\small \textit{Department of Physics and Electronics, Rhodes University}}
+\end{flushright}
+\end{minipage}\\[3cm]
+
+% If you don't want a supervisor, uncomment the two lines below and remove the section above
+%\Large \emph{Author:}\\
+%John \textsc{Smith}\\[3cm] % Your name
+
+%----------------------------------------------------------------------------------------
+%	DATE SECTION
+%----------------------------------------------------------------------------------------
+{\large February 2016}\\[1.5cm] % Date, change the \today to a set date if you want to be precise
+
+\vfill % Fill the rest of the page with whitespace
+
+\end{titlepage}
+
 \chapter*{Abstract}
  \addcontentsline{toc}{chapter}{Abstract}
- TODO
+ Imaging in radio astronomy entails the Fourier inversion of the relation between the sampled spatial coherence of an electromagnetic field and the intensity of its 
+ emitting source. Due to significant computational savings this inversion is normally computed by performing an expensive convolutional resampling step and applying 
+ the Inverse Fast Fourier Transform. Unfortunately the resulting planar approximation the sky is only valid over small regions. When imaging over wider fields of view,
+ and in particular using telescope arrays with long non-East-West antenna arrays, significant distortions are introduced on the computed image. We propose a coplanar faceting
+ algorithm using small w-projected narrow field images to alleviate some of the memory constraints of previous w-projection implementations. We compared the scaling performance of
+ both single and double precision resampled images on both an optimized multi-threaded CPU implementation and a GPU implementation that uses a well-known work distribution strategy
+ that limits memory accesses. We found that such a w-faceting approach scales slightly better than a traditional w-projection approach on GPUs. We also found that
+ double precision resampling on GPUs is about 71\% slower than its single precision counterpart, making double precision resampling on GPUs less power efficient than CPU-based double 
+ precision resampling. Lastly we have seen that employing only single precision in the resampling summations produced significant error in continuum images for a MeerKAT-sized a
+ rray over long observations, especially when using the large convolution filters necessary to create large images.
+ 
 \chapter*{Acknowledgements}
  \addcontentsline{toc}{chapter}{Acknowledgements}
- TODO
+ I would like to thank my supervisors James Gain, Oleg Smirnov and Cyril Tasse for their very insightful discussions without which this work would have taken significantly longer to complete, as well as 
+ their guidance over the period of February 2014 to February 2016. James Gain and the Computer Science Department of the University of Cape Town provided the necessary equipment funding for a 
+ development machine, as well as work space for both years. Thanks go to the SKA South Africa and Oleg Smirnov for funding trips to Rhodes University to meet up and work with my Rhodes colleagues.
+ 
+ Secondly I would like to thank my peers in the Computer Science Department, Radio Astronomy Techniques and Technologies group of the Department of Physics and Electronics at Rhodes University and
+ various people at the Cape Town branch of the Square Kilometre Array South Africa for their insight into some of the problems I ran into while developing the imaging software.Thanks also go to both imaging
+ experts Richard Perley and Bill Cotton from the National Radio Astronomy Observatory (NRAO, US) who provided valuable insights into facet imaging.
+ 
+ I also want to thank my friends, family and my parents for their support over the last couple of years, especially in the latter half of 2015.
+ 
+ We acknowledge and thank the National Research Foundation (NRF) of the Republic of South Africa for providing the necessary funding to support this research. Use was made of the University of Cape Town
+ Information and Communication Technology Services' high performance HEX cluster. In particular I would like to thank Andrew Lewis for his assistance in setting up the necessary software packages and 
+ dependencies of our software package.
 \chapter*{Plagiarism}
  \addcontentsline{toc}{chapter}{Plagiarism}
- TODO
+ I acknowledge that plagiarism is wrong and hereby declare that the work contained in this document and in the supporting software is my own, save for that which is properly acknowledged.
+ \vspace{55pt}
+ 
+ Benjamin Vorster Hugo
+ \clearpage
+  \topskip0pt
+  \vspace*{\fill}
+    \begin{center}
+     \huge
+     The source code for the imaging software package (along with its full development history) accompanying this document is publicly available on the Rhodes University Radio Astronomy 
+     Techniques and Technologies software repository at \url{https://www.github.com/ratt-ru/bullseye}. As such no part of the source code will be printed in this document.
+    \end{center}
+  \vspace*{\fill}
  \clearpage
 {\let\clearpage\relax \tableofcontents \listoffigures \listoftables}
