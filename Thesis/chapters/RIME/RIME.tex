@@ -3,7 +3,7 @@ In this chapter we give the reader a ``grand tour'' \footnote{It is important to
 electrical engineering and, increasingly, high performance and distributed computing. The following texts provide further insight for those with a computing background (we recommend 
 reading the first three texts in order before moving to synthesis imaging):
 \begin{itemize}
- \item \textit{Antennas: Fundamentals, Design, Measurement} \cite{blake2009antennas} serves as a good introductory text on general [communications] radio antenna design from an electrical engineering perspective. Chapters 1 through 4
+ \item \textit{Antennas: Fundamentals, Design, Measurement} \cite{blake2009antennas} serves as a good introductory text on general communications radio antenna design from an electrical engineering perspective. Chapters 1 through 4
  are very insightful.
  \item \textit{A Scientist and Engineer's guide to Digital Signals Processing} \cite{smith1997scientist}. Available freely at \url{http://www.dspguide.com/}. A must-read introduction to core digital 
  signals processing techniques, which cover sampling theory, introductory filter design and a good starter on the practical uses of Fourier transforms.
@@ -14,17 +14,18 @@ reading the first three texts in order before moving to synthesis imaging):
  \item \textit{Interferometry and Synthesis in Radio Astronomy} \cite{thompson2008interferometry} covers the imaging pipeline in great detail from correlation through calibration, cleaning
  and beyond. A very valuable reference.
 \end{itemize}
-} of how radio telescopes make measurements of the radio sky. A mathematical model relating the radio sky to these measurements is derived,
-and in the chapter on synthesis imaging we'll discuss the inversion of this model and some of the complications that arise when doing so.
+} of how radio telescopes make measurements of the radio sky. A mathematical model known as the Radio Interferometric Measurement Equation that relates the radio sky to these measurements is derived.
+This chapter aims to gradually build up an understanding of the data products that are measured, defines the necessary coordinate systems used in the observation and how modern aperture synthesis
+telescopes are used in synthesis imaging observations. In the next chapter we will discuss the inversion of this model and some of the complications that arise when doing so.
 \section{The radio universe}
 Just as with visible light, radio waves are a form of electromagnetic radiation (consisting of waves with an electrical and perpendicular magnetic component), which propagates through free space at the speed 
 of light. Recall from elementary physics that the frequency and wavelength of a wave are related:
 \begin{equation*}
  \nu = \frac{v}{\lambda}
 \end{equation*}
-where: $\nu$ is the frequency, $\lambda$ is the wavelength and $v$ is the velocity of the propagation of the wave in some propagation medium\\
+where: $\nu$ is the frequency, $\lambda$ is the wavelength and $v$ is the velocity of the propagation of the wave in some propagation medium.\\
 
-In a vacuum and far away from obstacles (\textit{free space}) electromagnetic waves propagate at a constant velocity, $c\approx 3\text{x}10^8m.s^{-1}$. This velocity is only slightly reduced
+In a vacuum and far away from obstacles (\textit{free space}) electromagnetic waves propagate at a constant velocity, $c\approx 3\text{x}10^8\text{ms}^{-1}$. This velocity is only slightly reduced
 when propagating though most other media. We can conveniently measure these wavefronts with telescopes of various form at either ground-level or from planetary orbit. 
 
 Generally speaking, black bodies (sources that near-perfectly absorb all incoming electromagnetic radiation) will radiate this energy over a very wide 
@@ -42,43 +43,41 @@ band of the electromagnetic spectrum. See Figure~\ref{fig_plank}.
 \end{figure}
 
 Large bodies like planets and stars are generally considered to be of this type. Black bodies have to be very hot 
-in order to be observed in radio if they are significantly far outside our solar system. One would expect the radio sky to be
-quite empty if this was the only source of radio emission in nature and it placed a damper on radio observation until 
-Karl Jansky's observation of radio electromagnetic radiation stemming from cosmic sources in the early 1930s sparked interest in observing 
-this region of the spectrum. 
+in order to be observed in radio if they are far outside our solar system. One would expect the radio sky to be
+quite empty if this was the only source of radio emission in nature. This placed a damper on radio observation until 
+Karl Jansky's observation of radio electromagnetic radiation stemming from the centre of the galaxy in the early 1930s sparked renewed 
+interest in this region of the spectrum. 
 
 We know now that electromagnetic energy can be emitted by both thermal and non-thermal sources. These thermal sources not only include
-black bodies, but can also include, for example, ionized gasses, such as ionized hydrogen. On the other hand, a good example of 
-non-thermal emission is the synchrotron emission by electrons accelerated radially through magnetic fields. 
-An example of a source of the latter are pulsars. 
+black bodies, but can include, for example ionized gasses such as ionized hydrogen. On the other hand, a good example of 
+non-thermal emission is the synchrotron emission by electrons accelerated radially through magnetic fields and the HI absorption line.
 
 One would expect radio waves to have the same optical properties as visible light, since they too are a form of electromagnetic radiation. These are, respectively, reflection, refraction (bending as these waves propagate
-through mediums of different densities), diffraction and interference. The last two phenomena are of particular importance in our discussion on radio telescopes and can only be described using
-physical optics. Interference can either be constructive or destructive by nature. When two or more waves collide the resulting wave will be the sum total of the colliding waves. If the incoming waves are perfectly 
-in phase (their crests line up perfectly) the resulting wave will have the combined amplitude of the contributing waves. However, if they are out of phase the resulting wave may have significantly reduced amplitude. 
-As for diffraction, Huygens' principle states that each point on an incoming wavefront (either planar or curved) acts as a point source on its own. The secondary waves produced by each of these point sources 
+through media of different densities), diffraction and interference. The last two phenomena are of particular importance in our discussion on radio telescopes and can only be described using
+physical optics. Interference can either be constructive or destructive in nature. If the incoming waves are perfectly in phase (their crests line up perfectly) the resulting wave will have the combined amplitude of the contributing waves. 
+However, if they are out of phase the resulting wave may have significantly reduced amplitude. As for diffraction, Huygens' principle states that 
+each point on an incoming wavefront (either planar or curved) acts as a point source on its own. The secondary waves produced by each of these point sources 
 propagates forward radially and a new wavefront is formed where they experience maximum constructive interference. This explains why even planar waves can seemingly ``bend'' around obstacles.
 
 In free space the total energy along the wavefront is conserved as it propagates forward, provided 
 the wavefront is of reasonable extent (significantly longer than a wavelength). This also means that the energy density 
-on each of these wavefronts will decay at a rate proportional to the square of the distance between the front and its emitting source, hence
-the requirement that the emitting source is sufficiently far away from the observing telescope. 
+on each of these wavefronts will decay at a rate proportional to the square of the distance between the front and its emitting source. Hence the emitting 
+source should be sufficiently far away from the observing telescope that the wavefront remains approximately planar over the entire area of the telescope. 
 
-When these waves propagate through some medium other than that of a vacuum the decrease in directional energy is not the only form of attenuation. In an
+When these waves propagate through some medium other than a vacuum the decrease in directional energy is not the only form of attenuation. In an
 atmosphere, depending on the wavelength, some particles such as oxygen and water vapor will absorb and scatter a significant portion of the incoming 
-energy (especially at shorter wavelengths). At the very long wavelengths the charged ionosphere is effectively opaque and acts as a good reflector. This may 
-be ideal when trying to transmit signals very far beyond the horizon, but makes astronomical observation at such wavelengths impossible.  Due to these additional attenuation 
-factors ground-based observation is effectively limited to the spectrum of visible light and the, vastly wider, radio band. Most of the in-between 
-infrared spectrum is only observable at high altitudes and under dry conditions, see Figure~\ref{fig_radio_window}. 
+energy (especially at shorter wavelengths). At very long wavelengths the charged ionosphere is effectively opaque and acts as a good reflector. This may 
+be ideal when trying to transmit signals very far beyond the horizon, but makes astronomical observation at such wavelengths impossible.  Due to these 
+additional attenuation factors ground-based observation is effectively limited to the spectrum of visible light and the, vastly wider, radio band. Most 
+of the infrared spectrum in-between is only observable at high altitudes and under dry conditions, see Figure~\ref{fig_radio_window}. 
 
 In addition to the optical properties of electromagnetic waves and their attenuation one has to consider the direction of propagation of each point on the incoming wavefront. If most of the energy of these points is strongly 
 directional the wave is said to be \textit{polarized}. For polarized emissions the path traced by each point (of either the electrical or magnetic components) will be highly regular; it will 
 remain in a single plane (\textit{linear} polarization), will spiral at a fixed diameter (\text{circular} polarization) or will spiral elliptically. 
 
 We can draw on an application of this property from an everyday context: in the visible spectrum sunglasses will filter out all light except vertically polarized light, in order to reduce glare. A single-feed radio 
-antenna will similarly measure a single directional component, and will therefore only be useful in measuring strongly polarized sources. Such antennae are not useful for general observations, except for highly directional
-sources. In most contexts it is more useful to have two perpendicular feeds (a dipole is a simple example) in order to fully describe the incoming wavefront of the field parallel to the dipole (or at least 
-the electric component thereof). When the energy measured by both feeds are roughly equal the emitting source is said to be \textit{unpolarized}.
+antenna will similarly measure a single directional component, and will therefore only be useful in measuring strongly polarized sources and the total power received by the antenna is at most half the power that would have been
+collected by perpendicular feeds (a dipole is a simple example). Additionally two feeds are desirable because the measurements they take fully describes the polarization of the incoming wavefront.
 \begin{figure}[ht]
  \begin{mdframed}
  \centering
@@ -89,32 +88,29 @@ the electric component thereof). When the energy measured by both feeds are roug
  \end{mdframed}
 \end{figure}
 
-Since the early days significant progress has been made towards increasing in the sensitivity and size of these radio telescopes. Next we will explore 
+In the last century significant progress has been made towards increasing the sensitivity and size of these radio telescopes. Next, we will explore 
 how a single-element telescope works, before moving onto the topic of aperture synthesis with array-based telescopes.
-
 \section{Single antenna telescopes}
 \subsection{Overview}
-Maxwell's set of partial differential equations (1873) is one of the most elegant ways of explaining the relationship between electrical and magnetic fields, and how these can propagate at the speed of light 
-though free space. In summary they state that a when current flows, a magnetic field is created in the surrounding space. When this magnetic field is varied an accompanying perpendicular electrical field is formed. This electrical field 
+Maxwell's set of partial differential equations (1873) is one of the most elegant ways of explaining the relationship between electrical and magnetic fields, and how these propagate at the speed of light 
+though free space. In summary they state that when current flows, a magnetic field is created in the surrounding space. When this magnetic field is varied an accompanying perpendicular electrical field is formed. This electrical field 
 varies at the same frequency as the magnetic field, which in turn varies at the frequency at which the underlying current changes. Not only does this mean that antennae can generate electromagnetic fields and transmit signals, 
 but in fact that any transmitting antenna can be used as a receiver and vice versa, assuming that it is capable of dealing with high voltages and is efficient enough for the particular application domain. Radio telescopes 
-take the form of receivers and, as with terrestrial radio transmission, the extraterrestrial electromagnetic radiation will induce measurable current in the antenna - much more so at shorter wavelengths 
-because of the opaqueness of the ionosphere at longer wavelengths.
+take the form of receivers and, as with terrestrial radio transmission, the extraterrestrial electromagnetic radiation will induce measurable current in the antenna.
 
 To simplify our discussion we will only consider directional antennae (a simple parabolic reflector with an axial feed above the center of the parabola is 
 one such choice). Here the parabolic reflector serves either to focus highly directional incoming energy to a single point, or conversely to 
-focus the energy of the transmitter into a very narrow beam. Because the wavelengths of radio waves are the size of man-made objects the geometrical optics 
-used in optical telescopes, where waves can be considered as rays, are of very limited use. It is preferable to describe these antennae in terms of 
-physical optics.
+focus the energy of the transmitter into a very narrow beam. Because of the wavelengths of radio waves geometrical optics, where waves can be 
+considered as rays, are of very limited use. It is preferable to describe these antennae in terms of physical optics.
 
 Consider, for the moment, that the telescope is suspended in free space with no obstructions in its vicinity (including the ground or supports). If
 we also discard the effects of the feed between this focus and measuring equipment, then the energy measured at the focus 
 of the parabola should be the sum of contributions across the extent of the collected wavefront. However, instead of focusing all 
-energy at one single point, as one would expect when using geometrical optics, an interference pattern is formed. Here
+energy at a single point, as one would expect when using geometrical optics, an interference pattern is formed. Here
 distinct beams are discernible (a close analogue to this is the interference pattern formed when light passes through a narrow slit).
 If a cutting plane were to be placed horizontally at the focus of the parabola a single ``primary'' beam of maximum 
 constructive interference would be noticed, along with several minor lobes to either side of that primary beam. The lobes right 
-next to the primary beam are appropriately termed ``side'' lobes (refer to Figure\ref{diffraction_pattern}). A highly directional antenna 
+next to the primary beam are appropriately termed ``side'' lobes (refer to Figure~\ref{diffraction_pattern}). A highly directional antenna 
 limits the maximum amplitude of these lobes considerably. It is important to note that an isotropic antenna will not have a single primary 
 lobe, but may have several main lobes of equal amplitude. 
 
@@ -125,7 +121,7 @@ lobe, but may have several main lobes of equal amplitude.
   \includegraphics[width=0.5\textwidth]{images/radiation_pattern.png}
   \caption[Collection of electromagnetic wave energy and response]{Here the wave pattern of a parabolic aperture is 
   illustrated with a single cutting plane. The interference pattern created at the focus (illustrated on the right) is analogous to the interference pattern 
-  of visible light when passing through a single narrow slit. Directional antennae form a discernible primary lobe, with several minor lobes of decreasing magnitudes to
+  of visible light when passing through a single narrow slit. Directional antennae form a discernible primary lobe, with several minor lobes of decreasing magnitude to
   either side. The beam width of the primary lobe is usually defined as being at the level where the electric intensity is halved (around $1/\sqrt{2}$ of the maximum response).
   At approximately $\frac{\lambda}{D}$ the ``first null'' appears ($D$ is the diameter of the aperture). This is the first point of complete destructive interference. When synthesizing
   an image  of a source which extends beyond the primary beam, one will notice a severe drop in the intensity of its edges. Images taken from \textit{Radiotelescopes} \cite{christiansenradiotelescopes} 
@@ -136,10 +132,10 @@ lobe, but may have several main lobes of equal amplitude.
 
 When placing the antenna back into a more realistic context: relatively close to the ground and taking the resistance of the feed connecting the antenna
 to measuring equipment into account, this radiation pattern changes considerably to a so-called ``absolute'' beam pattern.
-As expected the ground and any large nearby object will act as a reflector. Although the intensity of the reflection will vary depending
+As expected the ground and any large nearby object will act as a reflector. Although the intensity of the reflection varies depending
 on how level the surrounding terrain is and its conductivity (dry or wet conditions) it cannot simply be ignored. Because the reflected wave may
-be out of phase depending on the height of the antenna and its declination, portions of the primary beam in the vertical direction
-may experience significant destructive interference.
+be out of phase depending on the height of the antenna and its elevation angle, portions of the primary beam may experience significant 
+destructive interference.
 
 The gain, $G$, of the antenna is defined as the ratio of radiation intensity collected in a given direction (as when emitted by a highly 
 directional source), to the intensity that would have been obtained when receiving radiation isotropically. This definition includes feed losses
@@ -149,19 +145,19 @@ the effective area of the antenna. The effective area is defined in terms of the
  A_e = \frac{G\lambda^2}{4\pi}
 \end{equation*}
 Assuming absolutely no losses occur in the measured electric density and no phase errors are introduced, this effective area will approach the geometric area of telescope in the direction
-of maximum constructive interference. In practical application this is never achieved. The effective collecting area of the telescope is limited by a variety of
-factors including, but not limited to, aperture surface deformation, blockage of the collecting area by support struts and the radiating properties of the feed.
+of maximum constructive interference. In practical applications this is never achieved. The effective collecting area of the telescope is limited by a variety of
+factors including, but not limited to, aperture surface deformation, blockage of the collecting area by support struts, and the radiating properties of the feed.
 
 It is worth pointing out that these radiating patterns are measured in the far field of the antenna (at distances at least $\frac{2D^2}{\lambda}$ from
 the antenna where $D$ is the diameter of the aperture) to avoid any near-field reactive effects. The gain of an antenna must therefore be seen as a 
 far-field concept.
 
-In addition to the effective collecting area just defined all antennae are only considered effective for a limited spectrum of frequencies (or ``bandwidth''). 
+In addition to the effective collecting area just defined, all antennae are only considered effective for a limited spectrum of frequencies (or ``bandwidth''). 
 This may be either a narrow or a wide band of frequencies. Size is one of the factors governing effectiveness when it comes to bandwidth. 
-Although there are no hard and fast rules about the size of antennae, a general rule of thumb is that antennae smaller than $0.5\lambda$ are considered electrically small and antennae more than 
-about $100\lambda$ are considered electrically large, and are capable of attaining much higher gains in the case of directional antennae.
+Although there are no hard and fast rules about the size of antennae, a general rule of thumb is that antennae smaller than $0.5\lambda$ are considered electrically small 
+and antennae more than about $100\lambda$ are electrically large, and are capable of attaining much higher gains in the case of directional antennae.
 
-For astronomical purposes it is very important to have an antenna much larger than $\lambda$ in order to increase both sensitivity 
+For astronomy purposes it is very important to have an antenna much larger than $\lambda$ in order to increase both sensitivity 
 and resolution. Although large objects may easily be resolved if they are smaller than the primary beam in the response pattern of the antenna, 
 the resolution of finer details depends squarely on the angular resolution of the observing telescope:
 
@@ -171,49 +167,34 @@ the resolution of finer details depends squarely on the angular resolution of th
 where $D$ is the aperture diameter.
 
 Small telescopes will smear finer detail, and point sources right next to each other may not be discernible. The angular resolution is
-an indication of the minimum distance at which two point sources can be separated and still be discernible. This sheds some light on astronomers'
-neverending pursuit of larger and larger telescopes, as evident by the Arecibo observatory in Puerto Rico (Figure \ref{fig_arecibo}).
-
-\begin{figure}[ht]
- \begin{mdframed}
- \centering
- \includegraphics[width=0.7\textwidth]{images/arecibo.jpg}
- \caption[Arecibo Observatory]{At a massive 305m diameter, the telescope at the Arecibo Observatory is amongst the largest single-aperture telescopes in the world. 
- Image courtesy of the National Oceanic and Atmospheric Administration (public domain).}
-  \label{fig_arecibo}
- \end{mdframed}
-\end{figure}
-
+an indication of the minimum distance at which two point sources can be separated and still be discernible.
 \subsection{Measurement}
 For the sake of discussion and to simplify the mathematics we introduce the following simplifying assumptions about radio emission:
 \begin{enumerate}
  \item Most radio sources emit their radiation outward uniformly in all directions (they are \textit{isotropic}),
- \item Sources have roughly the same brightness over their entire area (they are said to be \textit{quasi-monochromatic}), 
- \item The emission from any two astronomical sources (or any two points on a single source) is incoherent: it certainly
- varies with frequency and to some extent with time.
+ \item The emission from any two astronomical sources (or any two points on a single source) is incoherent.
  \item That the distances over which these waves travel are far enough to consider them planar by the time they reach the 
  observing telescope.
 \end{enumerate}
 
 The energy available at the output terminals of a single aperture antenna will be roughly proportional to the electrical intensity per unit area per unit frequency on the 
-collected planar wavefront. This is the electrical flux density, $S$, measured in units $\text{W}\text{m}^{-2}\text{Hz}^{-1}$. It is useful to remind the reader that power is proportional to the square voltage and may 
-practically be used interchangeably.
+collected planar wavefront. This is the electrical flux density, $S$, measured in units $\text{W}\text{m}^{-2}\text{Hz}^{-1}$.
 
 A single antenna telescope measures its power over a limited bandwidth and effective area $A_e$, as explained earlier. Assuming
 no attenuation or delays are introduced by the atmosphere or equipment, and that the antenna measures two complementary polarizations, this 
 means the total power measured by the telescope when pointed in the direction of a single point source is: 
 \begin{equation*}
-W = A_e.S.\Delta\nu
+W = A_e.S.\Delta\nu \text{, where } \Delta\nu \text{ is the observed bandwidth}
 \end{equation*}
 
-Using this total power relation it is easy to see the advantage of averaging several bands together to observe sources of \emph{continuum emission}, although
+Using this total power relation it is easy to see the advantage of averaging several bands together to observe sources of \emph{continuous emission}, although
 observation of spectral line emission (such as the absorption line of abundant neutral hydrogen at 21cm, along with other common elements) is also very 
 important when tracking the evolution of the universe.
 
 Before deriving a more formal mathematical framework to describe the measurements taken of radio sources it is necessary to introduce a 
-cartesian coordinate system centered on the focus of the antenna, tilted such that x and y are the orthogonal horizontal and vertical cutting planes respectively, and z
-is orthogonal to both. The direction of a point on the sky dome (a fictitious unit sphere) is given by the direction cosines, measured according to this local frame. These cosines are 
-denoted by l, m and n respectively (note that $l^2 + m^2 + n^2 = 1$), and can be measured in terms of the azimuth and elevation/zenithal angles to the source along the local horizon.
+cartesian coordinate system centered on the focus of the antenna, tilted such that x and y are the orthogonal horizontal and vertical axis respectively, and z
+is orthogonal to both. The direction of a point on the sky dome (a fictitious unit sphere) is given by the spherical direction cosines, measured relative to this local frame. These cosines are 
+denoted by $l, m$ and $n$ respectively (note that $l^2 + m^2 + n^2 = 1$), and can be measured in terms of the azimuth and elevation/zenithal angles to the source along the local horizon.
 Zenith is the position directly upwards from the telescope. Refer to Figure~\ref{fig_lmn}.
 \begin{figure}[ht]
 \begin{mdframed}
@@ -241,8 +222,9 @@ per steradian over the entire solid angle per unit frequency must then be
     \label{REF_EQN_SINGLE_ANTENNA}
   \end{equation}
 where\\
-  $p$ is traditionally measured in terms of Janskies ($1\text{Jy} := 10^{-26}\text{W}\text{m}^{-2}\text{Hz}^{-1}$) per steradian\\
+  $p$ is traditionally measured in terms of Janskys ($1\text{Jy} := 10^{-26}\text{W}\text{m}^{-2}\text{Hz}^{-1}$) per steradian\\
   $I$ is the flux density measured per unit steradian: $I(l,m) := \frac{\Delta S(l,m)}{\Delta\Omega}$\\
+  $A$ is the directional modulating beam of the antenna
 \begin{figure}[ht]
 \begin{mdframed}
  \centering
@@ -253,19 +235,20 @@ where\\
 \end{figure}
 
 In reality multiple sources will be contributing to this integral, each at a separate angle to the pointing center. The integral should therefore be taken over 
-all contributing sources. It was assumed that these radiate independently of each other. Furthermore, the effects of the atmosphere, specifically frequency 
+all contributing sources. It is assumed that these radiate independently of each other. Furthermore, the effects of the atmosphere, specifically frequency 
 dependent delays and phase rotation, as well as tropospheric effects have been downplayed. The pointing accuracy and radiative properties of the antenna including its internal 
-temperature, polarization leakage, were also downplayed. Some of these effects can be corrected for through direct calibration and model-fitting techniques, 
-but the exact details are beyond the scope of this introductory discussion. Typically calibration can be broken up into three areas:
+temperature, polarization leakage, have also been downplayed. Some of these effects can be corrected for through direct calibration and model-fitting techniques, 
+but the exact details are beyond the scope of this introductory discussion. Typically calibration and preprocessing can be broken up into three areas:
 \begin{itemize}
- \item \textbf{Direct calibration} involves data flagging. This type of calibration is normally used to mark broad portions of the data that is known to be invalid, due to for example
- technical malfunction or terrestrial radio interference. Modern radio astronomy software, for example the CASA reduction suite, have tools for performing this type of calibration.
+ \item \textbf{Flagging}. This preprocessing is completed before imaging and used to mark broad portions of the data that is known to be invalid, due to, for example,
+ technical malfunction or terrestrial radio interference. Modern radio astronomy software, for example the CASA reduction suite, have tools available for automatic flagging.
  \item \textbf{Calibration through known calibrator sources and a priori information} 
  \item \textbf{Self-calibration processes} are iterative processes which typically involve model fitting algorithms and techniques.
 \end{itemize}
 
-For more details the reader is referred to Synthesis Imaging II \cite[Lectures 3, 5, 8 and 10]{taylor1999synthesis}. In the measurement section of the next chapter
-we will refer to a general model which may be used to describe both atmospheric and antenna terms and can be used for self-calibration processes.
+For more details the reader is referred to Synthesis Imaging in Radio Astronomy II \cite[Lectures 3, 5, 8 and 10]{taylor1999synthesis}. In the measurement section of the 
+array-based telescope observations we will refer to a general model, which may be used to describe both atmospheric and antenna terms and can be used for self-calibration 
+processes.
 
 \section{Aperture synthesis with array telescopes}
 \subsection{Overview}
@@ -278,8 +261,8 @@ reduced weight (which is much cheaper to build). The obvious effect is a decreas
 and therefore decreased sensitivity.
 
 Array telescopes can be thought of as a special case of these unfilled apertures. The very simplest way of creating such
-a telescope will be to simply add the signals from all the receivers together before measurement, in order to form a 
-basic ``total power'' telescope. This is only possible if the signals being added together are reasonably \textit{coherent}. If they
+a telescope is to add the signals from all the receivers together before measurement, in order to form a 
+basic ``total power'' telescope. This is only possible if the signals are reasonably \textit{coherent}. If they
 are significantly out of phase the signals will experience destructive interference and the telescope will be
 rendered useless. For the sake of discussion, however, it is assumed that the distances between antennae are fully accounted for: the wavefront 
 collected at different locations will simultaneously arrive at the measurement equipment shortly 
@@ -287,7 +270,7 @@ thereafter, and the increased impedance associated with longer transmission line
 
 Using an array it is possible to ``synthesize'' a single aperture telescope that encompasses the entire array. This
 basic idea is known as \textit{aperture synthesis}. It does, however, pose a serious conundrum: only some areas will be well covered, whereas
-large areas may not be covered at all. As we see later this produces smearing in the synthesized images and is a topic of much 
+large areas may not be covered at all. As we see later the Fourier Transform of this pattern is convolved into the synthesized images and is a topic of much 
 discussion by itself.
 
 The resolving power obtained from such a synthesized aperture depends on the distance between the furthest separated 
@@ -296,13 +279,13 @@ antennae, and can be expressed as:
  \text{angular resolution} \propto \frac{\lambda}{B} \text{ if } D\ll B
 \end{equation*}
 where $D$ is the diameter of the largest aperture in the array and $B$ is the length of the longest \textit{baseline} 
-(the vector defined between the positions of pairs of antennae: $\vec{b}_{pq}=P_p - P_q$). $\lambda$ is the observed wavelength.
+(the vector defined between the positions, $P$, of pairs of antennae $p$ and $q$: $\vec{b}_{pq}=P_p - P_q$). $\lambda$ is the observed wavelength.
 
 Since Martin Ryle and his collaborators made their pioneering observations using array telescopes there has been
 a significant drive towards building arrays of ever-increasing size. In applications where angular resolution is
 the one of the dominant factors it is even possible to connect up telescopes located on different continents, or even orbiting satellites.
 This is appropriately called \textit{Very Long Baseline Interferometry}. For more details refer to the survey 
-conducted by Middelberg et al. \cite{middelberg2008high} for a good introductory overview of VLBI. In the next section we discuss
+conducted by Middelberg et al. \cite{middelberg2008high} for an introductory overview of VLBI. In the next section we discuss
 what is meant by an interferometer and why array telescopes are referred to as radio interferometers
 
 \subsection{Measurement}
@@ -318,10 +301,10 @@ the first and second sensors will tell the observer something about the position
 
 If this bowl of water analogy is scaled up to monstrous proportions, and the water is replaced with free space, it 
 resembles an array telescope. Since the source is assumed to be sufficiently far away, each electromagnetic wave crest 
-will be measured by two (or more) directional antennae at exactly the same time, provided those antennae point
-towards the same sky position. Just as with the bowl of water analogy if the source is slightly offset from the pointing centre of the
-telescope, the phase delay between the arrival of the wave front at two separate antennae will tell the observer something about its 
-offset from the pointing centre. Refer to Figure~\ref{fig_interferometer} for an illustration.
+will be measured by two (or more) directional antennae at exactly the same time, provided the wavefront is parallel to the baseline
+vector between the two antennae and they point in the same direction. Just as with the bowl of water analogy if the source is slightly 
+offset from the pointing centre of the telescope, the phase delay between the arrival of the wave front at two separate antennae will 
+tell the observer something about its offset from the pointing centre. Refer to Figure~\ref{fig_interferometer} for an illustration.
 
 \begin{figure}[ht]
  \begin{mdframed}
@@ -356,80 +339,79 @@ offset from the pointing centre. Refer to Figure~\ref{fig_interferometer} for an
 \rput[bl](3.9601634,-5.5175757){correlator}
 \end{pspicture}
 }
-  \caption[Array-base observation]{In this simplified illustration of a two antenna array the incoming wavefront being measured is produced
+  \caption[Array-based observation]{In this simplified illustration of a two antenna array the incoming wavefront being measured is produced
   by a single source in the direction of $\vec{s}$, offset at an angle $\theta$ from the pointing center,$\vec{s_0}$, of the telescope.
   Here, it is assumed that the pointing center is also the center of maximum response and where the delay between incoming signals
   is exactly zero. The \textit{correlator} measures the degree to which the signals measured at the two antennae correspond 
   (both in phase and amplitude), by measuring the degree of spacial coherence of the incoming wavefront. For now we can assume
   the entire radio interferometer is on level ground, and importantly that the measured wavefronts are planar. As already mentioned
-  the time delay, $\tau$ between the arrival of the wave front between the two antennae corresponds to a phase delay in the measured
+  the time delay, $\tau$ between the arrival of the wavefront between at the two antennae corresponds to a phase delay in the measured
   signal. $c$ is the speed of light.}
   \label{fig_interferometer}
  \end{mdframed}
 \end{figure}
 
-These differences in phase, which depend on the angle of the incoming wavefront with respect to the pointing center, will 
-produce an interference phase pattern that is analogous to Young's double slit experiment, where an interference pattern 
+These differences in phase, which depend on the angle of the incoming wavefront with respect to the pointing center, 
+produces an interference phase pattern that is analogous to Young's double slit experiment, where an interference pattern 
 is formed on a screen when light passes through two small slits (separated by a distance $L$) somewhere in front of the 
 screen. Here the size of the slits are small in comparison to both $\lambda$ and $L$. The first null point occurs at a distance 
-proportional to $\frac{\lambda}{L}$. The only major difference between the two contexts is that the antennae should be
+proportional to $\frac{\lambda}{L}$. The only major difference in context is that the antennae should be
 viewed as narrow slits. Waves from directions $\theta=n\pi, n\in\mathbb{Z}$ will undergo constructive interference, but 
 those from directions $\theta = (n + \frac{1}{2})\pi$ will be invisible to the interferometer. Such an interference 
 pattern is not ideal when resolving large structures.
 
-One way around this problem is to take an additional delayed measurement 
-at $\tau_{delay}=\frac{\pi}{2}$ radians and combine this ``sine interference pattern'' with the original 
+One solution is to take an additional delayed measurement 
+at a phase delay of $\tau_{delay}=\frac{\pi}{2}$ radians and combine this ``sine interference pattern'' with the original 
 ``cosine interference pattern''. In theory this improves the signal to noise ratio by a factor of roughly $\sqrt{2}$ and will 
-produce a response pattern that is sensitive over a wider range of angles. From this point forward whenever referring to the 
+produce a response pattern that is sensitive over a wider range of angles. Hereafter whenever referring to the 
 correlator we will be considering the \textit{complex} correlator. It is convenient to think of the measurements made by such a complex 
 correlator in terms of the polar form of complex numbers. Recall Euler's identity:
 \begin{equation*}
  e^{i\theta} = \cos{\theta} + i\sin{\theta}
 \end{equation*}
 
-As the reader may suspect the mathematical treatment of the measurements taken by these array telescopes are analogous
+As the reader may suspect the mathematical treatment of the measurements taken by these array telescopes is analogous
 to that of a single aperture telescope, except that in the single antenna case the telescope measures the cosine modulated
-flux density directly. Here instead the signals are combined and measured by the external correlator. The mathematical 
+flux density directly. Here, instead, the signals are combined and measured by the external correlator. The mathematical 
 discussion is very similar to that of a single antenna telescope, but will be that of a complex measurement, 
-instead of only dealing with the real domain.
+instead of the real domain.
 
 Up to this point it has been assumed that the signal will not vary over time, and that the measurement equipment is perfect; it 
 does not delay or attenuate the collected signal (commonly referred to as the \textit{instrumental gain}). In reality, however, 
-such perfection is never attained. The sensitivity of the complex interferometer depends firmly on the total collecting area 
-as we already discussed, the resistivity (and associated temperature) of the equipment, including the antenna and amplifying 
-electronics, the bandwidth being integrated as mentioned previously and the integration time. We state without proof here 
-that:
+such perfection is never attained. The sensitivity of the complex interferometer depends firmly on the total collecting area, 
+the resistivity (and associated temperature) of the equipment, including the antenna and amplifying 
+electronics ($T_\text{sys}$), the bandwidth being integrated and the integration time:
 
 \begin{equation}
- \sigma_{noise} \propto \frac{T_{sys}}{\sqrt{\Delta\nu\Delta\tau_{integration}}}
+ \sigma_\text{noise} \propto \frac{T_\text{sys}}{\sqrt{\Delta\nu\Delta\tau_\text{integration}}}
 \end{equation}
 
 At a physical level, sources do vary slightly over time, although we expect their average intensity to be centered around 
-some mean. The instrumentation used for measuring will also contribute some variation in noise level that have to 
+some mean. The instrumentation used for measuring will also contribute some variation in noise level that has 
 be corrected for on a regular basis. With this in mind it is important to make yet another assumption about 
 the physical processes being measured: sources \textit{do not} vary significantly from their mean intensity 
-on a day to day basis. The obvious exception to this are the fast transient sources like pulsars. 
+on a day to day basis. The obvious exceptions to this are the fast transient sources like pulsars. 
 These sources must be observed over very short periods of time, and by implication must be relatively bright.
 Fainter sources have to be observed for much longer to be discernible from noise. This brings up the problem
 of tracking stellar sources.
 
 For this discussion refer to Figure~\ref{fig_celestrial_coords} for a visual reference. Due to the rotation 
-axis of the earth sources on the celestial sphere will appear to move both in azimuth and elevation, steadily moving from East to 
-West and completing a full rotation in just under 24 hours. In order to track sources over a prolonged period of time it is very 
+axis of the earth sources on the celestial sphere will appear to move both in azimuth and elevation, steadily moving from east to 
+west and completing a full rotation in just under 24 hours. In order to track sources over a prolonged period it is very 
 useful to convert their coordinates to a reference frame where the path of a source is determined only by an hour angle. However, for this 
 to work astronomers need a coordinate system that measures the Earth's rotation with respect to the stars and not the sun. 
 
-It may not immediately be apparent that the rising and setting positions of the sun with respect to the local horizon do not remain fixed 
-throughout the duration of a year. If one were to point a camera due East to monitor the sunrise over the course of one year, the rising 
-position will appear to oscillate around true East over the course of the year. Only at two points during the year will the sun rise due East - 
+It may not be immediately apparent that the rising and setting positions of the sun with respect to the local horizon do not remain fixed 
+throughout the duration of a year. If one were to point a camera due east to monitor the sunrise over the course of one year, the rising 
+position would appear to oscillate around true east. Only at two points during the year will the sun rise due east - 
 these are known as the spring and autumn equinoxes. At these points the plane containing the earth's equator intersects the sun. This is the 
-reason why the sun will appear to move along different star constellations throughout the year. 
+reason why the sun appears to move along different star constellations throughout the year. 
 
 Instead astronomers use the local sidereal time as the hour angle to a source. A sidereal day is slightly shorter than the solar day and the reference 
 point for the angle is the vernal equinox - which remains valid on the scale of decades. In this reference frame the equator of the earth is projected 
 out onto the unit celestial sphere mentioned previously. The declination of a source is the distance along the great circle 
-connecting the North Celestial Pole (NCP, the projection of the magnetic north pole onto the unit sphere) and the 
-projected equator.
+connecting the North Celestial Pole (NCP, the projection of the magnetic north pole onto the unit sphere), the source and the 
+projected equator as shown in Figure~\ref{fig_celestrial_coords}.
 
 \begin{figure}[h]
  \begin{mdframed}
@@ -447,11 +429,11 @@ Next we need to amend the local coordinate system defined previously for a singl
 All the antennae in an array will be measured relative to this new coordinate frame. We assume a single antenna is picked as the reference point and all the other antennae 
 positions are measured relative to this ``reference antenna''. 
 
-This local Euclidian frame has the regular components X, Y, Z. If we use a right-handed system where X points in the direction 
-of the $0^h$ hour hand, at a declination of $0^{\circ}$, Y lies on the same plane as X, but points to $18^h$ and Z points straight up 
-towards the North Celestial Pole (NCP), then the baseline is given by the following relation, where $H_0$ and $\delta_0$ are the 
-respective hour angle and declination of the phase reference center and $\lambda$ is the wavelength corresponding to the center 
-frequency of the receiver. Here u, v, w are given by:
+This local Euclidian frame has the regular components X, Y, Z that have its origin at any arbitrary point, usually one of the antennas. If we use a 
+right-handed system where X points in the direction of the $0^h$ hour hand, at a declination of $0^{\circ}$, Y lies on the same plane as X, but 
+points to $18^h$ and Z points straight up towards the North Celestial Pole (NCP), then the baseline is given by the following 
+relation, where $H_0$ and $\delta_0$ are the respective hour angle and declination of the phase reference center and $\lambda$ is the 
+wavelength corresponding to the center frequency of the receiver. Here u, v, w are given by:
 \begin{equation}
  \label{EQN_RIGHTHANDED_SYSTEM}
  \left[\begin{array}{c}
@@ -465,9 +447,9 @@ frequency of the receiver. Here u, v, w are given by:
      \cos{\delta_0}\cos{H_0} 	& -\cos{\delta_0}\sin{H_0}	& \sin{\delta_0}\\
     \end{array}\right]   
  \left[\begin{array}{c}
-     L_X \\
-     L_Y \\
-     L_Z \\
+     X \\
+     Y \\
+     Z \\
     \end{array}\right]
 \end{equation}
 The direction cosines towards a point on the celestial sphere are still given in relation to this relative u, v, w coordinate frame.
@@ -485,29 +467,29 @@ A similar left-handed convention can just as easily be defined ($\alpha_0$ is th
      \cos{\delta_0}\cos{\alpha_0} 	& \cos{\delta_0}\sin{\alpha_0}	& \sin{\delta_0}\\
     \end{array}\right]   
  \left[\begin{array}{c}
-     L_X \\
-     L_Y \\
-     L_Z \\
+     X \\
+     Y \\
+     Z \\
     \end{array}\right]
 \end{equation}
 
 Ignoring the effects of polarization, the directional antenna gain (the beam, as before) and any atmospheric effects
-for the moment, the correlator will measure values proportional to (forgoing some normalization terms):
+for the moment, the correlator will measure power values, $P$, proportional to:
 \begin{equation*}
-    p(u,v,w) \approx \left<\int_{sources}\int_{sources}{E_p(\vec{s})E_q^*(\vec{s'})e^{2\pi i\vec{p}\cdot\vec{s}}e^{-2\pi i\vec{q}\cdot\vec{s'}}d\Omega_pd\Omega_q}\right>     
+    P(u,v,w) \approx \left<\int_{sources}\int_{sources}{E_p(\vec{s})E_q^*(\vec{s'})e^{2\pi i\vec{p}\cdot\vec{s}}e^{-2\pi i\vec{q}\cdot\vec{s'}}d\Omega_pd\Omega_q}\right>     
 \end{equation*}
 
 Here E is the flux density over a small area (stemming directly from equation~\ref{REF_EQN_SINGLE_ANTENNA}). The assumption that two sources at differing locations are 
-not strongly correlated (in other words spatially coherent) and that the sources are very far away is essential in order to simplify this relationship between flux densities 
-and correlator output. Still assuming both source direction vectors ($\vec{s}$ and $\vec{s'}$ from antennas $p$ and $q$ respectively) are unit vectors pointing to positions 
+not strongly correlated (in other words spatially coherent) and that the sources are very far away is essential in order to simplify this relationship. Still assuming 
+both source direction vectors ($\vec{s}$ and $\vec{s'}$ from antennas $p$ and $q$ respectively) are unit vectors pointing to positions 
 on the unit celestial sphere, this assumption implies that $<S_p(\vec{s})S_q^*(\vec{s'})> \neq 0$ only when $\vec{s} = \vec{s'}$. Also note that, since complex fluxes 
-are being measured by the correlator, it is necessary to take the short time averages of the complex conjugate (denoted $^{*}$)
+are being measured by the correlator, it is necessary to take short time averages of the complex conjugate (denoted $^{*}$)
 of one of the antennae in order to measure the total flux contributed by both components - otherwise the difference between
 them will be measured! 
 \begin{equation*}
   \begin{split}
-    p(u,v,w) &\approx \int_{sources}{\left<E_p(\vec{s})E_q^*(\vec{s})\right>e^{-2\pi i(\vec{q} - \vec{p})\cdot\vec{s}}d\Omega}\\
-    p(u,v,w) &\approx \int_{sources}{B(\vec{s})e^{-2\pi i(\vec{b}\cdot(\vec{s}))}d\Omega}\\
+    P(u,v,w) &\approx \int_{sources}{\left<E_p(\vec{s})E_q^*(\vec{s})\right>e^{-2\pi i(\vec{q} - \vec{p})\cdot\vec{s}}d\Omega}\\
+    P(u,v,w) &\approx \int_{sources}{B(\vec{s})e^{-2\pi i(\vec{b}\cdot(\vec{s}))}d\Omega}\\
   \end{split}
 \end{equation*}
 
@@ -518,13 +500,13 @@ incoming (complex) flux from direction $\theta$ as shown in Figure~\ref{fig_inte
 \begin{equation}
  \label{EQN_ONE_CORR_RIME}
  \begin{split}
- p(u,v,w) &\approx \int_{sources}{B(\vec{s})e^{-2\pi i(\vec{b}\cdot(\vec{s}-\vec{s_0}))}d\Omega}\\
+ P(u,v,w) &\approx \int_{sources}{B(\vec{s})e^{-2\pi i(\vec{b}\cdot(\vec{s}-\vec{s_0}))}d\Omega}\\
 	  &\approx \int\int_{sources}{B(l,m,n)e^{-2\pi i(ul+vm+w(\sqrt{1-l^2-m^2}-1))}\frac{dldm}{\sqrt{1-l^2-m^2}}}\\
  \end{split}
 \end{equation}
 
 By no means should this model be taken as a rigorous derivation, but we will use it nonetheless (and slightly amend it 
-along the way). A more rigorous derivation is given by Romney in \cite{taylor1999synthesis}[ch. 4].
+along the way). A more rigorous derivation is provided by Romney in \cite{taylor1999synthesis}[ch. 4].
 
 In reality averaging the flux over a small band of frequencies and, additionally, over short periods of 
 time will result in smeared measurements. It is important to emphasize that the baselines between pairs of antennae are 
@@ -536,7 +518,7 @@ baseline. The correlator response will be maximum only when the source vector is
 correlator must continuously compensate for this delay at the tracking centre, as well as continuously shift the fringe modulation 
 function to the phase centre of the observed field.
 
-Up to this point we have for simplicity only discussed correlator output between single feed antennae.
+Up to this point we have, for simplicity, only discussed correlator output between single feed antennae.
 Just as in the case of a single antenna telescope, the response from such a correlator will only be sensitive to highly 
 directional sources. The correlator may therefore additionally correlate all four combinations between the two orthogonal 
 feeds of each antenna to form a 2x2 matrix of short time averages. Without any loss of generality the flux density 
@@ -560,8 +542,8 @@ V &= I\sin{2\chi}\\
 \begin{mdframed}
 \centering
 \includegraphics[width=0.45\textwidth]{images/poincare_sphere.png}
-\caption[The Poincar\'e Sphere]{The Poincar\'e Sphere gives a visualization of the different polarizations in an electromagnetic field. The angles $2\psi$ and
-$2\chi$ are the angles in a polar coordinate system, with each point on the sphere corresponding to a unique polarization. At $2\chi=0$ (the equator) the polarizations
+\caption[The Poincar\'e Sphere]{The Poincar\'e Sphere gives a visualization of the different polarizations in an electromagnetic field. The angles $2\psi$ ($QU$ plane) and
+$2\chi$ ($QV$ plane) are the angles in a polar coordinate system, with each point on the sphere corresponding to a unique polarization. At $2\chi=0$ (the equator) the polarizations
 are either linear (Q) or orthogonal (U). The northern latitudes ($2\chi > 0$) contain right-handed circular polarization, while the southern hemisphere
 contains the left-handed circular polarizations. $I$ is not linearly independent and describes the total flux of the electromagnetic wave: 
 $I = E_1^2 + E_2^2$ \cite{wilson2009tools}}
@@ -596,7 +578,7 @@ For linear orthogonal feeds the relationship is slightly different \cite{2011A&A
 \end{equation}
 
 Equation~\ref{EQN_ONE_CORR_RIME} may thus be rewritten to take multiple polarizations, equipment gains and directional effects into account through a \textit{Jones} matrix
-formulation, presented by Oleg Smirnov in a series of papers where he discusses their implications for telescope calibration \cite{2011A&A...527A.106S,2011A&A...527A.107S,2011A&A...527A.108S,2011A&A...531A.159S}:
+formulation, presented by Oleg Smirnov in a series of papers \cite{2011A&A...527A.106S,2011A&A...527A.107S,2011A&A...527A.108S,2011A&A...531A.159S}:
 
 \begin{equation}
 \label{eqn_RIME}
@@ -606,22 +588,22 @@ where $K = e^{-2\pi i(u_{pq}l+v_{pq}m+w_{pq}(n-1))}
     \left[\begin{array}{c c}
      1 & 0 \\
      0 & 1 \\
-    \end{array}\right]$ and the G terms are the direction-independent effects, while the D terms are dependent on the direction of 
+    \end{array}\right]$, the G terms are the direction-independent effects and the D terms are dependent on the direction of 
     the source in l,m space. $J^H:=J^{*^T}$ indicates the Hermitian transpose (the transpose of the complex conjugate matrix of J)\\
     
 We shall henceforth refer to this relation as the \textit{Radio Interferometric Measurement Equation (RIME)}. 
 The fundamental assumption here is that all effects on the measured intensities are linear and can therefore be 
 written as two-dimensional matrices. Each antenna will then have its own set of corrections. They 
 include corrections for Faraday rotation, ionospheric effects, tropospheric effects, the primary beam (and any rotation during
-observation) and pointing error due to weather (wind for instance). These corrections only account for amplitude scaling and 
-phase shifts and can be combined in a layered approach by multiplying several of these Jones terms together (note that the terms 
+observation) and pointing error. These corrections only account for amplitude scaling and 
+phase shifts and can be combined in a layered approach by multiplying several Jones terms together (note that the terms 
 may not necessarily commute, so the order of multiplication is important). We will come back to exactly how these terms are applied
-when discussing on how the RIME can be inverted.
+when discussing the inversion of the RIME.
 
 Up to this point the formulation only accounts for two-element arrays. However, the linearity of the system allows us
-to simply combine multiple of these short term averages together to form a single observation using an entire array of
-antennae. In practice, we can correlate the signal between all possible pairs of antennae and only reduce afterwards. 
-This means that the data rates produced in correlation grows quadratically with number of antennae (ie., the number of 
+to simply combine multiple short term averages together to form a single observation using an entire array of
+antennae. In practice, we can correlate the signal between all possible pairs of antennae and reduce afterwards. 
+This means that the data rates produced in correlation grows quadratically with the number of antennae (ie., the number of 
 possible baselines). This includes the auto-correlated baselines (correlation of each antenna with itself).
 \begin{equation}
   \text{number of baselines } = \frac{n(n-1)}{2} + n
@@ -630,17 +612,18 @@ possible baselines). This includes the auto-correlated baselines (correlation of
 Even if many baselines are used to synthesize an aperture it will still be
 very sparsely sampled, especially when considering very large arrays. In fact, only a handful of small points will be 
 sampled during a single integration period - hardly enough to represent a large continuous area! This means that 
-the array telescope will be quite insensitive to very faint sources.
+the array telescope will be insensitive to very faint sources.
 
-The solution to this problem lies in the beauty of the underpinning model just developed: the flux measurements
+The solution to this problem lies in the beauty of the underpinning model: the flux measurements
 are \textit{relative}. Recall also the assumption that the intensity of the sources of electromagnetic radiation 
 \textit{do not vary on a day-to-day basis}. This means an astronomer may fix one end of the baseline, and move the other
 end. Some of the early radio telescope arrays did just this. Although many of the antennae were stationary a handful
 of antennae were placed on tracks. These antennae would be moved to different positions to take multiple observations
 of the sky.
 
-Another, more promising, way of achieving this with much larger arrays is to use the rotation of the earth to rotate
-the baselines radially with respect to the rotation axis of the planet. This may sound strange, but it 
+Martin Ryle and his associates introduced another method for building up the coverage in the measurement domain by using Earth rotation 
+synthesis; as the earth rotates with respect to a fixed point on the celestial dome multiple coherence measurements can be taken, each at a
+different angle to every baseline, and hence along different points in the spatial frequency domain. This may sound strange, but it 
 follows naturally from the way the local coordinate frame was defined in Equation~\ref{EQN_RIGHTHANDED_SYSTEM}. If the
 array tracks some point on the sky at some fixed declination over an extended period of time, the change in the hour
 angle will rotate every baseline. This becomes more explicit once the equation is recast from parametric to implicit form. 
@@ -654,7 +637,7 @@ relation holds:
 
 This ellipse is shifted along the v axis by $\frac{L_Z\cos{\delta_0}}{\lambda}$. The major axis has a length of 
 $\frac{2\sqrt{L_X^2 + L_Y^2}}{\lambda}$. It also follows that at low declinations the baselines 
-of a pure east-to-west array will be nearly parallel to the pointing direction of the telsecope.
+of a pure east-to-west array will be nearly parallel to the pointing direction of the telescope.
 Not only will the foremost antenna shadow the antennae behind it, but there will be little coverage of the u, v
 frame. One way of improving u,v coverage is to add baselines that are sufficiently perpendicular to the 
 rotation of the Earth (as is done in the VLA). However, these baselines are rotated into the w-direction 
@@ -712,3 +695,7 @@ images are synthesized.
   \label{fig_evla_observation}
  \end{mdframed}
 \end{figure}      
+
+Now that the various measurement products, the RIME model relating the sky and these measurements, and observation coordinate systems have been 
+discussed we can move on to the synthesis imaging process where the RIME is inverted to reconstruct the sky intensity distribution. In the next chapter
+we will outline the issues surrounding narrow field imaging and then move on to a discussion on the wide field effect.
