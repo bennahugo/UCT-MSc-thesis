@@ -1,47 +1,43 @@
 \chapter{Bullseye: A parallel targeted facet imager}
 \section{Design objectives}
-The primary design objectives of this work is to build a scalable parallel facet-based imager. A full deconvolution pipeline is currently out of scope, instead 
+The primary design objective of this work is to build a scalable parallel facet-based imager. A full deconvolution pipeline is currently out of scope, instead 
 the focus is on accelerating the gridding step, since this step will be called on multiple times in a major-minor cycle deconvolution pipeline, as discussed in 
 chapter \ref{chapter_synthesis}. To this end we will focus on comparing performance between parallel CPU-based resampling and a GPU approach.
 
-\section{Architecture}
-We've decided to split up the our implementation into two major components:
+\section{Architecture and implementation}
+We have decided to split the implementation into two major components:
 \begin{enumerate}
  \item A front-end program dealing with the logic of reading in measurement data, dealing with user options, overall program flow and image finalization.
  \item A set of back-end libraries that implement a common interface and house the resampling and transformation routines. The resampling routines include options to resample multiple
  correlations and enable faceting and w-projection logic.
 \end{enumerate}
 
-The architecture above allows us to easily swap out one set of resampling routines for another and to compare between CPU and GPU-based implementations. Figure~\ref{fig_arch} shows
-the major components of our imager, along with several major dependencies. 
+The architecture above allows one set of resampling routines to be easily swapped out for another and a comparison between CPU and GPU-based implementations. Figure~\ref{fig_arch} shows
+the major components of our imager, along with several major dependencies.
 \begin{figure}[h]
   \begin{mdframed}
     \centering
-    \begin{subfigure}[b]{0.66\textwidth}
-      \centering
-      \includegraphics[width=\textwidth]{images/bullseye_arch.png}
+      \includegraphics[width=0.75\textwidth]{images/bullseye_arch.png}
       \caption{}
-    \end{subfigure}  
-    \caption[Bullseye Architecture]{The front end of the solution contains a commandline utility that has very similar options to that provided in other imagers, such as lwimager.
+    \caption[Bullseye Architecture]{The front end of the solution contains a command line utility that has very similar options to that provided in other imagers, such as lwimager.
     Included with it are modules required to generate the w-projection convolution functions and a prototype graphical interface illustrating targeted faceting. The backend consists
-    of the resampling routines along with routines to do fourier shifting, inversion and normalization on a set of facets that may each contain multiple spectral images.}
+    of the resampling routines along with routines for Fourier shifting, inversion and normalization on a set of facets that may each contain multiple spectral images.}
     \label{fig_arch}
   \end{mdframed}
 \end{figure}
 
-\section{Implementation strategy}
-We opted to implement the front end of the program using Python 2.7 due to the the ease of implementing reading Measurement Sets, user option parsing and writing to Fits files provided by the Python language and
-the extension packages widely used within the radio astronomy community. The backend libraries containing the resampling routines has to be implemented in C++ to be efficient and have a common ctypes interface 
+We opted to implement the front end of the program using Python 2.7 and extension packages due to the ease it provided in reading of Measurement Sets, user option 
+parsing and writing to FITS files. The backend libraries containing the resampling routines have to be implemented in C++ to be efficient and have a common ctypes interface 
 that can be called from Python. We opted to implement the backend libraries using constructs from the C++ 11 standard. The libraries contain a set of
-templates shared between Cuda and CPU code to implement the resampling routines for the various use cases of the imager. Both the CPU and GPU code therefore
-has to be compiled with the Nvidia NVCC compiler (versions 5.0 or above) toolkit.
+templates shared between CUDA and CPU code to implement the resampling routines for the various use cases of the imager. Both the CPU and GPU code therefore
+have to be compiled with the NVIDIA NVCC compiler (versions 5.0 or above) toolkit.
 
 \section{Normal workflow}
-During imaging the user will supply a set of facet centre coordinates or number of facets splitting the sky (or both), along with a measurements database and image dimensions. The imager outputs a 
-set of facet images that can optionally be recombined.
+During imaging the user will supply a set of facet centre coordinates or the number of facets splitting the sky (or both), along with a measurements database and image dimensions. The imager outputs a 
+set of facet images that can, optionally, be recombined.
 
 Program flow is indicated in Figure~\ref{fig_workflow}. The resampling and fourier inversion step may include sampling and transforming the sampling function.
-The latter requires that all measurements are set to unity. With this option enabled a PSF is synthesized for each facet image. Additionally 
+The latter requires that all measurements are set to unity. With this option enabled a PSF is synthesized for each facet image. Additionally, 
 each facet may have resampling grids allocated for multiple correlations and spectral bands, and can therefore be facet cubes 
 instead of simple 2D images. 
 
@@ -81,16 +77,15 @@ is located in the middle of the grids, thus shifting the image phase centre to t
  \end{mdframed}
 \end{figure}
 \section{Input/Output formats}
-\subsection{NRAO Measurement Set 2.0}
 The Measurement Set standard \cite{ms10,ms20} is an AIPS++ (later CASA) database format containing telescope observation data, 
-along with observation metadata. Correlated observation data is stored in a ``MAIN'' table, along with uvw coordinates, antenna ids, 
-timestamp information, weighting and flagging information and foreign keys to subtables with meta data to the observation. The 
+along with observation metadata. Correlated observation data is stored in a ``MAIN'' table, along with uvw coordinates, antenna identifiers, 
+timestamp information, weighting and flagging information and foreign keys to subtables with metadata for the observation. The 
 metadata describes everything from the antenna positions and mounts to feeds, spectral window descriptions and the observed fields. The
 standard database schema is summarized in Figure~\ref{FIG_MS_RELATIONS}.
 \begin{figure}[ht!]
  \begin{mdframed}
   \centering
-  \includegraphics[height=0.35\textheight,width=0.8\textwidth]{images/ms_relations.png}
+  \includegraphics[height=0.45\textheight,width=0.98\textwidth]{images/ms_relations.png}
   \caption[Measurement Set schema]{This diagram depicts the standard layout of a Measurement Set database. Only some of the optional fields
   are included in this diagram, for instance the MAIN table may have multiple data columns and per channel weights. Only the most important
   relations are shown in this diagram. Data can be queried using a SQL-like language known as TaQL.}
@@ -100,29 +95,29 @@ standard database schema is summarized in Figure~\ref{FIG_MS_RELATIONS}.
 
 Each row in the MAIN table contains measurements for a particular spectral band and may contain multiple correlations per spectral channel. Each
 row contains $N_\text{channel}\times N_\text{correlation}$ measurements. The rows are not necessarily 
-ordered by baseline or time by default. In total the Measurement Set MAIN table
-will contain $N_\text{baseline}\times \frac{\tau_\text{observed time}}{\tau_\text{integration length}}$ rows, including those contributed by auto-correlated antennas. It is worth noting 
-that during flagging and calibration some rows may be deleted from the Measurement Set.
+ordered by baseline or time by default. In total, the Measurement Set MAIN table
+will contain $N_\text{baseline}\times \frac{\tau_\text{observed time}}{\tau_\text{integration length}}$ rows for each of the observed fields. The
+number of baselines includes those rows contributed by auto-correlated antennas. It is worth noting that during flagging and calibration some 
+rows may be deleted from the Measurement Set.
 
 Bullseye is designed to handle observations split into multiple Measurement Sets as input. When more than one Measurement Set is specified as input it is assumed that
 the two measurement sets contain observations of the same set of fields and that all the metadata remains the same between the two databases.
 
-\subsection{The Flexible Image Transport System}
 Our facet imager has to output a series of image cubes, one per facet. Each facet cube is a 3-dimensional array containing continuum images at multiple 
 frequency bins, where several channels in the measurement set may be averaged into each of these slices. The Flexible Image Transport System (FITS) \cite{pence2010definition} 
-format has been the defacto standard for data sharing between observatories. A FITS file can be used to store an N-dimensional data cube where N can range between 1 and 999 and is
+format has become the defacto standard for data sharing between observatories. A FITS file can be used to store an N-dimensional data cube where N can range between 1 and 999 and is
 structured as a series of Header Data unit blocks, each 2880 bytes in size. Each header contains a series of 80 character key-value pairs that 
 describe the coordinates of each of the axes, along with projection and transformation information.
 
-Since the primary goal of our imager is to make facet images, we choose to use the orthogonal projection coordinate system for the l and m coordinates. The orthogonal
-projection results in coordinate distortions away from the projection pole. Since the primary goal of our imager to create narrow field facet images using this projection is
+Since the primary goal of our imager is to make facet images, we choose to use the orthogonal projection coordinate system for the $l$ and $m$ coordinates. The orthogonal
+projection results in coordinate distortions away from the projection pole. Since the primary goal of our imager is to create narrow-field facet images, using this projection is
 justified.
 
 \section{Parallelizing data precomputation and resampling}
 \subsection{Disk I/O vs. compute}
 Although it is important to consider the computational costs involved with the resampling operation it is also necessary to take the latencies of loading
 and preprocessing into account. When performing narrow field imaging, the costs of disk I/O alone can amount to a significant portion of the run time.
-This is less of a problem when performing faceting and w-projection, but can't be ignored. In order to mitigate this latency we opt to split the data into many pieces, making it possible
+This is less of a problem when performing faceting and w-projection, but cannot be ignored. In order to mitigate this latency we opt to split the data into many pieces, making it possible
 to load the next chunk into buffers while still imaging data already loaded and preprocessed as illustrated in Figure~\ref{fig_async_compute}.
 
 \begin{figure}[ht!]
@@ -153,14 +148,56 @@ to load the next chunk into buffers while still imaging data already loaded and 
  \end{mdframed}
 \end{figure}
 
-When performing widefield imaging with a large number of facets and/or w-projection with filters of large support the latency involved with disk
-I/O is effectively hidden by this approach, and the runtime is bound by the compute time. All but the cost of loading the first chunk of data is hidden by this strategy.
+When performing wide-field imaging with a large number of facets and/or w-projection with filters of large support the latency involved with disk
+I/O is effectively hidden by this approach, and the runtime becomes bound by the compute time as indicated in Figure~\ref{FIG_GRIDDING_VS_RUNTIME}. 
+All but the cost of loading the first chunk of data is hidden by this strategy.
+
+\begin{figure}[ht!]
+ \begin{mdframed}
+ \centering
+ \begin{tikzpicture}
+  \pgfplotstableread{ % Read the data into a table macro
+  Support	Runtime_P
+  7		4.3366145721
+  15		8.8752490002
+  23		19.2033565925
+  31		36.2112696525
+  63		88.4928859103
+  95		93.8918816778
+  127		95.1333016538
+  255		99.4277739964
+  }\datatable
+
+  \begin{axis}[
+    legend style={at={(0.5,-0.20)}, anchor=north,legend columns=-1},
+    ymin=0,         % Start y axis at 0
+    xlabel=Full support,
+    ylabel=Gridding time / Runtime (\%),
+    grid=major,    
+    visualization depends on=x \as \rawx,
+    visualization depends on=y \as \rawy,
+    scale only axis, % The height and width argument only apply to the actual axis
+    height=0.25\textheight,
+    width=0.85\textwidth,
+    nodes near coords,
+    every node near coord/.append style={font=\tiny},
+    minor y tick num=1]
+    \addplot table [x=Support, y=Runtime_P] {\datatable};
+  \end{axis}
+  \end{tikzpicture}
+  \caption{Here typical gridding time (CPU-based w-projection) is plotted against runtime. 
+	   Disk I/O and associated total runtime may be slightly lower depending on 
+	   drive speeds, but these figures are for a typical desktop hard drive at the time
+	   of writing.}
+  \label{FIG_GRIDDING_VS_RUNTIME}
+  \end{mdframed}
+\end{figure}
 
 \subsection{The CPU-based resampling algorithm}
 The requirement of creating a field containing multiple facets provides a course-grained approach to parallelizing the resampling process,
 without the need for synchronization and locks. This parallelization strategy works well when there are at least as many facets as CPU cores 
-on the system, especially when the number of facets is close to a multiple of the number of CPU cores, balancing the workload between cores. The
-parallelization is implemented using the lightweight OpenMP framework of macros.
+on the system, especially when the number of facets is close to a multiple of the number of CPU cores, balancing the workload between cores. This
+parallelization over facets is implemented using the lightweight OpenMP framework of macros.
 
 The resampling algorithm should cater for gridding multiple correlations and enabling faceting and w-projection-based resampling when required.
 To achieve this efficiently and with maximum reuse of code the resampling algorithm is implemented using a set of traits and policy C++ templates.
