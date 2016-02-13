@@ -1,4 +1,4 @@
-\chapter{Wide field image synthesis}
+\chapter{Wide-field image synthesis}
 \label{chapter_synthesis}
 In this chapter we discuss how the Radio Interferometric Measurement Equation (RIME) can be inverted to obtain a synthesized image of the radio sky. First an overview of the imaging pipeline is provided, before
 delving into the finer details of creating ``dirty'' images of the sky and correcting the wide field distortions introduced when breaking the assumptions made when the images 
@@ -189,7 +189,7 @@ effects in wide-field imaging is the antenna primary beam. We will return to way
 after discussing the projection effect introduced by the $w(n-1)$ term in the RIME.
 
 Next we discuss how images can be efficiently synthesized (Fourier-inverted / ``backwards-processed'') using a narrow-field approximation.
-\section{Narrow field synthesis using the FFT}
+\section{Narrow-field synthesis using the FFT}
  There are generally two techniques used to approximate the Fourier transforms between the observed visibilities and the (dirty) image: direct Fourier sums or by employing
  the Fast Fourier Transform. In the brute-force Direct Fourier Transform each image pixel is approximated through an by evaluation over all the observed 
  visibilities (M of them in total). This approach requires on the order of $N^2M \approx N^4$ sine and cosine evaluations (where N is the size of a single dimension of a square grid) for a large 
@@ -501,7 +501,7 @@ Next we discuss how images can be efficiently synthesized (Fourier-inverted / ``
   \end{mdframed}
  \end{figure}
  
-\section{Wide field distortions and the problem of non-coplanar baselines}
+\section{Wide-field distortions and the problem of non-coplanar baselines}
 Up to this point the discussion on employing the Fast Fourier Transform to invert interferometer measurements and discretize the sky has assumed
 that the the field of view can be well-approximated by a tangent projection plane. When synthesizing an image over a larger field of view
 this assumption is broken. This is especially true for lower-frequency instruments, such as LOFAR. Much of the remainder of this 
