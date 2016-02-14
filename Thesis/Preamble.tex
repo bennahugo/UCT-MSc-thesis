@@ -66,14 +66,17 @@ Cyril \textsc{Tasse} \\
 \chapter*{Abstract}
  \addcontentsline{toc}{chapter}{Abstract}
  Imaging in radio astronomy entails the Fourier inversion of the relation between the sampled spatial coherence of an electromagnetic field and the intensity of its 
- emitting source. Due to significant computational savings this inversion is normally computed by performing an expensive convolutional resampling step and applying 
- the Inverse Fast Fourier Transform. Unfortunately the resulting planar approximation the sky is only valid over small regions. When imaging over wider fields of view,
- and in particular using telescope arrays with long non-East-West components, significant distortions are introduced on the computed image. We propose a coplanar faceting
- algorithm that uses w-projection to correct the projection error along the edges of the facets to alleviate some of the memory constraints of previous w-projection implementations. 
- We compared the scaling performance of both single and double precision resampled images on both an optimized multi-threaded CPU implementation and a GPU implementation that uses a 
+ emitting source. This inversion is normally computed by performing a convolutional resampling step and applying 
+ the Inverse Fast Fourier Transform, because this leads to computational savings. Unfortunately, the resulting planar approximation the sky is only valid over small regions. When imaging 
+ over wider fields of view, and in particular using telescope arrays with long non-East-West components, significant distortions are introduced in the computed image. We propose a coplanar 
+ faceting algorithm, where the sky is split up into many smaller images. Each of these narrow-field images are further corrected using a phase-correcting technique known as w-projection. 
+ This eliminates the projection error along the edges of the facets and ensures approximate coplanarity. The combination of faceting and w-projection approaches 
+ alleviates the memory constraints of previous w-projection implementations. 
+ 
+ We compared the scaling performance of both single and double precision resampled images in both an optimized multi-threaded CPU implementation and a GPU implementation that uses a 
  memory-access-limiting work distribution strategy. We found that such a w-faceting approach scales slightly better than a traditional w-projection approach on GPUs. We also found that
  double precision resampling on GPUs is about 71\% slower than its single precision counterpart, making double precision resampling on GPUs less power efficient than CPU-based double 
- precision resampling. Lastly we have seen that employing only single precision in the resampling summations produced significant error in continuum images for a MeerKAT-sized 
+ precision resampling. Lastly, we have seen that employing only single precision in the resampling summations produces significant error in continuum images for a MeerKAT-sized 
  array over long observations, especially when employing the large convolution filters necessary to create large images.
  
 \chapter*{Acknowledgements}
