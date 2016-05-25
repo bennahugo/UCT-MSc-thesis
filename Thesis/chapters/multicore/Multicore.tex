@@ -80,8 +80,8 @@ SIMD vector operations. Figure~\ref{fig_SIMD} illustrates a typical SIMD computa
 the MMX instruction set allowed only integer arithmetic operations on packed byte, word and doubleword registers and added eight additional 64-bit registers to the processor. Later extensions included 
 various versions of Streaming SIMD Extensions (SSE) and Advanced Vector eXtensions (AVX), adding floating point and integer arithmetic on packed 128-bit and 256-bit registers, respectively. These
 SIMD vector operations improves the performance of tasks like 3D graphics and signal/image processing, that are inherently parallel, have localized recurring operations on data streams and have data-independent 
-control flow. Most compilers (including the GNU compiler suite) vectorize code automatically when optimizations are enabled, but it may be necessary to write assembly code by hand in cases where the compiler fails
-to do so (deeply nested loops are one such situation) \cite{intelArch}.
+control flow. Most compilers (including the GNU compiler suite) vectorize code automatically when optimizations are enabled, but it may be necessary to write SIMD directives by hand in cases where the compiler fails
+to do so (deeply nested loops is one such situation) \cite{intelArch}.
 \begin{figure}[ht!]
  \begin{mdframed}
  \centering

@@ -476,7 +476,7 @@ Next we discuss how images can be efficiently synthesized (Fourier-inverted / ``
  mean will appear either too light or too dark when compared to a model image. It is unclear if the prolate spheriodal function suffers from the same
  problem. Th\'evenaz et al. also point out that the sinc introduces blockiness in the image.
  
- Lastly, it is necessary add that both the Direct Fourier Transform and Fast Fourier Transform approaches
+ Lastly, it is necessary to add that both the Direct Fourier Transform and Fast Fourier Transform approaches
  have to scale the field of view of the image according to the cell size and number of pixels in the image. In the Fast Fourier Transform approach this is 
  achieved by scaling the measurement domain's u,v coordinates (measured in $\text{cycles}.\text{m}^{-1}.\text{rad}^{-1}$) such that, when inverted, the image
  has the desired field of view. To achieve this we use the \emph{similarity} property of the FFT:
@@ -539,15 +539,15 @@ This theorem says that adding a delay term through multiplication by a complex e
 signal (sky/image) domain. In this context the effect is somewhat more complicated because sources closer to the tracking centre of the field are not as affected 
 by this shift as those further away. Refer to Figure~\ref{fig_wide_field_error} for an illustration of the two terms: $w$ and $(n-1)$.
 
-\begin{figure}[h]
+\begin{figure}[ht!]
   \begin{mdframed}
     \centering
-    \begin{subfigure}[b]{0.70\textwidth}
+    \begin{subfigure}[b]{0.60\textwidth}
      \centering
      \includegraphics[width=\textwidth]{images/source_projection_onto_image_plane.png}
      \caption{}
     \end{subfigure}
-    \begin{subfigure}[b]{0.45\textwidth}
+    \begin{subfigure}[b]{0.55\textwidth}
       \centering
       \begin{tikzpicture}
 	\draw [black, domain=0:180] plot ({2*cos(\x)}, {2*sin(\x)});
@@ -566,7 +566,7 @@ by this shift as those further away. Refer to Figure~\ref{fig_wide_field_error} 
       \end{tikzpicture}
       \caption{Error between the orthogonal planar FFT approximation to the sky and the correct position on the celestial sphere}
     \end{subfigure}
-    \begin{subfigure}[b]{0.45\textwidth}
+    \begin{subfigure}[b]{0.55\textwidth}
       \centering
       \begin{tikzpicture}
 	\draw [black,thick] (0,2) -- (3,2);

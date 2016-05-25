@@ -15,7 +15,7 @@ The following machines were used in generating the results in this chapter:
  version 6.5 was used to compile our imager. 
  \item System C:\\
  A development machine with an Intel Core i7-4770, a quad-core processor with a maximum memory bandwidth of 25.6 GB/s \footnote{\url{http://ark.intel.com/products/75122/Intel-Core-i7-4770-Processor-8M-Cache-up-to-3_90-GHz}}. 
- The machine has a NVIDIA GTX 770 card installed with a maximum memory bandwidth of 224.3 and power usage of 
+ The machine has a NVIDIA GTX 770 card installed with a maximum memory bandwidth of 224.3 GB/s and power usage of 
  230W \footnote{According to NVIDIA \url{http://www.geforce.com/hardware/desktop-gpus/geforce-gtx-770/specifications}}. The Nvidia toolkit version 6.5 was used to compile our imager.
 \end{itemize}
 
@@ -89,6 +89,8 @@ with enough pixels to account for the size of the convolution filter.
 \end{table}
 
 \section{Scalability}
+This section presents the results from experiments with various imager configurations. The discussion of these results
+follow in section \ref{sec_results_discussion}.
 \subsection{Faceting only}
 This set of performance benchmarks focuses on creating narrow-field facets using the first order approximation to $w(n-1)$. As such full w-projection is disabled.
 
@@ -469,7 +471,8 @@ following two experiments:
  \item Determine how the relative error grows with filter support size.
 \end{itemize}
 
-For the first experiment generated datasets 3-10 which has increasing observation time. Prior to imaging we set all the visibilities equal to $1+0i$, which must produce a 1 Jy source in the centre of the image. The relative error is then computed as
+For the first experiment we generated datasets 3 through 10, increasing the observation time, and therefore total number of visibilities, of each dataset. Prior to imaging we set all the visibilities 
+equal to $1+0i$, which must produce a 1 Jy source in the centre of the image. The relative error is then computed as
 follows:
 \begin{equation}
  \text{Relative Brightness Error (RBE)} := ||\frac{\text{Measured brightness}}{\text{True brightness}}||
@@ -639,20 +642,17 @@ a single continuum image. Both the RBE and RSN are plotted in Figure~\ref{FIG_RB
   \label{FIG_RBE_SUP}
   \end{mdframed}
 \end{figure}
+
 \section{Discussion}
+\label{sec_results_discussion}
 Figure~\ref{FIG_FACETING_CPU_VS_GPU} shows that, at least, for small facets GPU performance is slightly better than that of a multicore CPU node when gridding in
 single precision. It is also clear that the parallel CPU imager does not scale linearly with number of cores, most likely due to an imbalance in the workload (the number of
 facets being gridded cannot be divided evenly between CPU cores). This leads to an overall drop in power
 efficiency when using multiple cores (Figure~\ref{FIG_FACETING_CPU_VS_GPU_POWER_EFFICIENCY}). In terms of power efficiency the K40 outperforms the CPU node when 
 comparing the peak performance of the CPU cluster at 64 cores, but is slightly less power-efficient than employing a single multi-core CPU.
 
-As expected the double precision performance on the GPU is significantly lower than single precision. The gridding algorithm contains a significant amount of
-integer arithmetic (profiling shows this to be about 50\% when gridding single correlations) and 
-is bounded by memory latencies. The latter explains why performance is not a third of the single precision
-performance\footnote{The Kepler Architecture has 1 double precision arithmetic unit for every 3 single precision units}. 
-Ignoring effects of the L2 caches we estimate that a maximum of 64.8 GB/s is transferred over the memory bus of the GPU at a gridding rate of 
-4.05 G, this transfer is significantly lower than the theoretical maximum of the card. When gridding with double precision the GPU is outperformed 
-by a single multi-core CPU and is therefore significantly less power efficient when compared to a single 16-core Opteron CPU, of course assuming 
+When gridding with double precision the GPU is outperformed by a single multi-core CPU and is therefore 
+significantly less power efficient when compared to a single 16-core Opteron CPU, of course assuming 
 that enough facets are created to fully utilize the CPU.
 
 Figure~\ref{FIG_FACETING_GPU} shows that once the GPU is saturated with enough work, gridding performance increases up to around 4.3 G when faceting and 3.42 G when doing 
@@ -685,7 +685,7 @@ grows more rapidly with an increase in filter size than the error seen with incr
 fewer measurements taken in the central region of the uv plane with a short observation than with a longer observation. 
 
 For comparison we re-ran the same support-size experiment on the long 3 hour observation and saw devastating effects in the fidelity of the images produced using single precision gridding (while the images synthesized using double precision
-gridding were uneffected), see Figure~\ref{FIG_PREC_ERROR_IMAGES}. The error in the PSF sidelobe structure across the images support out statement that the low frequency terms are more susceptible to the noise introduced by this rounding
+gridding were uneffected), see Figure~\ref{FIG_PREC_ERROR_IMAGES}. The error in the PSF sidelobe structure across the images support our statement that the low frequency terms are more susceptible to the noise introduced by this rounding
 error than the high frequency components.
 \begin{figure}[ht!]
  \begin{mdframed} \centering
@@ -707,3 +707,23 @@ error than the high frequency components.
     \label{FIG_PREC_ERROR_IMAGES}
  \end{mdframed}
 \end{figure}
+
+\section{Profiling and implementation comments}
+The NVIDIA Visual Profiler shows that the single precision gridding algorithm\footnote{Faceting a single correlation, with w-projection code disabled by means of templated 
+traits and policies. These figures were obtained running on a GT960.} consists of just over 40\% integer arithmetic and only about 10\% single precision floating point arithmetic. These figures exclude the instructions wasted
+on branch divergence. Our profiling also shows that the implementation is firmly bounded by memory latencies. Surprisingly this is not due to the global memory bandwidth 
+(profiling shows that only about 10\% of the peak bandwidth is used), instead kernel register preasure is responsible for lowering the 
+obtained occupancy (even for single correlation gridding). The combination of the low single precision floating point instruction usage 
+and memory latencies results in a ~27\% utilization of available compute (Function Unit Utilization, as reported by the NVIDIA profiler). This 
+also explains why the results indicate that double precision performance is not a third of single precision performance \footnote{The Kepler Architecture 
+has 1 double precision arithmetic unit for every 3 single precision units}.
+
+We suspect that the increased register usage of our algorithm and the resulting low compute utilization is one of the primary causes
+of the large discrepency between the performance figures seen in John Romein's gridding benchmark\footnote{Code available at
+\url{www.exaska.org/?q=Codes}} \cite{romein2012efficient} and our implementation. Our implementation is somewhat more general, and therefore 
+algorithmically more complex than the benchmark implementation. Bullseye is able to handle common imaging use-cases, such as forming continuum 
+image cubes, by dividing the available observation bandwidth (which may be spread out over multiple spectral windows) between grids for example, whereas 
+this would require preprocessing the data and running Romein's implementation multiple times. We also do not precompute and 
+store a set of uvw coordinates per channel because of the considerable memory requirements when dealing with larger databases, 
+instead these are scaled by frequency on the fly. Some necessary memory accesses to visibility weights and flagging information, and 
+the assocated branching that is common in imaging implementations are also missing from the benchmark.
